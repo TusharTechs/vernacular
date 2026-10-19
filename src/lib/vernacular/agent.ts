@@ -14,6 +14,7 @@ import {
   type Equivalent,
   type Evidence,
 } from "../qloo/tools";
+import { changeOf } from "./diff";
 import { claude, FALLBACK, MODEL, RefusalError } from "./llm";
 import { verdictFor } from "./score";
 import type { CheckEvent, Kept, ScoredReference, Swap, Verdict } from "./types";
@@ -193,6 +194,7 @@ export async function runSwapAgent(
           referenceId: r.id,
           replacement: { ...v.candidate, percentile: v.percentile, affinity: v.affinity },
           rewrittenSentence: input.rewritten_sentence,
+          change: changeOf(currentSentence.get(r.sentence) ?? r.sentence, input.rewritten_sentence),
           rationale: input.rationale,
           evidence: evidenceFor.get(r.id) ?? [],
         };

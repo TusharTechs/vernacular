@@ -1,6 +1,7 @@
 "use client";
 
 import { AGE_BANDS, type AgeBand } from "@/lib/qloo/params";
+import { contextOf } from "@/lib/vernacular/diff";
 import type { Kept, ScoredReference, Swap, Verdict } from "@/lib/vernacular/types";
 
 const VERDICT_TEXT: Record<Verdict, string> = { lands: "Lands", mixed: "Mixed", misses: "Misses", unmeasured: "Not measured" };
@@ -73,7 +74,21 @@ function AgeBars({ skew, focus }: { skew: Partial<Record<AgeBand, number>>; focu
   );
 }
 
+function SwapPreview({ swap }: { swap: Swap }) {
+  const { lead, tail } = contextOf(swap.change);
+  return (
+    <p className="font-serif text-[15px] leading-snug text-muted" aria-label={`Change: ${swap.change.before} becomes ${swap.change.after}`}>
+      {lead}
+      <del className="text-misses decoration-misses/60">{swap.change.before}</del>
+      {swap.change.before && swap.change.after ? " " : ""}
+      <ins className="swapped text-ink no-underline">{swap.change.after}</ins>
+      {tail}
+    </p>
+  );
+}
+
 export function ReferenceCard({
+  id,
   span,
   reference,
   swap,
@@ -86,6 +101,7 @@ export function ReferenceCard({
   onAccept,
   onDismiss,
 }: {
+  id: string;
   span: string;
   reference?: ScoredReference;
   swap?: Swap;
@@ -101,8 +117,10 @@ export function ReferenceCard({
   const verdict = reference?.verdict;
   return (
     <article
+      id={id}
+      tabIndex={-1}
       onClick={onSelect}
-      className={`flex flex-col gap-3 rounded-lg border bg-sheet p-4 transition-shadow ${selected ? "border-accent shadow-[0_0_0_3px_var(--accent-soft)]" : "border-rule"}`}
+      className={`flex flex-col gap-3 rounded-lg border bg-sheet p-4 scroll-mt-4 outline-none transition-shadow ${selected ? "border-accent shadow-[0_0_0_3px_var(--accent-soft)]" : "border-rule"}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -151,7 +169,7 @@ export function ReferenceCard({
             <Source kind="generated" />
             <span>{swap.rationale}</span>
           </p>
-          <p className="font-serif text-[15px] italic leading-snug">“{swap.rewrittenSentence}”</p>
+          <SwapPreview swap={swap} />
           <div className="flex gap-2 pt-1">
             {accepted ? (
               <button type="button" onClick={(e) => { e.stopPropagation(); onDismiss(); }} className="rounded-md border border-rule px-3 py-1.5 text-sm hover:border-ink">

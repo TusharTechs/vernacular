@@ -27,6 +27,8 @@ export class QlooError extends Error {
     message: string,
     public status?: number,
     public retryable = false,
+    /** Server-suggested wait before retrying, from Retry-After. */
+    public retryAfterMs?: number,
   ) {
     super(message);
     this.name = "QlooError";
@@ -54,6 +56,21 @@ interface Options {
 }
 
 const cache = new Map<string, { at: number; value: QlooCall<unknown> }>();
+const pending = new Map<string, Promise<QlooCall<unknown>>>();
+
+// Qloo publishes no rate-limit numbers and returns 429 under bursts, so keep
+// only a few requests in flight per server instance.
+const MAX_IN_FLIGHT = 3;
+let inFlight = 0;
+const waiters: (() => void)[] = [];
+async function acquire() {
+  if (inFlight >= MAX_IN_FLIGHT) await new Promise<void>((r) => waiters.push(r));
+  inFlight++;
+}
+function release() {
+  inFlight--;
+  waiters.shift()?.();
+}
 const CACHE_MAX = 500;
 let callCounter = 0;
 
@@ -79,12 +96,15 @@ function normalise(params: QlooParams): Record<string, string> {
   return out;
 }
 
-function classify(status: number, body: string): QlooError {
+function classify(status: number, body: string, retryAfter: string | null): QlooError {
   const snippet = body.slice(0, 300);
   if (status === 401) return new QlooError("auth", `Qloo rejected the API key (401). ${snippet}`, status);
   if (status === 403) return new QlooError("forbidden", `Qloo returned 403, often an unsupported filter.type. ${snippet}`, status);
   if (status === 404) return new QlooError("not_found", `Qloo returned 404. ${snippet}`, status);
-  if (status === 429) return new QlooError("rate_limited", "Qloo rate limit reached (429).", status, true);
+  if (status === 429) {
+    const seconds = Number(retryAfter);
+    return new QlooError("rate_limited", "Qloo rate limit reached (429).", status, true, Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : undefined);
+  }
   if (status >= 500) return new QlooError("server", `Qloo server error (${status}).`, status, true);
   return new QlooError("bad_request", `Qloo returned ${status}. ${snippet}`, status);
 }
@@ -94,7 +114,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export async function qlooGet<T = unknown>(
   path: string,
   params: QlooParams = {},
-  { timeoutMs = 8000, retries = 1, cacheTtlMs = 60 * 60 * 1000 }: Options = {},
+  { timeoutMs = 8000, retries = 3, cacheTtlMs = 60 * 60 * 1000 }: Options = {},
 ): Promise<QlooCall<T>> {
   const { key, baseUrl } = config();
   assertKnownParams(path, params);
@@ -107,10 +127,36 @@ export async function qlooGet<T = unknown>(
   if (hit && Date.now() - hit.at < cacheTtlMs) {
     return { ...(hit.value as QlooCall<T>), meta: { ...hit.value.meta, callId, cached: true } };
   }
+  // Identical requests already on the wire share one response.
+  const shared = pending.get(url);
+  if (shared) {
+    const value = (await shared) as QlooCall<T>;
+    return { ...value, meta: { ...value.meta, callId, cached: true } };
+  }
+  const work = fetchWithRetry<T>(url, key, path, query, callId, timeoutMs, retries);
+  pending.set(url, work as Promise<QlooCall<unknown>>);
+  try {
+    return await work;
+  } finally {
+    pending.delete(url);
+  }
+}
 
+async function fetchWithRetry<T>(
+  url: string,
+  key: string,
+  path: string,
+  query: Record<string, string>,
+  callId: string,
+  timeoutMs: number,
+  retries: number,
+): Promise<QlooCall<T>> {
+  const baseDelay = Number(process.env.QLOO_RETRY_BASE_MS ?? 500);
   let attempt = 0;
   for (;;) {
+    let delay = 0;
     const started = Date.now();
+    await acquire();
     try {
       const res = await fetch(url, {
         headers: { "X-Api-Key": key, Accept: "application/json" },
@@ -118,7 +164,7 @@ export async function qlooGet<T = unknown>(
         cache: "no-store",
       });
       const text = await res.text();
-      if (!res.ok) throw classify(res.status, text);
+      if (!res.ok) throw classify(res.status, text, res.headers.get("retry-after"));
       const value: QlooCall<T> = {
         data: JSON.parse(text) as T,
         meta: { callId, path, params: query, status: res.status, ms: Date.now() - started, cached: false },
@@ -133,12 +179,12 @@ export async function qlooGet<T = unknown>(
           : err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")
             ? new QlooError("timeout", `Qloo did not answer within ${timeoutMs} ms.`, undefined, true)
             : new QlooError("network", `Could not reach Qloo: ${(err as Error).message}`, undefined, true);
-      if (e.retryable && attempt < retries) {
-        attempt++;
-        await sleep(400 * 2 ** attempt);
-        continue;
-      }
-      throw e;
+      if (!e.retryable || attempt >= retries) throw e;
+      attempt++;
+      delay = e.retryAfterMs ?? baseDelay * 2 ** (attempt - 1) + Math.random() * baseDelay;
+    } finally {
+      release();
     }
+    await sleep(delay); // wait outside the in-flight slot
   }
 }

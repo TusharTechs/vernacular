@@ -1,6 +1,7 @@
 // Orchestrates one check: extract (model) → score (Qloo) → swap agent (model + Qloo).
 
 import { runSwapAgent } from "./agent";
+import { applyChange } from "./diff";
 import { extractReferences } from "./extract";
 import { resolveAudience, scoreReferences } from "./score";
 import { MAX_TEXT_CHARS } from "./limits";
@@ -31,11 +32,7 @@ export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void 
   const weak = scored.filter((s) => s.entity && (s.verdict === "misses" || s.verdict === "mixed"));
   const { swaps, kept, llmCalls } = await runSwapAgent(text, weak, audience, emit);
 
-  // Apply sentence rewrites; when one sentence had several swaps, the last one already includes the rest.
-  let rewrittenText = text;
-  const latest = new Map<string, string>();
-  for (const sw of swaps) latest.set(scored.find((s) => s.id === sw.referenceId)!.sentence, sw.rewrittenSentence);
-  for (const [original, rewritten] of latest) rewrittenText = rewrittenText.replace(original, rewritten);
+  const rewrittenText = swaps.reduce((t, sw) => applyChange(t, sw.change), text);
 
   const qlooCalls =
     audienceEvidence.length +

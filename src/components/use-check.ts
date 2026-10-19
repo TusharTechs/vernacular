@@ -70,6 +70,33 @@ export function traceOf(s: CheckState): Evidence[] {
   return [...seen.values()];
 }
 
+/** POST JSON and feed each server-sent event to `onEvent`. Returns an error message, or null. */
+export async function streamPost<E>(url: string, body: unknown, signal: AbortSignal, onEvent: (e: E) => void): Promise<string | null> {
+  try {
+    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal });
+    if (!res.ok || !res.body) {
+      const data = await res.json().catch(() => ({}));
+      return data.error ?? `The request failed (${res.status}).`;
+    }
+    const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buffer = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) return null;
+      buffer += value;
+      let idx;
+      while ((idx = buffer.indexOf("\n\n")) >= 0) {
+        const chunk = buffer.slice(0, idx);
+        buffer = buffer.slice(idx + 2);
+        for (const line of chunk.split("\n")) if (line.startsWith("data: ")) onEvent(JSON.parse(line.slice(6)) as E);
+      }
+    }
+  } catch (err) {
+    if ((err as Error).name === "AbortError") return null;
+    return "Lost the connection to the server. Check your network and try again.";
+  }
+}
+
 export function useCheck() {
   const [state, dispatch] = useReducer(reducer, initial);
   const abort = useRef<AbortController | null>(null);
@@ -79,37 +106,8 @@ export function useCheck() {
     const controller = new AbortController();
     abort.current = controller;
     dispatch({ type: "start", text: input.text });
-    try {
-      const res = await fetch("/api/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-        signal: controller.signal,
-      });
-      if (!res.ok || !res.body) {
-        const body = await res.json().catch(() => ({}));
-        dispatch({ type: "fail", message: body.error ?? `The check failed (${res.status}).` });
-        return;
-      }
-      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
-      let buffer = "";
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += value;
-        let idx;
-        while ((idx = buffer.indexOf("\n\n")) >= 0) {
-          const chunk = buffer.slice(0, idx);
-          buffer = buffer.slice(idx + 2);
-          for (const line of chunk.split("\n")) {
-            if (line.startsWith("data: ")) dispatch({ type: "event", event: JSON.parse(line.slice(6)) as CheckEvent });
-          }
-        }
-      }
-    } catch (err) {
-      if ((err as Error).name === "AbortError") return;
-      dispatch({ type: "fail", message: "Lost the connection to the server. Check your network and try again." });
-    }
+    const error = await streamPost<CheckEvent>("/api/check", input, controller.signal, (event) => dispatch({ type: "event", event }));
+    if (error) dispatch({ type: "fail", message: error });
   }, []);
 
   const reset = useCallback(() => {

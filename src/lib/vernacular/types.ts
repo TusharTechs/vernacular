@@ -1,5 +1,6 @@
 import type { AgeBand, EntityType } from "../qloo/params";
 import type { AgeProfile, Evidence, ResolvedEntity } from "../qloo/tools";
+import type { Change } from "./diff";
 
 /** What the user asks Vernacular to check. */
 export interface CheckInput {
@@ -48,6 +49,8 @@ export interface Swap {
   referenceId: string;
   replacement: ResolvedEntity & { percentile: number | null; affinity: number | null };
   rewrittenSentence: string;
+  /** Just this swap's edit, so it can be shown and applied independently of other swaps. */
+  change: Change;
   rationale: string;
   evidence: Evidence[];
 }

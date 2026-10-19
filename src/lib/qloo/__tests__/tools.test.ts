@@ -29,6 +29,7 @@ function mockFetch(...bodies: { status?: number; body: unknown }[]) {
 
 beforeEach(() => {
   requests = [];
+  process.env.QLOO_RETRY_BASE_MS = "1";
   process.env.QLOO_API_KEY = "test-key";
   process.env.QLOO_BASE_URL = `https://example.test/${Math.random()}`; // unique host per test defeats the cache
 });
@@ -121,10 +122,24 @@ describe("findEquivalents", () => {
 });
 
 describe("client errors", () => {
-  it("retries once on 429, then reports rate limiting", async () => {
-    mockFetch({ status: 429, body: {} }, { status: 429, body: {} });
+  it("retries 429s with backoff, then reports rate limiting", async () => {
+    mockFetch(...Array.from({ length: 4 }, () => ({ status: 429, body: {} })));
     await expect(resolveEntity("x", "movie")).rejects.toMatchObject({ code: "rate_limited" });
-    expect(requests).toHaveLength(2);
+    expect(requests).toHaveLength(4);
+  });
+
+  it("recovers when a retry succeeds", async () => {
+    mockFetch({ status: 429, body: {} }, { body: { results: [{ entity_id: "e1", name: "X" }] } });
+    const r = await resolveEntity("x", "movie");
+    expect(r.entity?.id).toBe("e1");
+  });
+
+  it("shares one request between identical concurrent calls", async () => {
+    mockFetch({ body: { results: [{ entity_id: "e1", name: "X" }] } });
+    const [a, b] = await Promise.all([resolveEntity("x", "movie"), resolveEntity("x", "movie")]);
+    expect(a.entity?.id).toBe("e1");
+    expect(b.entity?.id).toBe("e1");
+    expect(requests).toHaveLength(1);
   });
 
   it("does not retry auth failures", async () => {

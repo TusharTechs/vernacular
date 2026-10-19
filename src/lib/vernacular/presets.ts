@@ -10,6 +10,14 @@ export const AUDIENCE_PRESETS: { id: string; spec: AudienceSpec }[] = [
     spec: { label: "30–34 hip-hop heads", anchors: [{ query: "Kendrick Lamar", type: "artist" }, { query: "Atlanta", type: "tv_show" }], age: "30_to_34" },
   },
   {
+    id: "indie-25",
+    spec: { label: "25–29 indie & A24 fans", anchors: [{ query: "Phoebe Bridgers", type: "artist" }, { query: "Everything Everywhere All at Once", type: "movie" }], age: "25_to_29" },
+  },
+  {
+    id: "country-45",
+    spec: { label: "45–54 country fans", anchors: [{ query: "Garth Brooks", type: "artist" }, { query: "Yellowstone", type: "tv_show" }], age: "45_to_54" },
+  },
+  {
     id: "classic-55",
     spec: { label: "55+ classic-rock fans", anchors: [{ query: "Eagles", type: "artist" }, { query: "M*A*S*H", type: "tv_show" }], age: "55_and_older" },
   },

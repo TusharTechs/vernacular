@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 import { MAX_TEXT_CHARS } from "@/lib/vernacular/limits";
 import { AUDIENCE_PRESETS, SAMPLE_COPY } from "@/lib/vernacular/presets";
-import type { AudienceSpec, Swap, Verdict } from "@/lib/vernacular/types";
+import { applyChange } from "@/lib/vernacular/diff";
+import type { AudienceSpec, Verdict } from "@/lib/vernacular/types";
 import { AGE_LABEL, AudienceBuilder } from "./audience-builder";
 import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
 import { ReferenceCard } from "./reference-card";
+import { TourView } from "./tour-view";
 import { TraceDrawer } from "./trace-drawer";
 import { traceOf, useCheck, type Phase } from "./use-check";
 
@@ -19,17 +21,6 @@ const PHASE_TEXT: Record<Phase, string> = {
   error: "",
 };
 
-function applySwaps(text: string, swaps: Swap[], sentenceOf: (id: string) => string | undefined) {
-  const latest = new Map<string, string>();
-  for (const s of swaps) {
-    const original = sentenceOf(s.referenceId);
-    if (original) latest.set(original, s.rewrittenSentence);
-  }
-  let out = text;
-  for (const [original, rewritten] of latest) out = out.replace(original, rewritten);
-  return out;
-}
-
 export function Workbench() {
   const [text, setText] = useState(SAMPLE_COPY[0].text);
   const [audience, setAudience] = useState<AudienceSpec>(structuredClone(AUDIENCE_PRESETS[0].spec));
@@ -37,6 +28,7 @@ export function Workbench() {
   const [selected, setSelected] = useState<string | null>(null);
   const [decisions, setDecisions] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
+  const [mode, setMode] = useState<"editor" | "tour">("editor");
   const { state, run, reset } = useCheck();
 
   const busy = state.phase === "reading" || state.phase === "scoring" || state.phase === "swapping";
@@ -48,12 +40,22 @@ export function Workbench() {
   }, [state.extracted, state.scored]);
   const swapsInOrder = useMemo(() => Object.values(state.swaps), [state.swaps]);
   const accepted = swapsInOrder.filter((s) => decisions[s.referenceId]);
-  const rewritten = applySwaps(state.text, accepted, (id) => state.extracted.find((r) => r.id === id)?.sentence);
+  const rewritten = accepted.reduce((t, s) => applyChange(t, s.change), state.text);
   const trace = traceOf(state);
   const counts = Object.values(state.scored).reduce<Record<string, number>>((c, r) => ({ ...c, [r.verdict]: (c[r.verdict] ?? 0) + 1 }), {});
 
-  const check = () => {
-    const spec: AudienceSpec = { ...audience, anchors: audience.anchors.filter((a) => a.query.trim()) };
+  const selectFromCopy = (id: string) => {
+    setSelected(id);
+    const card = document.getElementById(`note-${id}`);
+    if (card) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      card.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+      card.focus({ preventScroll: true });
+    }
+  };
+
+  const check = (forAudience: AudienceSpec = audience) => {
+    const spec: AudienceSpec = { ...forAudience, anchors: forAudience.anchors.filter((a) => a.query.trim()) };
     setEditing(false);
     setSelected(null);
     setDecisions({});
@@ -82,14 +84,42 @@ export function Workbench() {
             The spell-checker for culture. Every reference in your copy, scored for the audience you&apos;re writing for on Qloo&apos;s taste graph, and the ones that miss swapped for verified equivalents.
           </p>
         </div>
+        <div className="flex flex-col items-end gap-3">
+        <div className="flex rounded-lg border border-rule bg-sheet p-1 text-sm" role="tablist" aria-label="Mode">
+          {(["editor", "tour"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              aria-selected={mode === m}
+              onClick={() => setMode(m)}
+              className={`rounded-md px-3 py-1.5 transition-colors ${mode === m ? "bg-ink text-sheet" : "text-muted hover:text-ink"}`}
+            >
+              {m === "editor" ? "Editor" : "Tour Mode"}
+            </button>
+          ))}
+        </div>
         <div className="flex gap-3 text-xs text-muted">
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-lands" /> Lands</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-mixed" /> Mixed</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-misses" /> Misses</span>
         </div>
+        </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
+      {mode === "tour" && (
+        <TourView
+          text={text}
+          onOpen={(spec) => {
+            const copy = structuredClone(spec);
+            setAudience(copy);
+            setMode("editor");
+            check(copy);
+          }}
+        />
+      )}
+
+      <div className={`grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] ${mode === "tour" ? "hidden" : ""}`}>
         <main className="flex min-w-0 flex-col gap-4">
           <section className="rounded-xl border border-rule bg-sheet p-6 shadow-sm sm:p-8" aria-label="Copy">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -122,7 +152,7 @@ export function Workbench() {
                 className="w-full resize-y bg-transparent font-serif text-[21px] leading-[1.75] outline-none placeholder:text-muted/60"
               />
             ) : (
-              <MarkedCopy text={state.text} refs={located} verdicts={verdicts} selectedId={selected} onSelect={setSelected} />
+              <MarkedCopy text={state.text} refs={located} verdicts={verdicts} selectedId={selected} onSelect={selectFromCopy} />
             )}
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4">
@@ -132,7 +162,7 @@ export function Workbench() {
               {editing && (
                 <button
                   type="button"
-                  onClick={check}
+                  onClick={() => check()}
                   disabled={!text.trim() || (!audience.anchors.some((a) => a.query.trim()) && !audience.age)}
                   className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-40"
                 >
@@ -146,7 +176,7 @@ export function Workbench() {
           {state.phase === "error" && (
             <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-misses/40 bg-misses-soft px-4 py-3 text-sm">
               <span>{state.error}</span>
-              <button type="button" onClick={check} className="rounded-md border border-misses/40 px-3 py-1 hover:bg-sheet">
+              <button type="button" onClick={() => check()} className="rounded-md border border-misses/40 px-3 py-1 hover:bg-sheet">
                 Try again
               </button>
             </div>
@@ -205,6 +235,7 @@ export function Workbench() {
             (state.extracted.length ? state.extracted : []).map((r) => (
               <ReferenceCard
                 key={r.id}
+                id={`note-${r.id}`}
                 span={r.span}
                 reference={state.scored[r.id]}
                 swap={state.swaps[r.id]}
