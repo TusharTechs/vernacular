@@ -3,9 +3,8 @@
 import { runSwapAgent } from "./agent";
 import { extractReferences } from "./extract";
 import { resolveAudience, scoreReferences } from "./score";
+import { MAX_TEXT_CHARS } from "./limits";
 import type { CheckEvent, CheckInput, CheckResult } from "./types";
-
-export const MAX_TEXT_CHARS = 4000;
 
 export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void = () => {}): Promise<CheckResult> {
   const started = Date.now();

@@ -1,0 +1,255 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { MAX_TEXT_CHARS } from "@/lib/vernacular/limits";
+import { AUDIENCE_PRESETS, SAMPLE_COPY } from "@/lib/vernacular/presets";
+import type { AudienceSpec, Swap, Verdict } from "@/lib/vernacular/types";
+import { AGE_LABEL, AudienceBuilder } from "./audience-builder";
+import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
+import { ReferenceCard } from "./reference-card";
+import { TraceDrawer } from "./trace-drawer";
+import { traceOf, useCheck, type Phase } from "./use-check";
+
+const PHASE_TEXT: Record<Phase, string> = {
+  idle: "",
+  reading: "Reading the copy and resolving the audience on Qloo…",
+  scoring: "Scoring each reference for this audience on Qloo…",
+  swapping: "Finding verified replacements for the weak references…",
+  done: "",
+  error: "",
+};
+
+function applySwaps(text: string, swaps: Swap[], sentenceOf: (id: string) => string | undefined) {
+  const latest = new Map<string, string>();
+  for (const s of swaps) {
+    const original = sentenceOf(s.referenceId);
+    if (original) latest.set(original, s.rewrittenSentence);
+  }
+  let out = text;
+  for (const [original, rewritten] of latest) out = out.replace(original, rewritten);
+  return out;
+}
+
+export function Workbench() {
+  const [text, setText] = useState(SAMPLE_COPY[0].text);
+  const [audience, setAudience] = useState<AudienceSpec>(structuredClone(AUDIENCE_PRESETS[0].spec));
+  const [editing, setEditing] = useState(true);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [decisions, setDecisions] = useState<Record<string, boolean>>({});
+  const [copied, setCopied] = useState(false);
+  const { state, run, reset } = useCheck();
+
+  const busy = state.phase === "reading" || state.phase === "scoring" || state.phase === "swapping";
+  const located = useMemo(() => locate(state.text, state.extracted), [state.text, state.extracted]);
+  const verdicts = useMemo(() => {
+    const v: Record<string, Verdict | "pending"> = {};
+    for (const r of state.extracted) v[r.id] = state.scored[r.id]?.verdict ?? "pending";
+    return v;
+  }, [state.extracted, state.scored]);
+  const swapsInOrder = useMemo(() => Object.values(state.swaps), [state.swaps]);
+  const accepted = swapsInOrder.filter((s) => decisions[s.referenceId]);
+  const rewritten = applySwaps(state.text, accepted, (id) => state.extracted.find((r) => r.id === id)?.sentence);
+  const trace = traceOf(state);
+  const counts = Object.values(state.scored).reduce<Record<string, number>>((c, r) => ({ ...c, [r.verdict]: (c[r.verdict] ?? 0) + 1 }), {});
+
+  const check = () => {
+    const spec: AudienceSpec = { ...audience, anchors: audience.anchors.filter((a) => a.query.trim()) };
+    setEditing(false);
+    setSelected(null);
+    setDecisions({});
+    setCopied(false);
+    run({ text, audience: spec });
+  };
+  const edit = () => {
+    reset();
+    setEditing(true);
+  };
+  const copyRewritten = async () => {
+    try {
+      await navigator.clipboard.writeText(rewritten);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:py-10">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-serif text-4xl italic tracking-tight sm:text-5xl">Vernacular</h1>
+          <p className="max-w-xl text-muted">
+            The spell-checker for culture. Every reference in your copy, scored for the audience you&apos;re writing for on Qloo&apos;s taste graph, and the ones that miss swapped for verified equivalents.
+          </p>
+        </div>
+        <div className="flex gap-3 text-xs text-muted">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-lands" /> Lands</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-mixed" /> Mixed</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-misses" /> Misses</span>
+        </div>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <main className="flex min-w-0 flex-col gap-4">
+          <section className="rounded-xl border border-rule bg-sheet p-6 shadow-sm sm:p-8" aria-label="Copy">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs font-medium uppercase tracking-wider text-muted">
+                {editing ? "Your copy" : `Checked for ${audience.label}`}
+              </span>
+              {editing ? (
+                <div className="flex flex-wrap gap-2">
+                  {SAMPLE_COPY.map((s) => (
+                    <button key={s.id} type="button" onClick={() => setText(s.text)} className="rounded-full border border-rule px-3 py-1 text-xs text-muted hover:border-accent hover:text-ink">
+                      Sample: {s.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <button type="button" onClick={edit} className="text-sm text-accent hover:underline">
+                  Edit copy
+                </button>
+              )}
+            </div>
+
+            {editing ? (
+              <textarea
+                id="copy-input"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                maxLength={MAX_TEXT_CHARS}
+                rows={7}
+                placeholder="Paste an ad script, caption, tour announcement or stand-up bit…"
+                className="w-full resize-y bg-transparent font-serif text-[21px] leading-[1.75] outline-none placeholder:text-muted/60"
+              />
+            ) : (
+              <MarkedCopy text={state.text} refs={located} verdicts={verdicts} selectedId={selected} onSelect={setSelected} />
+            )}
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4">
+              <span className="font-mono text-xs text-muted">
+                {editing ? `${text.length.toLocaleString()} / ${MAX_TEXT_CHARS.toLocaleString()}` : PHASE_TEXT[state.phase] || summaryLine(counts, state.phase)}
+              </span>
+              {editing && (
+                <button
+                  type="button"
+                  onClick={check}
+                  disabled={!text.trim() || (!audience.anchors.some((a) => a.query.trim()) && !audience.age)}
+                  className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+                >
+                  Check copy
+                </button>
+              )}
+              {!editing && busy && <span className="h-1.5 w-32 overflow-hidden rounded-full bg-desk"><span className="block h-full w-1/3 animate-[slide_1.2s_ease-in-out_infinite] rounded-full bg-accent" /></span>}
+            </div>
+          </section>
+
+          {state.phase === "error" && (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-misses/40 bg-misses-soft px-4 py-3 text-sm">
+              <span>{state.error}</span>
+              <button type="button" onClick={check} className="rounded-md border border-misses/40 px-3 py-1 hover:bg-sheet">
+                Try again
+              </button>
+            </div>
+          )}
+
+          {state.phase === "done" && state.extracted.length === 0 && (
+            <p className="rounded-lg border border-rule bg-sheet px-4 py-3 text-sm text-muted">
+              No named cultural references found. Vernacular checks specific artists, shows, films, books, podcasts, games, brands and places.
+            </p>
+          )}
+
+          {swapsInOrder.length > 0 && (
+            <section className="flex flex-col gap-3 rounded-xl border border-rule bg-sheet p-6" aria-label="Rewritten copy">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted">
+                  Rewritten · {accepted.length} of {swapsInOrder.length} swaps accepted
+                </span>
+                <div className="flex gap-2">
+                  {accepted.length < swapsInOrder.length && (
+                    <button type="button" onClick={() => setDecisions(Object.fromEntries(swapsInOrder.map((s) => [s.referenceId, true])))} className="rounded-md border border-rule px-3 py-1 text-sm hover:border-ink">
+                      Accept all
+                    </button>
+                  )}
+                  <button type="button" onClick={copyRewritten} className="rounded-md bg-ink px-3 py-1 text-sm text-sheet hover:opacity-90">
+                    {copied ? "Copied" : "Copy text"}
+                  </button>
+                </div>
+              </div>
+              <p className="whitespace-pre-wrap font-serif text-[19px] leading-[1.7]">
+                <HighlightedNames text={rewritten} names={accepted.map((s) => s.replacement.name)} />
+              </p>
+            </section>
+          )}
+
+          <TraceDrawer calls={trace} />
+        </main>
+
+        <aside className="flex min-w-0 flex-col gap-4" aria-label="Audience and references">
+          <section className="rounded-xl border border-rule bg-sheet p-5">
+            <h2 className="mb-4 text-sm font-semibold">Who is this for?</h2>
+            {editing ? (
+              <AudienceBuilder value={audience} onChange={setAudience} disabled={busy} />
+            ) : (
+              <div className="flex flex-col gap-2 text-sm">
+                <p className="font-serif text-lg">{audience.label}</p>
+                <p className="text-muted">
+                  {state.anchors.length ? `Loves ${state.anchors.map((a) => a.name).join(", ")}` : "Resolving taste anchors…"}
+                  {audience.age ? ` · ${AGE_LABEL[audience.age]}` : ""}
+                  {audience.location ? ` · ${audience.location}` : ""}
+                </p>
+              </div>
+            )}
+          </section>
+
+          {!editing &&
+            (state.extracted.length ? state.extracted : []).map((r) => (
+              <ReferenceCard
+                key={r.id}
+                span={r.span}
+                reference={state.scored[r.id]}
+                swap={state.swaps[r.id]}
+                kept={state.kept[r.id]}
+                working={busy}
+                focusAge={audience.age}
+                selected={selected === r.id}
+                accepted={decisions[r.id]}
+                onSelect={() => setSelected(r.id)}
+                onAccept={() => setDecisions((d) => ({ ...d, [r.id]: true }))}
+                onDismiss={() => setDecisions((d) => ({ ...d, [r.id]: false }))}
+              />
+            ))}
+
+          {!editing && state.phase === "reading" && (
+            <div className="flex flex-col gap-3" aria-hidden>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-32 animate-pulse rounded-lg border border-rule bg-sheet" />
+              ))}
+            </div>
+          )}
+
+          {!editing && state.steps.length > 0 && (
+            <section className="rounded-lg border border-rule bg-sheet p-4" aria-label="Agent activity">
+              <h2 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">Agent activity</h2>
+              <ol className="flex flex-col gap-1 font-mono text-xs text-muted">
+                {state.steps.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ol>
+            </section>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function summaryLine(counts: Record<string, number>, phase: Phase) {
+  if (phase !== "done") return "";
+  const parts = [
+    counts.lands && `${counts.lands} land`,
+    counts.mixed && `${counts.mixed} mixed`,
+    counts.misses && `${counts.misses} miss`,
+    counts.unmeasured && `${counts.unmeasured} not measured`,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "Done";
+}
