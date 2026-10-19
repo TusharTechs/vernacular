@@ -32,10 +32,29 @@ const initial: CheckState = {
   error: null,
 };
 
-type Action = { type: "start"; text: string } | { type: "event"; event: CheckEvent } | { type: "fail"; message: string } | { type: "reset" };
+type Action =
+  | { type: "start"; text: string }
+  | { type: "event"; event: CheckEvent }
+  | { type: "fail"; message: string }
+  | { type: "reset" }
+  | { type: "load"; result: CheckResult };
 
 function reducer(s: CheckState, a: Action): CheckState {
   if (a.type === "reset") return initial;
+  if (a.type === "load") {
+    const r = a.result;
+    return {
+      ...initial,
+      phase: "done",
+      text: r.input.text,
+      anchors: r.audience.anchors,
+      extracted: r.references,
+      scored: Object.fromEntries(r.references.map((x) => [x.id, x])),
+      swaps: Object.fromEntries(r.swaps.map((x) => [x.referenceId, x])),
+      kept: Object.fromEntries(r.kept.map((x) => [x.referenceId, x])),
+      result: r,
+    };
+  }
   if (a.type === "start") return { ...initial, phase: "reading", text: a.text };
   if (a.type === "fail") return { ...s, phase: "error", error: a.message };
   const e = a.event;
@@ -110,10 +129,12 @@ export function useCheck() {
     if (error) dispatch({ type: "fail", message: error });
   }, []);
 
+  const load = useCallback((result: CheckResult) => dispatch({ type: "load", result }), []);
+
   const reset = useCallback(() => {
     abort.current?.abort();
     dispatch({ type: "reset" });
   }, []);
 
-  return { state, run, reset };
+  return { state, run, reset, load };
 }

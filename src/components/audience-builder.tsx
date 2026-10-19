@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AGE_BANDS, type AgeBand, type EntityType } from "@/lib/qloo/params";
 import { AUDIENCE_PRESETS } from "@/lib/vernacular/presets";
 import type { AudienceSpec } from "@/lib/vernacular/types";
@@ -24,13 +25,89 @@ const ANCHOR_TYPES: { value: EntityType; label: string }[] = [
   { value: "person", label: "Person" },
 ];
 
+interface Proposal {
+  spec: AudienceSpec;
+  fingerprint: { id: string; name: string; type: EntityType; affinity: number | null }[];
+}
+
+function DescribeAudience({ onProposal, disabled }: { onProposal: (p: Proposal) => void; disabled?: boolean }) {
+  const [description, setDescription] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const build = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/audience", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ description }) });
+      const data = await res.json();
+      if (!res.ok) setError(data.error ?? "Couldn't build that audience.");
+      else onProposal(data as Proposal);
+    } catch {
+      setError("Lost the connection to the server. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <form
+      className="flex flex-col gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (description.trim().length >= 3) build();
+      }}
+    >
+      <label htmlFor="audience-description" className="text-xs font-medium uppercase tracking-wider text-muted">
+        Describe your audience
+      </label>
+      <div className="flex gap-2">
+        <input
+          id="audience-description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          disabled={disabled || busy}
+          maxLength={300}
+          placeholder="e.g. Glossier customers who run on weekends"
+          className="min-w-0 flex-1 rounded-md border border-rule bg-sheet px-3 py-2 text-sm outline-none focus:border-accent"
+        />
+        <button
+          type="submit"
+          disabled={disabled || busy || description.trim().length < 3}
+          className="shrink-0 rounded-md bg-ink px-3 py-2 text-sm text-sheet hover:opacity-90 disabled:opacity-40"
+        >
+          {busy ? "Building…" : "Build with Qloo"}
+        </button>
+      </div>
+      {error && <p className="text-sm text-misses">{error}</p>}
+    </form>
+  );
+}
+
 export function AudienceBuilder({ value, onChange, disabled }: { value: AudienceSpec; onChange: (a: AudienceSpec) => void; disabled?: boolean }) {
+  const [fingerprint, setFingerprint] = useState<Proposal["fingerprint"]>([]);
   const setAnchor = (i: number, patch: Partial<AudienceSpec["anchors"][number]>) =>
     onChange({ ...value, anchors: value.anchors.map((a, j) => (j === i ? { ...a, ...patch } : a)) });
 
   return (
     <fieldset disabled={disabled} className="flex flex-col gap-4 disabled:opacity-60">
       <legend className="sr-only">Audience</legend>
+      <DescribeAudience
+        disabled={disabled}
+        onProposal={(p) => {
+          onChange(p.spec);
+          setFingerprint(p.fingerprint);
+        }}
+      />
+      {fingerprint.length > 0 && (
+        <div className="rounded-md bg-desk/70 p-3 text-xs text-muted">
+          <span className="mr-1 rounded border border-lands/40 px-1.5 py-px font-mono text-[10px] uppercase tracking-wider text-lands">Qloo</span>
+          This audience over-indexes on {fingerprint.map((f) => f.name).join(", ")}.
+        </div>
+      )}
+      <div className="flex items-center gap-3 text-xs text-muted">
+        <span className="h-px flex-1 bg-rule" />
+        or start from a preset
+        <span className="h-px flex-1 bg-rule" />
+      </div>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Audience presets">
         {AUDIENCE_PRESETS.map((p) => {
           const active = p.spec.label === value.label;
@@ -38,7 +115,10 @@ export function AudienceBuilder({ value, onChange, disabled }: { value: Audience
             <button
               key={p.id}
               type="button"
-              onClick={() => onChange(structuredClone(p.spec))}
+              onClick={() => {
+                onChange(structuredClone(p.spec));
+                setFingerprint([]);
+              }}
               aria-pressed={active}
               className={`rounded-full border px-3 py-1 text-sm transition-colors ${
                 active ? "border-accent bg-accent-soft text-ink" : "border-rule text-muted hover:border-accent hover:text-ink"
@@ -105,6 +185,48 @@ export function AudienceBuilder({ value, onChange, disabled }: { value: Audience
           </button>
         )}
       </div>
+
+      {!!value.tags?.length && (
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted">Qloo tags</span>
+          <div className="flex flex-wrap gap-2">
+            {value.tags.map((t) => (
+              <span key={t.id} title={t.id} className="flex items-center gap-1 rounded-full border border-rule bg-desk px-2.5 py-0.5 text-sm">
+                {t.name}
+                <button
+                  type="button"
+                  aria-label={`Remove ${t.name}`}
+                  onClick={() => onChange({ ...value, tags: value.tags!.filter((x) => x.id !== t.id) })}
+                  className="text-muted hover:text-misses"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!!value.segments?.length && (
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted">Qloo segments</span>
+          <div className="flex flex-wrap gap-2">
+            {value.segments.map((s) => (
+              <span key={s.id} className="flex items-center gap-1 rounded-full border border-rule bg-desk px-2.5 py-0.5 text-sm">
+                {s.name}
+                <button
+                  type="button"
+                  aria-label={`Remove ${s.name}`}
+                  onClick={() => onChange({ ...value, segments: value.segments!.filter((x) => x.id !== s.id) })}
+                  className="text-muted hover:text-misses"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-sm">

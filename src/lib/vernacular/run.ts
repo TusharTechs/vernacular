@@ -12,8 +12,8 @@ export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void 
   const text = input.text.trim();
   if (!text) throw new Error("Paste some copy to check.");
   if (text.length > MAX_TEXT_CHARS) throw new Error(`Copy is limited to ${MAX_TEXT_CHARS.toLocaleString()} characters.`);
-  if (!input.audience.anchors.length && !input.audience.age) {
-    throw new Error("Describe the audience with at least one thing they love or an age band.");
+  if (!input.audience.anchors.length && !input.audience.age && !input.audience.segments?.length && !input.audience.tags?.length) {
+    throw new Error("Describe the audience with at least one thing they love, a segment or an age band.");
   }
 
   const [{ audience, evidence: audienceEvidence, unresolved }, references] = await Promise.all([

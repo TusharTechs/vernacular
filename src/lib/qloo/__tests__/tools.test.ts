@@ -42,6 +42,15 @@ describe("audienceSignals", () => {
   });
 });
 
+describe("audienceSignals with segments and tags", () => {
+  it("sends segment ids and tag ids as Qloo signals", () => {
+    const s = audienceSignals({ label: "x", anchors: [], segments: ["urn:audience:leisure:foodie"], tags: ["urn:tag:genre:music:reggaeton"] }, "artist");
+    expect(s["signal.demographics.audiences"]).toBe("urn:audience:leisure:foodie");
+    expect(s["signal.interests.tags"]).toBe("urn:tag:genre:music:reggaeton");
+    expect(s["signal.interests.entities"]).toBeUndefined();
+  });
+});
+
 describe("resolveEntity", () => {
   it("returns the top search result with genre tags kept", async () => {
     mockFetch({

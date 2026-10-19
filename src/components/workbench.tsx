@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MAX_TEXT_CHARS } from "@/lib/vernacular/limits";
 import { AUDIENCE_PRESETS, SAMPLE_COPY } from "@/lib/vernacular/presets";
 import { applyChange } from "@/lib/vernacular/diff";
-import type { AudienceSpec, Verdict } from "@/lib/vernacular/types";
+import type { AudienceSpec, CheckResult, Verdict } from "@/lib/vernacular/types";
 import { AGE_LABEL, AudienceBuilder } from "./audience-builder";
+import { ComparePanel } from "./compare-panel";
 import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
 import { ReferenceCard } from "./reference-card";
 import { TourView } from "./tour-view";
@@ -29,7 +30,28 @@ export function Workbench() {
   const [decisions, setDecisions] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<"editor" | "tour">("editor");
-  const { state, run, reset } = useCheck();
+  const { state, run, reset, load } = useCheck();
+  const [sampleAt, setSampleAt] = useState<string | null>(null);
+  const touched = useRef(false);
+
+  // Open on a real, server-cached check of the sample so the first view shows results.
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/sample")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { checkedAt: string; result: CheckResult } | null) => {
+        if (!alive || !d || touched.current) return;
+        load(d.result);
+        setText(d.result.input.text);
+        setAudience(structuredClone(d.result.input.audience));
+        setEditing(false);
+        setSampleAt(d.checkedAt);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [load]);
 
   const busy = state.phase === "reading" || state.phase === "scoring" || state.phase === "swapping";
   const located = useMemo(() => locate(state.text, state.extracted), [state.text, state.extracted]);
@@ -55,6 +77,8 @@ export function Workbench() {
   };
 
   const check = (forAudience: AudienceSpec = audience) => {
+    touched.current = true;
+    setSampleAt(null);
     const spec: AudienceSpec = { ...forAudience, anchors: forAudience.anchors.filter((a) => a.query.trim()) };
     setEditing(false);
     setSelected(null);
@@ -63,6 +87,8 @@ export function Workbench() {
     run({ text, audience: spec });
   };
   const edit = () => {
+    touched.current = true;
+    setSampleAt(null);
     reset();
     setEditing(true);
   };
@@ -121,6 +147,18 @@ export function Workbench() {
 
       <div className={`grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] ${mode === "tour" ? "hidden" : ""}`}>
         <main className="flex min-w-0 flex-col gap-4">
+          {sampleAt && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent-soft px-4 py-3 text-sm">
+              <span>
+                Example: this sample was checked live on Qloo{" "}
+                {new Date(sampleAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}. Click a marked reference to see why.
+              </span>
+              <button type="button" onClick={edit} className="font-medium text-accent hover:underline">
+                Try your own copy
+              </button>
+            </div>
+          )}
+
           <section className="rounded-xl border border-rule bg-sheet p-6 shadow-sm sm:p-8" aria-label="Copy">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted">
@@ -145,7 +183,10 @@ export function Workbench() {
               <textarea
                 id="copy-input"
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  touched.current = true;
+                  setText(e.target.value);
+                }}
                 maxLength={MAX_TEXT_CHARS}
                 rows={7}
                 placeholder="Paste an ad script, caption, tour announcement or stand-up bit…"
@@ -163,7 +204,7 @@ export function Workbench() {
                 <button
                   type="button"
                   onClick={() => check()}
-                  disabled={!text.trim() || (!audience.anchors.some((a) => a.query.trim()) && !audience.age)}
+                  disabled={!text.trim() || (!audience.anchors.some((a) => a.query.trim()) && !audience.age && !audience.segments?.length && !audience.tags?.length)}
                   className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-40"
                 >
                   Check copy
@@ -211,6 +252,10 @@ export function Workbench() {
             </section>
           )}
 
+          {state.phase === "done" && swapsInOrder.length > 0 && (
+            <ComparePanel text={state.text} audience={audience} references={state.extracted} scored={state.scored} swaps={state.swaps} />
+          )}
+
           <TraceDrawer calls={trace} />
         </main>
 
@@ -218,12 +263,21 @@ export function Workbench() {
           <section className="rounded-xl border border-rule bg-sheet p-5">
             <h2 className="mb-4 text-sm font-semibold">Who is this for?</h2>
             {editing ? (
-              <AudienceBuilder value={audience} onChange={setAudience} disabled={busy} />
+              <AudienceBuilder
+                value={audience}
+                onChange={(a) => {
+                  touched.current = true;
+                  setAudience(a);
+                }}
+                disabled={busy}
+              />
             ) : (
               <div className="flex flex-col gap-2 text-sm">
                 <p className="font-serif text-lg">{audience.label}</p>
                 <p className="text-muted">
                   {state.anchors.length ? `Loves ${state.anchors.map((a) => a.name).join(", ")}` : "Resolving taste anchors…"}
+                  {audience.tags?.length ? ` · into ${audience.tags.map((t) => t.name).join(", ")}` : ""}
+                  {audience.segments?.length ? ` · ${audience.segments.map((s) => s.name).join(", ")}` : ""}
                   {audience.age ? ` · ${AGE_LABEL[audience.age]}` : ""}
                   {audience.location ? ` · ${audience.location}` : ""}
                 </p>

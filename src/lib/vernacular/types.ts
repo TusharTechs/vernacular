@@ -16,6 +16,10 @@ export interface AudienceSpec {
   gender?: "male" | "female";
   /** City or neighbourhood; applied to place and brand references only. */
   location?: string;
+  /** Qloo audience segments (life stage, interests, communities…). */
+  segments?: { id: string; name: string }[];
+  /** Qloo tags (genres, styles, cuisines…) the audience is into. */
+  tags?: { id: string; name: string }[];
 }
 
 /** A cultural reference the model found in the text. */
@@ -51,6 +55,8 @@ export interface Swap {
   rewrittenSentence: string;
   /** Just this swap's edit, so it can be shown and applied independently of other swaps. */
   change: Change;
+  /** Qloo explainability: how much each audience anchor drove the replacement's affinity. */
+  drivers: { name: string; share: number }[];
   rationale: string;
   evidence: Evidence[];
 }

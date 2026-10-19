@@ -43,7 +43,15 @@ export async function resolveAudience(spec: AudienceSpec) {
   const evidence: Evidence[] = found.map((f) => f.evidence);
   const anchors: ResolvedEntity[] = found.flatMap((f) => (f.entity ? [f.entity] : []));
   const unresolved = wanted.filter((_, i) => !found[i].entity).map((a) => a.query);
-  const audience: Audience = { label: spec.label, anchors, age: spec.age, gender: spec.gender, location: spec.location };
+  const audience: Audience = {
+    label: spec.label,
+    anchors,
+    age: spec.age,
+    gender: spec.gender,
+    location: spec.location,
+    segments: spec.segments?.map((s) => s.id),
+    tags: spec.tags?.map((t) => t.id),
+  };
   return { audience, evidence, unresolved };
 }
 

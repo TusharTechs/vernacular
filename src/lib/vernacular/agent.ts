@@ -190,7 +190,15 @@ export async function runSwapAgent(
         if (!said.includes(firstWords)) throw new Error(`The rewritten sentence must name ${v.candidate.name}.`);
         if (input.rewritten_sentence.includes(r.span)) throw new Error(`The rewritten sentence still contains "${r.span}".`);
 
+        const raw = (v.candidate.explainability as { "signal.interests.entities"?: { entity_id: string; score: number }[] } | undefined)?.[
+          "signal.interests.entities"
+        ];
+        const drivers = (raw ?? [])
+          .map((d) => ({ name: audience.anchors.find((a) => a.id === d.entity_id)?.name ?? "", share: d.score }))
+          .filter((d) => d.name)
+          .sort((a, b) => b.share - a.share);
         const swap: Swap = {
+          drivers,
           referenceId: r.id,
           replacement: { ...v.candidate, percentile: v.percentile, affinity: v.affinity },
           rewrittenSentence: input.rewritten_sentence,

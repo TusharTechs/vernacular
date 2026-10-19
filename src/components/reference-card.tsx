@@ -170,6 +170,14 @@ export function ReferenceCard({
             <span>{swap.rationale}</span>
           </p>
           <SwapPreview swap={swap} />
+          {swap.drivers.length > 1 && (
+            <p className="flex items-start gap-2 text-xs text-muted">
+              <Source kind="qloo" />
+              <span>
+                Driven by {swap.drivers.map((d) => `${d.name} ${Math.round(d.share * 100)}%`).join(" · ")}
+              </span>
+            </p>
+          )}
           <div className="flex gap-2 pt-1">
             {accepted ? (
               <button type="button" onClick={(e) => { e.stopPropagation(); onDismiss(); }} className="rounded-md border border-rule px-3 py-1.5 text-sm hover:border-ink">

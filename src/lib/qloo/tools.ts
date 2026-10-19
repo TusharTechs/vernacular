@@ -35,6 +35,10 @@ export interface Audience {
   gender?: "male" | "female";
   /** Applied only to place and brand references, where Qloo honours location. */
   location?: string;
+  /** Qloo audience segment ids, e.g. urn:audience:life_stage:parents_with_young_children. */
+  segments?: string[];
+  /** Qloo tag ids the audience is into, e.g. urn:tag:genre:music:reggaeton. */
+  tags?: string[];
 }
 
 type RawTag = { id?: string; tag_id?: string; name?: string; type?: string };
@@ -83,6 +87,8 @@ export function audienceSignals(audience: Audience, targetType: EntityType) {
     "signal.interests.entities": audience.anchors.length ? audience.anchors.map((a) => a.id).join(",") : undefined,
     "signal.demographics.age": audience.age,
     "signal.demographics.gender": audience.gender,
+    "signal.demographics.audiences": audience.segments?.length ? audience.segments.join(",") : undefined,
+    "signal.interests.tags": audience.tags?.length ? audience.tags.join(",") : undefined,
     "signal.location.query": audience.location && LOCATION_TYPES.includes(targetType) ? audience.location : undefined,
   };
 }
