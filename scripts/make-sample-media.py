@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 """Draws the original sample storyboard (5 panels) and renders it as JPEGs and
-a 15-second animatic MP4 in public/samples/. Requires Google Chrome (headless), ImageMagick and ffmpeg.
+a 15-second animatic MP4 in public/samples/. Requires Google Chrome (headless),
+ImageMagick and ffmpeg.
 
-Usage: python3 scripts/make-sample-media.py
+If OPENAI_API_KEY is set, the animatic also gets a voiceover generated with
+OpenAI text-to-speech (an AI voice; the app discloses this next to the sample).
+
+Usage: OPENAI_API_KEY=... python3 scripts/make-sample-media.py
 """
+import json
+import os
 import pathlib
 import subprocess
 import tempfile
+import urllib.request
 
 OUT = pathlib.Path("public/samples")
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -34,7 +41,7 @@ PANELS = [
     },
     {
         "caption": "SHOT 2 — The group crowds a booth for dinner under the Olive Garden sign.",
-        "vo": "Dinner like a Friday at your favourite spot.",
+        "vo": "Funnier than the Friends reunion special.",
         "art": f"""
           <rect x="330" y="90" width="620" height="120" rx="12" fill="{PAPER}" stroke="{INK}" stroke-width="6"/>
           <text x="640" y="172" font-size="64" font-style="italic" font-weight="700" text-anchor="middle" fill="{INK}" font-family="Georgia">Olive Garden</text>
@@ -49,7 +56,7 @@ PANELS = [
     },
     {
         "caption": "SHOT 3 — A lounge stage. A poster reads “Frank Sinatra Tribute Night”. The crowd sings along.",
-        "vo": "And a sing-along you'll still be humming on Monday.",
+        "vo": "Louder than a Garth Brooks stadium show.",
         "art": f"""
           <rect x="140" y="110" width="330" height="420" fill="{PAPER}" stroke="{INK}" stroke-width="6"/>
           <text x="305" y="200" font-size="40" font-weight="800" text-anchor="middle" fill="{INK}" font-family="Helvetica">FRANK</text>
@@ -67,7 +74,7 @@ PANELS = [
     },
     {
         "caption": "SHOT 4 — Outside the venue after the show. A Buick is parked under a billboard for the tour.",
-        "vo": "One night only, in a city near you.",
+        "vo": "With the energy of a Bad Bunny encore.",
         "art": f"""
           <rect x="680" y="90" width="500" height="200" fill="{PAPER}" stroke="{INK}" stroke-width="6"/>
           <text x="930" y="175" font-size="44" font-weight="800" text-anchor="middle" fill="{INK}" font-family="Helvetica">LIVE COMEDY</text>
@@ -99,10 +106,53 @@ def svg(panel: dict, n: int) -> str:
   <rect x="24" y="24" width="{W - 48}" height="{H - 48}" fill="none" stroke="{INK}" stroke-width="4"/>
   <text x="48" y="64" font-size="22" font-weight="700" fill="{INK}" font-family="Helvetica">PANEL {n}</text>
   {panel["art"]}
-  <rect x="24" y="560" width="{W - 48}" height="136" fill="{INK}"/>
-  <text x="56" y="612" font-size="26" fill="{PAPER}" font-family="Helvetica">{panel["caption"]}</text>
-  <text x="56" y="664" font-size="26" font-style="italic" fill="#c8cede" font-family="Helvetica">VO: “{panel["vo"]}”</text>
+  <rect x="24" y="600" width="{W - 48}" height="96" fill="{INK}"/>
+  <text x="56" y="658" font-size="26" fill="{PAPER}" font-family="Helvetica">{panel["caption"]}</text>
 </svg>"""
+
+
+SECONDS = 3.0
+
+
+def duration(path: pathlib.Path) -> float:
+    out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+                         check=True, capture_output=True, text=True).stdout
+    return float(out.strip())
+
+
+def make_voiceover(tmp: str) -> pathlib.Path | None:
+    key = os.environ.get("OPENAI_API_KEY")
+    if not key:
+        print("OPENAI_API_KEY not set: the animatic will be silent.")
+        return None
+    clips = []
+    for i, p in enumerate(PANELS, start=1):
+        req = urllib.request.Request(
+            "https://api.openai.com/v1/audio/speech",
+            data=json.dumps({
+                "model": "gpt-4o-mini-tts",
+                "voice": "marin",
+                "input": p["vo"],
+                "instructions": "Upbeat, warm promo announcer for a comedy tour. Brisk pace.",
+                "response_format": "wav",
+            }).encode(),
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        )
+        raw = pathlib.Path(tmp) / f"vo-{i}.wav"
+        with urllib.request.urlopen(req, timeout=60) as r:
+            raw.write_bytes(r.read())
+        # Fit each line into its panel's 3 seconds: speed up long lines a little, pad short ones.
+        d = duration(raw)
+        tempo = min(1.5, d / (SECONDS - 0.2)) if d > SECONDS - 0.2 else 1.0
+        fitted = pathlib.Path(tmp) / f"vo-{i}-fit.wav"
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-af",
+                        f"atempo={tempo:.3f},apad,atrim=0:{SECONDS}", "-ar", "24000", "-ac", "1", str(fitted)], check=True)
+        clips.append(fitted)
+    out = pathlib.Path(tmp) / "voiceover.wav"
+    listing = pathlib.Path(tmp) / "clips.txt"
+    listing.write_text("".join(f"file '{c}'\n" for c in clips))
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(listing), "-c", "copy", str(out)], check=True)
+    return out
 
 
 def main() -> None:
@@ -128,9 +178,12 @@ def main() -> None:
             inputs += ["-i", str(f)]
             filters.append(f"[{i}:v]scale=1280:720,zoompan=z='min(zoom+0.0006,1.04)':d=72:s=1280x720:fps=24,setsar=1[v{i}]")
         concat = "".join(f"[v{i}]" for i in range(len(frames))) + f"concat=n={len(frames)}:v=1:a=0[out]"
+        voice = make_voiceover(tmp)
+        audio_in = ["-i", str(voice)] if voice else []
+        audio_map = ["-map", f"{len(frames)}:a", "-c:a", "aac", "-b:a", "96k", "-shortest"] if voice else []
         subprocess.run(
-            ["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", ";".join(filters + [concat]),
-             "-map", "[out]", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "28", "-movflags", "+faststart",
+            ["ffmpeg", "-y", "-loglevel", "error", *inputs, *audio_in, "-filter_complex", ";".join(filters + [concat]),
+             "-map", "[out]", *audio_map, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "28", "-movflags", "+faststart",
              str(OUT / "comedy-tour-animatic.mp4")],
             check=True,
         )

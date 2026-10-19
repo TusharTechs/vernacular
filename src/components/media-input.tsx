@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { extractVoice } from "./audio";
 
 export interface Frame {
   src: string;
@@ -52,8 +53,13 @@ async function sampleVideo(url: string, name: string, onProgress: (s: string) =>
   for (let i = 0; i < n; i++) {
     const t = ((i + 0.5) * duration) / n;
     onProgress(`Sampling frame ${i + 1} of ${n}…`);
+    // Some browsers drop "seeked" (e.g. in a background tab), so never wait more than 3 s per frame.
     await new Promise<void>((ok) => {
-      video.onseeked = () => ok();
+      const timer = window.setTimeout(ok, 3000);
+      video.onseeked = () => {
+        window.clearTimeout(timer);
+        ok();
+      };
       video.currentTime = t;
     });
     frames.push({ src: toJpeg(video, video.videoWidth, video.videoHeight, 960), t: Math.round(t * 10) / 10, name });
@@ -64,6 +70,8 @@ async function sampleVideo(url: string, name: string, onProgress: (s: string) =>
 export function MediaInput({ onRead, disabled }: { onRead: (r: StoryboardRead) => void; disabled?: boolean }) {
   const [frames, setFrames] = useState<Frame[]>([]);
   const [voiceover, setVoiceover] = useState("");
+  const [segments, setSegments] = useState<{ start: number; end: number; text: string }[] | null>(null);
+  const [voiceNote, setVoiceNote] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const imageInput = useRef<HTMLInputElement>(null);
@@ -89,9 +97,35 @@ export function MediaInput({ onRead, disabled }: { onRead: (r: StoryboardRead) =
       setFrames((cur) => [...cur.filter((c) => c.t === undefined), ...next].slice(0, MAX_FRAMES));
     });
 
-  const addVideo = (url: string, name: string) =>
+  const addVideo = (video: Blob, name: string) =>
     guard("Opening the video…", async () => {
-      setFrames(await sampleVideo(url, name, (s) => setStatus(s)));
+      const url = URL.createObjectURL(video);
+      try {
+        setFrames(await sampleVideo(url, name, (s) => setStatus(s)));
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+      setVoiceover("");
+      setSegments(null);
+      setVoiceNote(null);
+      setStatus("Listening for a voiceover…");
+      const audio = await extractVoice(video);
+      if (!audio) {
+        setVoiceNote("No voiceover found in this video. Paste a script below if there is one.");
+        return;
+      }
+      setStatus("Transcribing the voiceover…");
+      const form = new FormData();
+      form.append("audio", audio, "voiceover.wav");
+      const res = await fetch("/api/transcribe", { method: "POST", body: form });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setVoiceNote(`${data.error ?? "Couldn't transcribe the voiceover."} You can paste it below instead.`);
+        return;
+      }
+      setVoiceover(data.text ?? "");
+      setSegments(data.segments ?? null);
+      setVoiceNote("Voiceover transcribed. Each line will be matched to the frame it plays over; edit it if anything was misheard.");
     });
 
   const loadSampleBoard = () =>
@@ -105,7 +139,11 @@ export function MediaInput({ onRead, disabled }: { onRead: (r: StoryboardRead) =
       const res = await fetch("/api/storyboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ frames: frames.map((f) => ({ image: f.src, t: f.t })), voiceover: voiceover.trim() || undefined }),
+        body: JSON.stringify({
+          frames: frames.map((f) => ({ image: f.src, t: f.t })),
+          voiceover: voiceover.trim() || undefined,
+          voiceSegments: segments ?? undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Couldn't read the frames.");
@@ -125,7 +163,12 @@ export function MediaInput({ onRead, disabled }: { onRead: (r: StoryboardRead) =
         <button type="button" disabled={disabled || busy} onClick={loadSampleBoard} className="rounded-full border border-rule px-3 py-1 text-xs text-muted hover:border-accent hover:text-ink">
           Sample storyboard
         </button>
-        <button type="button" disabled={disabled || busy} onClick={() => addVideo("/samples/comedy-tour-animatic.mp4", "comedy-tour-animatic.mp4")} className="rounded-full border border-rule px-3 py-1 text-xs text-muted hover:border-accent hover:text-ink">
+        <button type="button" disabled={disabled || busy} onClick={() =>
+            guard("Loading the sample animatic…", async () => {
+              const blob = await (await fetch("/samples/comedy-tour-animatic.mp4")).blob();
+              await addVideo(blob, "comedy-tour-animatic.mp4");
+            })
+          } className="rounded-full border border-rule px-3 py-1 text-xs text-muted hover:border-accent hover:text-ink">
           Sample animatic (video)
         </button>
         <input ref={imageInput} type="file" accept="image/*" multiple hidden onChange={(e) => addImages(e.target.files)} />
@@ -136,12 +179,15 @@ export function MediaInput({ onRead, disabled }: { onRead: (r: StoryboardRead) =
           hidden
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) addVideo(URL.createObjectURL(f), f.name);
+            if (f) addVideo(f, f.name);
           }}
         />
       </div>
 
-      <p className="text-xs text-muted">Videos are sampled into frames in your browser; only the stills are sent for reading. Up to {MAX_FRAMES} frames.</p>
+      <p className="text-xs text-muted">
+        Videos are sampled into frames in your browser; only the stills and a compressed copy of the soundtrack are sent, for reading and transcription. Up to{" "}
+        {MAX_FRAMES} frames. The sample animatic&apos;s voiceover is AI-generated.
+      </p>
 
       {frames.length > 0 ? (
         <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
@@ -171,10 +217,14 @@ export function MediaInput({ onRead, disabled }: { onRead: (r: StoryboardRead) =
 
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-xs font-medium uppercase tracking-wider text-muted">Voiceover or script (optional)</span>
+        {voiceNote && <span className="text-xs text-muted">{voiceNote}</span>}
         <textarea
           id="voiceover"
           value={voiceover}
-          onChange={(e) => setVoiceover(e.target.value)}
+          onChange={(e) => {
+            setVoiceover(e.target.value);
+            setSegments(null); // edited text is checked as a whole rather than per frame
+          }}
           rows={2}
           maxLength={1500}
           placeholder="Paste the voiceover so its references are checked too"

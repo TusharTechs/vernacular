@@ -17,6 +17,12 @@ export interface FrameInput {
   t?: number;
 }
 
+export interface TimedLine {
+  start: number;
+  end: number;
+  text: string;
+}
+
 export interface Shot {
   index: number;
   label: string;
@@ -57,8 +63,23 @@ function parseDataUrl(url: string) {
   return { media_type: m[1] as "image/jpeg" | "image/png" | "image/webp", data: m[2] };
 }
 
+/**
+ * Assign each timed voiceover line to the frame it plays over. A frame's window
+ * runs from halfway after the previous frame to halfway before the next one.
+ */
+export function assignLines(frameTimes: number[], lines: TimedLine[]): Map<number, string[]> {
+  const out = new Map<number, string[]>();
+  for (const line of lines) {
+    const mid = (line.start + line.end) / 2;
+    let idx = 0;
+    for (let i = 1; i < frameTimes.length; i++) if (mid >= (frameTimes[i - 1] + frameTimes[i]) / 2) idx = i;
+    out.set(idx, [...(out.get(idx) ?? []), line.text.replace(/[“”"]/g, "'").trim()]);
+  }
+  return out;
+}
+
 /** Turn frames (and an optional voiceover) into shot notes the check can run on. */
-export async function readStoryboard(frames: FrameInput[], voiceover?: string) {
+export async function readStoryboard(frames: FrameInput[], voiceover?: string, voiceSegments?: TimedLine[]) {
   if (!frames.length) throw new Error("Add at least one frame or image.");
   if (frames.length > MAX_FRAMES) throw new Error(`Use up to ${MAX_FRAMES} frames.`);
   const images = frames.map((f) => parseDataUrl(f.image));
@@ -95,6 +116,14 @@ export async function readStoryboard(frames: FrameInput[], voiceover?: string) {
       return { index: s.index, label, note: `[${label}] ${sentence}${text}` };
     });
 
-  const vo = voiceover?.trim() ? `\n\nVoiceover: ${voiceover.trim()}` : "";
+  const timed = frames.every((f) => typeof f.t === "number") && voiceSegments?.length ? voiceSegments : null;
+  if (timed) {
+    const lines = assignLines(frames.map((f) => f.t!), timed);
+    for (const shot of shots) {
+      const said = lines.get(shot.index);
+      if (said?.length) shot.note += ` Voiceover: “${said.join(" ")}”`;
+    }
+  }
+  const vo = !timed && voiceover?.trim() ? `\n\nVoiceover: ${voiceover.trim()}` : "";
   return { shots, text: shots.map((s) => s.note).join("\n") + vo };
 }

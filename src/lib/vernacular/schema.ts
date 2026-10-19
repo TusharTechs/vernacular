@@ -39,6 +39,10 @@ export const StoryboardInputSchema = z.object({
     .min(1, "Add at least one frame or image.")
     .max(16, "Use up to 16 frames."),
   voiceover: z.string().max(1500, "Keep the voiceover under 1,500 characters.").optional(),
+  voiceSegments: z
+    .array(z.object({ start: z.number().min(0).max(600), end: z.number().min(0).max(600), text: z.string().max(300) }))
+    .max(80)
+    .optional(),
 });
 
 export const CheckInputSchema = z.object({ text: Text, audience: AudienceSchema });

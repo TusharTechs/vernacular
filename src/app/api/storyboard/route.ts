@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   const admission = admit(ip, "vision");
   if (!admission.ok) return Response.json({ error: admission.message }, { status: admission.status });
   try {
-    return Response.json(await readStoryboard(parsed.data.frames, parsed.data.voiceover));
+    return Response.json(await readStoryboard(parsed.data.frames, parsed.data.voiceover, parsed.data.voiceSegments));
   } catch (err) {
     console.error("storyboard failed:", err instanceof Error ? err.message : err);
     return Response.json({ error: publicMessage(err) }, { status: 500 });
