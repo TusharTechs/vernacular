@@ -7,10 +7,13 @@ import { applyChange } from "@/lib/vernacular/diff";
 import type { AudienceSpec, CheckResult, Verdict } from "@/lib/vernacular/types";
 import { AGE_LABEL, AudienceBuilder } from "./audience-builder";
 import { ComparePanel } from "./compare-panel";
+import { FeedPreview } from "./feed-preview";
 import { Filmstrip } from "./filmstrip";
 import { MediaInput, type StoryboardRead } from "./media-input";
 import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
 import { ReferenceCard } from "./reference-card";
+import { ShareButton } from "./share-dialog";
+import { SwipeReview } from "./swipe-review";
 import { TourView } from "./tour-view";
 import { TraceDrawer } from "./trace-drawer";
 import { traceOf, useCheck, type Phase } from "./use-check";
@@ -283,6 +286,8 @@ export function Workbench() {
                       Accept all
                     </button>
                   )}
+                  <SwipeReview swaps={swapsInOrder} references={state.scored} onDecide={(id, accept) => setDecisions((d) => ({ ...d, [id]: accept }))} />
+                  {state.result && <ShareButton result={state.result} />}
                   <button type="button" onClick={copyRewritten} className="rounded-md bg-ink px-3 py-1 text-sm text-sheet hover:opacity-90">
                     {copied ? "Copied" : "Copy text"}
                   </button>
@@ -292,6 +297,18 @@ export function Workbench() {
                 <HighlightedNames text={rewritten} names={accepted.map((s) => s.replacement.name)} />
               </p>
             </section>
+          )}
+
+          {state.phase === "done" && state.extracted.length > 0 && (
+            <FeedPreview
+              original={state.text}
+              rewritten={swapsInOrder.reduce((t, sw) => applyChange(t, sw.change), state.text)}
+              refs={located}
+              verdicts={verdicts}
+              swapNames={swapsInOrder.map((s) => s.replacement.name)}
+              media={board && board.text === state.text ? board.frames[0]?.src : undefined}
+              audience={audience.label}
+            />
           )}
 
           {state.phase === "done" && swapsInOrder.length > 0 && (

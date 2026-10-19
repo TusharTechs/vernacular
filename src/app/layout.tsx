@@ -6,7 +6,12 @@ const ui = Instrument_Sans({ variable: "--font-ui", subsets: ["latin"] });
 const copy = Newsreader({ variable: "--font-copy", subsets: ["latin"], style: ["normal", "italic"] });
 const data = JetBrains_Mono({ variable: "--font-data", subsets: ["latin"] });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Vernacular · the spell-checker for culture",
   description:
     "Paste any copy and pick who it's for. Vernacular scores every cultural reference on Qloo's taste graph and swaps the ones that miss for verified equivalents.",
