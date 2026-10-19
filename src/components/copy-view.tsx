@@ -28,8 +28,10 @@ export function MarkedCopy({
   verdicts,
   selectedId,
   onSelect,
+  compact = false,
 }: {
   text: string;
+  compact?: boolean;
   refs: Located[];
   verdicts: Record<string, Verdict | "pending">;
   selectedId: string | null;
@@ -56,7 +58,7 @@ export function MarkedCopy({
     cursor = r.end;
   }
   parts.push(text.slice(cursor));
-  return <p className="whitespace-pre-wrap font-serif text-[21px] leading-[1.75]">{parts}</p>;
+  return <p className={`whitespace-pre-wrap font-serif ${compact ? "text-[16px] leading-[1.7]" : "text-[21px] leading-[1.75]"}`}>{parts}</p>;
 }
 
 /** Text with replacement names highlighted. */

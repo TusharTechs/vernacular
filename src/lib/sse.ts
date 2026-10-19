@@ -16,7 +16,7 @@ export function publicMessage(err: unknown): string {
   if (err instanceof Anthropic.RateLimitError) return "The model is rate-limited right now. Try again in a minute.";
   if (err instanceof Anthropic.AuthenticationError) return "The server's model connection isn't configured correctly.";
   if (err instanceof Anthropic.APIError) return "The model request failed. Try again in a moment.";
-  if (err instanceof Error && /Paste some copy|limited to|Describe the audience|taste anchors|Tour Mode compares|interpret that audience/.test(err.message)) return err.message;
+  if (err instanceof Error && /Paste some copy|limited to|Describe the audience|taste anchors|Tour Mode compares|interpret that audience|frames|Frames|voiceover/.test(err.message)) return err.message;
   return "Something went wrong while checking this copy.";
 }
 

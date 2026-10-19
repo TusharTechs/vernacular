@@ -2,8 +2,8 @@
 // Each check costs roughly 20–40 Qloo calls and several Claude calls.
 
 const WINDOW_MS = 10 * 60 * 1000;
-const PER_IP: Record<Bucket, number> = { check: 8, audience: 20 };
-export type Bucket = "check" | "audience";
+const PER_IP: Record<Bucket, number> = { check: 8, audience: 20, vision: 10 };
+export type Bucket = "check" | "audience" | "vision";
 const MAX_CONCURRENT = 4;
 
 const hits = new Map<string, number[]>();

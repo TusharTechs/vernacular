@@ -33,6 +33,14 @@ export const AudienceDescriptionSchema = z.object({
   description: z.string().trim().min(3, "Describe the audience in a few words.").max(300, "Keep the description under 300 characters."),
 });
 
+export const StoryboardInputSchema = z.object({
+  frames: z
+    .array(z.object({ image: z.string().startsWith("data:image/").max(900_000), t: z.number().min(0).max(600).optional() }))
+    .min(1, "Add at least one frame or image.")
+    .max(16, "Use up to 16 frames."),
+  voiceover: z.string().max(1500, "Keep the voiceover under 1,500 characters.").optional(),
+});
+
 export const CheckInputSchema = z.object({ text: Text, audience: AudienceSchema });
 
 export const TourInputSchema = z.object({

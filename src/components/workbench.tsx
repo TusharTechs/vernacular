@@ -7,6 +7,8 @@ import { applyChange } from "@/lib/vernacular/diff";
 import type { AudienceSpec, CheckResult, Verdict } from "@/lib/vernacular/types";
 import { AGE_LABEL, AudienceBuilder } from "./audience-builder";
 import { ComparePanel } from "./compare-panel";
+import { Filmstrip } from "./filmstrip";
+import { MediaInput, type StoryboardRead } from "./media-input";
 import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
 import { ReferenceCard } from "./reference-card";
 import { TourView } from "./tour-view";
@@ -30,6 +32,8 @@ export function Workbench() {
   const [decisions, setDecisions] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<"editor" | "tour">("editor");
+  const [input, setInput] = useState<"copy" | "media">("copy");
+  const [board, setBoard] = useState<StoryboardRead | null>(null);
   const { state, run, reset, load } = useCheck();
   const [sampleAt, setSampleAt] = useState<string | null>(null);
   const touched = useRef(false);
@@ -76,7 +80,7 @@ export function Workbench() {
     }
   };
 
-  const check = (forAudience: AudienceSpec = audience) => {
+  const check = (forAudience: AudienceSpec = audience, forText: string = text) => {
     touched.current = true;
     setSampleAt(null);
     const spec: AudienceSpec = { ...forAudience, anchors: forAudience.anchors.filter((a) => a.query.trim()) };
@@ -84,7 +88,7 @@ export function Workbench() {
     setSelected(null);
     setDecisions({});
     setCopied(false);
-    run({ text, audience: spec });
+    run({ text: forText, audience: spec });
   };
   const edit = () => {
     touched.current = true;
@@ -162,24 +166,50 @@ export function Workbench() {
           <section className="rounded-xl border border-rule bg-sheet p-6 shadow-sm sm:p-8" aria-label="Copy">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted">
-                {editing ? "Your copy" : `Checked for ${audience.label}`}
+                {editing ? "Your copy" : `${board && board.text === state.text ? "Shot notes checked" : "Checked"} for ${audience.label}`}
               </span>
-              {editing ? (
-                <div className="flex flex-wrap gap-2">
+              {editing && (
+                <div className="flex rounded-md border border-rule p-0.5 text-xs" role="tablist" aria-label="Input type">
+                  {(["copy", "media"] as const).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      role="tab"
+                      aria-selected={input === m}
+                      onClick={() => setInput(m)}
+                      className={`rounded px-2.5 py-1 ${input === m ? "bg-ink text-sheet" : "text-muted hover:text-ink"}`}
+                    >
+                      {m === "copy" ? "Copy" : "Storyboard or video"}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {editing && input === "copy" ? (
+                <div className="flex w-full flex-wrap gap-2">
                   {SAMPLE_COPY.map((s) => (
-                    <button key={s.id} type="button" onClick={() => setText(s.text)} className="rounded-full border border-rule px-3 py-1 text-xs text-muted hover:border-accent hover:text-ink">
+                    <button key={s.id} type="button" onClick={() => { setText(s.text); setBoard(null); }} className="rounded-full border border-rule px-3 py-1 text-xs text-muted hover:border-accent hover:text-ink">
                       Sample: {s.label}
                     </button>
                   ))}
                 </div>
-              ) : (
+              ) : !editing ? (
                 <button type="button" onClick={edit} className="text-sm text-accent hover:underline">
-                  Edit copy
+                  {board && board.text === state.text ? "Change frames" : "Edit copy"}
                 </button>
-              )}
+              ) : null}
             </div>
 
-            {editing ? (
+            {editing && input === "media" ? (
+              <MediaInput
+                disabled={busy}
+                onRead={(r) => {
+                  touched.current = true;
+                  setBoard(r);
+                  setText(r.text);
+                  check(audience, r.text);
+                }}
+              />
+            ) : editing ? (
               <textarea
                 id="copy-input"
                 value={text}
@@ -193,14 +223,26 @@ export function Workbench() {
                 className="w-full resize-y bg-transparent font-serif text-[21px] leading-[1.75] outline-none placeholder:text-muted/60"
               />
             ) : (
-              <MarkedCopy text={state.text} refs={located} verdicts={verdicts} selectedId={selected} onSelect={selectFromCopy} />
+              <div className="flex flex-col gap-5">
+                {board && board.text === state.text && (
+                  <Filmstrip text={state.text} frames={board.frames} shots={board.shots} refs={located} verdicts={verdicts} selectedId={selected} onSelect={selectFromCopy} />
+                )}
+                <MarkedCopy
+                  text={state.text}
+                  refs={located}
+                  verdicts={verdicts}
+                  selectedId={selected}
+                  onSelect={selectFromCopy}
+                  compact={!!board && board.text === state.text}
+                />
+              </div>
             )}
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4">
               <span className="font-mono text-xs text-muted">
-                {editing ? `${text.length.toLocaleString()} / ${MAX_TEXT_CHARS.toLocaleString()}` : PHASE_TEXT[state.phase] || summaryLine(counts, state.phase)}
+                {editing ? (input === "copy" ? `${text.length.toLocaleString()} / ${MAX_TEXT_CHARS.toLocaleString()}` : "") : PHASE_TEXT[state.phase] || summaryLine(counts, state.phase)}
               </span>
-              {editing && (
+              {editing && input === "copy" && (
                 <button
                   type="button"
                   onClick={() => check()}
