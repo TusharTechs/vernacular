@@ -1,0 +1,37 @@
+{
+  "name": "vernacular",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "qloo:smoke": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/qloo-smoke.ts",
+    "qloo:confirm-test": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/confirm-test.ts",
+    "check": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/check.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "next": "15.5.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.4",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
+  },
+  "license": "MIT"
+}
