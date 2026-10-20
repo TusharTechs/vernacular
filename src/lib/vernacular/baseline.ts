@@ -75,7 +75,8 @@ async function scoreNames(items: { name: string; type: EntityType }[], audience:
   return { out, evidence };
 }
 
-export async function runBaseline(text: string, spec: AudienceSpec): Promise<BaselineResult> {
+/** Claude's own rewrite, with no Qloo data. */
+export async function baselineRewrite(text: string, spec: AudienceSpec) {
   const response = await claude().beta.messages.parse({
     model: MODEL,
     max_tokens: 8000,
@@ -87,9 +88,15 @@ export async function runBaseline(text: string, spec: AudienceSpec): Promise<Bas
   if (response.stop_reason === "refusal") throw new RefusalError(response.stop_details?.category);
   const parsed = response.parsed_output;
   if (!parsed) throw new Error("Could not read the baseline rewrite.");
+  return {
+    rewritten: parsed.rewritten,
+    swaps: parsed.swaps.filter((s) => s.original.trim() && s.replacement.trim() && s.original !== s.replacement),
+  };
+}
 
-  const { audience, evidence } = await resolveAudience(spec);
-  const swaps = parsed.swaps.filter((s) => s.original.trim() && s.replacement.trim() && s.original !== s.replacement);
+export async function runBaseline(text: string, spec: AudienceSpec): Promise<BaselineResult> {
+  const [parsed, { audience, evidence }] = await Promise.all([baselineRewrite(text, spec), resolveAudience(spec)]);
+  const swaps = parsed.swaps;
   const { out, evidence: scoreEvidence } = await scoreNames(swaps.map((s) => ({ name: s.replacement, type: s.type })), audience);
   return {
     rewritten: parsed.rewritten,

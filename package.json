@@ -12,7 +12,8 @@
     "qloo:smoke": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/qloo-smoke.ts",
     "qloo:confirm-test": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/confirm-test.ts",
     "check": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/check.ts",
-    "mcp:smoke": "tsx scripts/mcp-smoke.ts"
+    "mcp:smoke": "tsx scripts/mcp-smoke.ts",
+    "benchmark": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/benchmark.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

@@ -58,14 +58,21 @@ interface Options {
 const cache = new Map<string, { at: number; value: QlooCall<unknown> }>();
 const pending = new Map<string, Promise<QlooCall<unknown>>>();
 
-// Qloo publishes no rate-limit numbers and returns 429 under bursts, so keep
-// only a few requests in flight per server instance.
+// Hackathon keys allow 5 requests a second (x-second-ratelimit-*) and a fixed
+// monthly quota (x-month-ratelimit-*), so keep a few requests in flight and
+// space their starts out.
 const MAX_IN_FLIGHT = 3;
+const MIN_SPACING_MS = 220;
 let inFlight = 0;
+let nextStart = 0;
 const waiters: (() => void)[] = [];
 async function acquire() {
   if (inFlight >= MAX_IN_FLIGHT) await new Promise<void>((r) => waiters.push(r));
   inFlight++;
+  const now = Date.now();
+  const at = Math.max(now, nextStart);
+  nextStart = at + MIN_SPACING_MS;
+  if (at > now) await sleep(at - now);
 }
 function release() {
   inFlight--;
@@ -73,6 +80,35 @@ function release() {
 }
 const CACHE_MAX = 500;
 let callCounter = 0;
+
+/** What Qloo last reported about the monthly quota, and how many calls this process made. */
+const usage = { networkCalls: 0, monthRemaining: null as number | null, monthLimit: null as number | null };
+export function qlooUsage() {
+  return { ...usage };
+}
+
+// Scripts (not the app) can keep responses on disk so reruns cost no quota.
+async function diskCache() {
+  const dir = process.env.QLOO_DISK_CACHE;
+  if (!dir) return null;
+  const [{ mkdir, readFile, writeFile }, { createHash }, { join }] = await Promise.all([
+    import("node:fs/promises"),
+    import("node:crypto"),
+    import("node:path"),
+  ]);
+  await mkdir(dir, { recursive: true });
+  const file = (url: string) => join(dir, `${createHash("sha1").update(url).digest("hex")}.json`);
+  return {
+    get: async (url: string) => {
+      try {
+        return JSON.parse(await readFile(file(url), "utf8")) as QlooCall<unknown>;
+      } catch {
+        return null;
+      }
+    },
+    set: (url: string, value: QlooCall<unknown>) => writeFile(file(url), JSON.stringify(value)),
+  };
+}
 
 function config() {
   const key = process.env.QLOO_API_KEY;
@@ -133,7 +169,14 @@ export async function qlooGet<T = unknown>(
     const value = (await shared) as QlooCall<T>;
     return { ...value, meta: { ...value.meta, callId, cached: true } };
   }
-  const work = fetchWithRetry<T>(url, key, path, query, callId, timeoutMs, retries);
+  const work = (async () => {
+    const disk = await diskCache();
+    const stored = await disk?.get(url);
+    if (stored) return { ...(stored as QlooCall<T>), meta: { ...stored.meta, callId, cached: true } };
+    const value = await fetchWithRetry<T>(url, key, path, query, callId, timeoutMs, retries);
+    await disk?.set(url, value as QlooCall<unknown>);
+    return value;
+  })();
   pending.set(url, work as Promise<QlooCall<unknown>>);
   try {
     return await work;
@@ -164,6 +207,11 @@ async function fetchWithRetry<T>(
         cache: "no-store",
       });
       const text = await res.text();
+      usage.networkCalls++;
+      const remaining = Number(res.headers.get("x-month-ratelimit-remaining") ?? NaN);
+      const limit = Number(res.headers.get("x-month-ratelimit-limit") ?? NaN);
+      if (Number.isFinite(remaining)) usage.monthRemaining = remaining;
+      if (Number.isFinite(limit)) usage.monthLimit = limit;
       if (!res.ok) throw classify(res.status, text, res.headers.get("retry-after"));
       const value: QlooCall<T> = {
         data: JSON.parse(text) as T,

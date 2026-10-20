@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MAX_TEXT_CHARS } from "@/lib/vernacular/limits";
 import { AUDIENCE_PRESETS, SAMPLE_COPY } from "@/lib/vernacular/presets";
@@ -133,6 +134,7 @@ export function Workbench() {
           ))}
         </div>
         <div className="flex gap-3 text-xs text-muted">
+          <Link href="/benchmark" className="text-accent hover:underline">Benchmark vs Claude alone →</Link>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-lands" /> Lands</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-mixed" /> Mixed</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-misses" /> Misses</span>

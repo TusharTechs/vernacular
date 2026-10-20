@@ -1,0 +1,4397 @@
+{
+  "corpusVersion": 1,
+  "ranAt": "2026-10-20",
+  "model": "claude-opus-5-5",
+  "copy": [
+    {
+      "id": "tour",
+      "label": "Comedy tour announcement",
+      "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast."
+    },
+    {
+      "id": "coffee",
+      "label": "Cold brew launch",
+      "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike."
+    },
+    {
+      "id": "sneaker",
+      "label": "Running shoe drop",
+      "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory."
+    },
+    {
+      "id": "streaming",
+      "label": "Streaming bundle promo",
+      "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free."
+    },
+    {
+      "id": "fitness",
+      "label": "Fitness app launch",
+      "text": "Train like Rocky on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us."
+    },
+    {
+      "id": "restaurant",
+      "label": "Taco bar opening",
+      "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a Monday Night Football watch party."
+    },
+    {
+      "id": "hotel",
+      "label": "Boutique hotel campaign",
+      "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers."
+    },
+    {
+      "id": "fintech",
+      "label": "Savings app ad",
+      "text": "Spend like it's a Drake album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes."
+    }
+  ],
+  "audiences": [
+    {
+      "id": "genz-latin",
+      "label": "Gen Z Latin-pop fans",
+      "anchors": [
+        "Bad Bunny",
+        "Euphoria"
+      ]
+    },
+    {
+      "id": "hiphop-30s",
+      "label": "30–34 hip-hop heads",
+      "anchors": [
+        "Kendrick Lamar",
+        "Atlanta"
+      ]
+    },
+    {
+      "id": "indie-25",
+      "label": "25–29 indie & A24 fans",
+      "anchors": [
+        "Phoebe Bridgers",
+        "Everything Everywhere All at Once"
+      ]
+    },
+    {
+      "id": "country-45",
+      "label": "45–54 country fans",
+      "anchors": [
+        "Garth Brooks",
+        "Yellowstone"
+      ]
+    },
+    {
+      "id": "classic-55",
+      "label": "55+ classic-rock fans",
+      "anchors": [
+        "Eagles",
+        "M*A*S*H"
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "copyId": "coffee",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 53,
+            "verdict": "misses"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 98,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a M*A*S*H binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "M*A*S*H",
+            "name": "M*A*S*H",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 98,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 4,
+          "note": "'a M*A*S*H' should be 'an M*A*S*H' since it's pronounced 'mash'... actually 'a' is correct, but the asterisks read slightly awkwardly."
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Cheers binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Cheers",
+            "name": "Cheers",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 98,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Succession",
+            "to": "Cheers",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 17,
+        "ms": 31538
+      }
+    },
+    {
+      "copyId": "coffee",
+      "audienceId": "country-45",
+      "original": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 50,
+            "verdict": "misses"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 63,
+            "verdict": "misses"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Our new cold brew is smoother than a George Strait album and more addictive than a Yellowstone binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "George Strait",
+            "name": "George Strait",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Yellowstone",
+            "name": "Yellowstone",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2
+      },
+      "vernacular": {
+        "text": "Our new cold brew is smoother than a Joe Nichols album and more addictive than a Virgin River binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Joe Nichols",
+            "name": "Joe Nichols",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Virgin River",
+            "name": "Virgin River",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Fleetwood Mac",
+            "to": "Joe Nichols",
+            "percentile": 100
+          },
+          {
+            "from": "Succession",
+            "to": "Virgin River",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 22,
+        "ms": 26900
+      }
+    },
+    {
+      "copyId": "coffee",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 38,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 25,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Our new cold brew is smoother than a Bad Bunny album and more addictive than a Euphoria binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Bad Bunny",
+            "name": "Bad Bunny",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Euphoria",
+            "name": "Euphoria",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 25,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 4,
+          "note": "'Smoother than a Bad Bunny album' is a slightly loose fit, since his music is not typically called smooth."
+        },
+        "changes": 2
+      },
+      "vernacular": {
+        "text": "Our new cold brew is smoother than a Kali Uchis album and more addictive than a Succession binge. Grab one before your next Vans-clad hike.",
+        "refs": [
+          {
+            "span": "Kali Uchis",
+            "name": "Kali Uchis",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Vans",
+            "name": "Vans",
+            "type": "brand",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Vans are not hiking gear, so 'Vans-clad hike' loses Patagonia's outdoor-apparel role and reads slightly odd."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Fleetwood Mac",
+            "to": "Kali Uchis",
+            "percentile": 100
+          },
+          {
+            "from": "Patagonia",
+            "to": "Vans",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 21,
+        "ms": 37121
+      }
+    },
+    {
+      "copyId": "coffee",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 50,
+            "verdict": "misses"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 8,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Our new cold brew is smoother than a Kendrick Lamar album and more addictive than an Atlanta binge. Grab one before your next North Face-clad hike.",
+        "refs": [
+          {
+            "span": "Kendrick Lamar",
+            "name": "Kendrick Lamar",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Atlanta",
+            "name": "Atlanta",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "North Face",
+            "name": "The North Face",
+            "type": "brand",
+            "percentile": 50,
+            "verdict": "mixed"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Kendrick albums aren't typically described as 'smooth', so the smoothness comparison loses some of its force."
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "Our new cold brew is smoother than a Frank Ocean album and more addictive than a Succession binge. Grab one before your next Timberland-clad hike.",
+        "refs": [
+          {
+            "span": "Frank Ocean",
+            "name": "Frank Ocean",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Timberland",
+            "name": "Timberland",
+            "type": "brand",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Fleetwood Mac",
+            "to": "Frank Ocean",
+            "percentile": 100
+          },
+          {
+            "from": "Patagonia",
+            "to": "Timberland",
+            "percentile": 97
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 21,
+        "ms": 24063
+      }
+    },
+    {
+      "copyId": "coffee",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 50,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 30,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Our new cold brew is smoother than a Fleetwood Mac album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Fleetwood Mac",
+            "name": "Fleetwood Mac",
+            "type": "artist",
+            "percentile": 50,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 30,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "Unchanged from the original."
+        },
+        "changes": 0
+      },
+      "vernacular": {
+        "text": "Our new cold brew is smoother than a Faye Webster album and more addictive than a Succession binge. Grab one before your next Patagonia-clad hike.",
+        "refs": [
+          {
+            "span": "Faye Webster",
+            "name": "Faye Webster",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "Patagonia",
+            "name": "Patagonia",
+            "type": "brand",
+            "percentile": 30,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "Faye Webster still works as a smooth-music reference, and the rest of the copy is unchanged."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Fleetwood Mac",
+            "to": "Faye Webster",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 17,
+        "ms": 27852
+      }
+    },
+    {
+      "copyId": "fintech",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "Spend like it's a Drake album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 8,
+            "verdict": "misses"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 88,
+            "verdict": "lands"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 5,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Spend like it's an Eagles reunion tour, save like Warren Buffett is watching, and feel as organised as a Martha Stewart makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Eagles",
+            "name": "Eagles",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 88,
+            "verdict": "lands"
+          },
+          {
+            "span": "Martha Stewart",
+            "name": "Martha Stewart",
+            "type": "person",
+            "percentile": 88,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2
+      },
+      "vernacular": {
+        "text": "Spend like it's a Tom Petty album drop, save like Warren Buffett is watching, and feel as organised as a Fixer Upper makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Tom Petty",
+            "name": "Tom Petty",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 88,
+            "verdict": "lands"
+          },
+          {
+            "span": "Fixer Upper",
+            "name": "Fixer Upper",
+            "type": "tv_show",
+            "percentile": 98,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "'Album drop' is modern slang that sits oddly with Tom Petty, and Fixer Upper is about renovation rather than organising, so it weakens the tidiness role."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Drake",
+            "to": "Tom Petty",
+            "percentile": 100
+          },
+          {
+            "from": "Marie Kondo",
+            "to": "Fixer Upper",
+            "percentile": 98
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 24,
+        "ms": 46564
+      }
+    },
+    {
+      "copyId": "fintech",
+      "audienceId": "country-45",
+      "original": {
+        "text": "Spend like it's a Drake album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 23,
+            "verdict": "misses"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 20,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Spend like it's a Garth Brooks album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Garth Brooks",
+            "name": "Garth Brooks",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 20,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Spend like it's a Florida Georgia Line album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Florida Georgia Line",
+            "name": "Florida Georgia Line",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 20,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Drake",
+            "to": "Florida Georgia Line",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 18,
+        "ms": 60623
+      }
+    },
+    {
+      "copyId": "fintech",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "Spend like it's a Drake album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Spend like it's a Bad Bunny album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Bad Bunny",
+            "name": "Bad Bunny",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Spend like it's a Drake album drop, save like you're on How to Get Rich, and feel as organised as a Queer Eye makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "How to Get Rich",
+            "name": "How to Get Rich",
+            "type": "tv_show",
+            "percentile": 65,
+            "verdict": "lands"
+          },
+          {
+            "span": "Queer Eye",
+            "name": "Queer Eye",
+            "type": "tv_show",
+            "percentile": 93,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "'Save like you're on How to Get Rich' shifts the idea from an expert watching you to being on a show, and it reads less crisply."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Marie Kondo",
+            "to": "Queer Eye",
+            "percentile": 93
+          },
+          {
+            "from": "Warren Buffett",
+            "to": "How to Get Rich",
+            "percentile": 65
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 22,
+        "ms": 41432
+      }
+    },
+    {
+      "copyId": "fintech",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "Spend like it's a Drake album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 18,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 0,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Spend like it's a Kendrick Lamar album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Kendrick Lamar",
+            "name": "Kendrick Lamar",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 18,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 0,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Spend like it's a Drake album drop, save like Warren Buffett is watching, and feel as organised as a Queer Eye makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 18,
+            "verdict": "misses"
+          },
+          {
+            "span": "Queer Eye",
+            "name": "Queer Eye",
+            "type": "tv_show",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 5,
+          "note": "Queer Eye makeovers aren't specifically about organising, which weakens the 'organised' link."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Marie Kondo",
+            "to": "Queer Eye",
+            "percentile": 95
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 14,
+        "ms": 45261
+      }
+    },
+    {
+      "copyId": "fintech",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "Spend like it's a Drake album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 88,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 83,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Spend like it's a Phoebe Bridgers album drop, save like Warren Buffett is watching, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Phoebe Bridgers",
+            "name": "Phoebe Bridgers",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Warren Buffett",
+            "name": "Warren Buffett",
+            "type": "person",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 83,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Spend like it's a Drake album drop, save like The Profit is auditing your books, and feel as organised as a Marie Kondo makeover. Open an account in two minutes.",
+        "refs": [
+          {
+            "span": "Drake",
+            "name": "Drake",
+            "type": "artist",
+            "percentile": 88,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Profit",
+            "name": "The Profit",
+            "type": "tv_show",
+            "percentile": 48,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Marie Kondo",
+            "name": "Marie Kondo",
+            "type": "person",
+            "percentile": 83,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 3,
+          "note": "'The Profit is auditing your books' is clunky and shifts the image from a watchful frugal investor to a business audit."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Warren Buffett",
+            "to": "The Profit",
+            "percentile": 48
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 23,
+        "ms": 43520
+      }
+    },
+    {
+      "copyId": "fitness",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 38,
+            "verdict": "misses"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 48,
+            "verdict": "misses"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with the Eagles, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 38,
+            "verdict": "misses"
+          },
+          {
+            "span": "the Eagles",
+            "name": "Eagles",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Train like you're in Southpaw, keep your playlist stacked with Bob Seger, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Southpaw",
+            "name": "Southpaw",
+            "type": "movie",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Seger",
+            "name": "Bob Seger",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Southpaw replaces the iconic Rocky steps image with a vaguer training reference, though the role is kept."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Taylor Swift",
+            "to": "Bob Seger",
+            "percentile": 100
+          },
+          {
+            "from": "Rocky",
+            "to": "Southpaw",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 23,
+        "ms": 42846
+      }
+    },
+    {
+      "copyId": "fitness",
+      "audienceId": "country-45",
+      "original": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 65,
+            "verdict": "lands"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 45,
+            "verdict": "misses"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Garth Brooks, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 65,
+            "verdict": "lands"
+          },
+          {
+            "span": "Garth Brooks",
+            "name": "Garth Brooks",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Travis Tritt, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 65,
+            "verdict": "lands"
+          },
+          {
+            "span": "Travis Tritt",
+            "name": "Travis Tritt",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Taylor Swift",
+            "to": "Travis Tritt",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 17,
+        "ms": 20378
+      }
+    },
+    {
+      "copyId": "fitness",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 18,
+            "verdict": "misses"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Train like Creed on the museum steps, keep your playlist stacked with Bad Bunny, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Creed",
+            "name": "Creed",
+            "type": "movie",
+            "percentile": 68,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bad Bunny",
+            "name": "Bad Bunny",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 4,
+          "note": "Same Creed/museum-steps link is slightly weaker; Bad Bunny playlist swap reads fluently."
+        },
+        "changes": 2
+      },
+      "vernacular": {
+        "text": "Train like Creed on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Creed",
+            "name": "Creed",
+            "type": "movie",
+            "percentile": 68,
+            "verdict": "lands"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross episode",
+            "name": "The Joy of Painting",
+            "type": "tv_show",
+            "percentile": 40,
+            "verdict": "mixed"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 4,
+          "note": "Creed on the museum steps works as a nod (Adonis does run them), though the steps image is iconic to Rocky."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Rocky",
+            "to": "Creed",
+            "percentile": 68
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 19,
+        "ms": 37477
+      }
+    },
+    {
+      "copyId": "fitness",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Kendrick Lamar, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "Kendrick Lamar",
+            "name": "Kendrick Lamar",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 0,
+        "swaps": []
+      },
+      "stats": {
+        "qlooCalls": 11,
+        "ms": 3710
+      }
+    },
+    {
+      "copyId": "fitness",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 18,
+            "verdict": "misses"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "Bob Ross",
+            "type": "person",
+            "percentile": null,
+            "verdict": "unmeasured"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Train like Rocky on the museum steps, keep your playlist stacked with Phoebe Bridgers, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Rocky",
+            "name": "Rocky",
+            "type": "movie",
+            "percentile": 18,
+            "verdict": "misses"
+          },
+          {
+            "span": "Phoebe Bridgers",
+            "name": "Phoebe Bridgers",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "The Joy of Painting",
+            "type": "tv_show",
+            "percentile": 28,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Phoebe Bridgers' melancholy music fits the 'stacked workout playlist' role less naturally than Taylor Swift's upbeat hits."
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Train like you're in a Creed III montage, keep your playlist stacked with Taylor Swift, and recover with a stretch session calmer than a Bob Ross episode. Your first week is on us.",
+        "refs": [
+          {
+            "span": "Creed III",
+            "name": "Creed III",
+            "type": "movie",
+            "percentile": 77,
+            "verdict": "lands"
+          },
+          {
+            "span": "Taylor Swift",
+            "name": "Taylor Swift",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bob Ross",
+            "name": "The Joy of Painting",
+            "type": "tv_show",
+            "percentile": 28,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Rocky",
+            "to": "Creed III",
+            "percentile": 77
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 16,
+        "ms": 24663
+      }
+    },
+    {
+      "copyId": "hotel",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 5,
+            "verdict": "misses"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Coldplay",
+            "name": "Coldplay",
+            "type": "artist",
+            "percentile": 28,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Wake up somewhere that looks like a scene from To Catch a Thief, spend the afternoon like a guest on The Love Boat, and end the night with the Eagles drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "To Catch a Thief",
+            "name": "To Catch a Thief",
+            "type": "movie",
+            "percentile": 15,
+            "verdict": "misses"
+          },
+          {
+            "span": "The Love Boat",
+            "name": "The Love Boat",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "the Eagles",
+            "name": "Eagles",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "Wake up somewhere that looks like a scene from Moonrise Kingdom, spend the afternoon like a guest on The White Lotus, and end the night with Jackson Browne drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Moonrise Kingdom",
+            "name": "Moonrise Kingdom",
+            "type": "movie",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Jackson Browne",
+            "name": "Jackson Browne",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Coldplay",
+            "to": "Jackson Browne",
+            "percentile": 100
+          },
+          {
+            "from": "Wes Anderson",
+            "to": "Moonrise Kingdom",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 23,
+        "ms": 36863
+      }
+    },
+    {
+      "copyId": "hotel",
+      "audienceId": "country-45",
+      "original": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 68,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Coldplay",
+            "name": "Coldplay",
+            "type": "artist",
+            "percentile": 5,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Wake up somewhere that looks like a scene from Yellowstone, spend the afternoon like a guest at Blackberry Farm, and end the night with Garth Brooks drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Yellowstone",
+            "name": "Yellowstone",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Blackberry Farm",
+            "name": "Blackberry Farm",
+            "type": "place",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Garth Brooks",
+            "name": "Garth Brooks",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 5,
+          "note": "Blackberry Farm is a real resort rather than a show, but it still plays the luxury-guest role; Yellowstone visuals shift the aesthetic from whimsical to rugged."
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "Wake up somewhere that looks like a scene from Under the Amalfi Sun, spend the afternoon like a guest on Below Deck, and end the night with Joe Nichols drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Under the Amalfi Sun",
+            "name": "Under the Amalfi Sun",
+            "type": "movie",
+            "percentile": 93,
+            "verdict": "lands"
+          },
+          {
+            "span": "Below Deck",
+            "name": "Below Deck",
+            "type": "tv_show",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "Joe Nichols",
+            "name": "Joe Nichols",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Below Deck guests are yacht charterers, which roughly keeps the luxury-guest role; 'Under the Amalfi Sun' is an obscure visual reference."
+        },
+        "changes": 3,
+        "swaps": [
+          {
+            "from": "Coldplay",
+            "to": "Joe Nichols",
+            "percentile": 100
+          },
+          {
+            "from": "Wes Anderson",
+            "to": "Under the Amalfi Sun",
+            "percentile": 93
+          },
+          {
+            "from": "The White Lotus",
+            "to": "Below Deck",
+            "percentile": 95
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 29,
+        "ms": 54097
+      }
+    },
+    {
+      "copyId": "hotel",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 10,
+            "verdict": "misses"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Coldplay",
+            "name": "Coldplay",
+            "type": "artist",
+            "percentile": 56,
+            "verdict": "mixed"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Bad Bunny drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 10,
+            "verdict": "misses"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bad Bunny",
+            "name": "Bad Bunny",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 5,
+          "note": "Bad Bunny is high-energy, so 'drifting' music loses some of Coldplay's mellow wind-down feel."
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Wake up somewhere that looks like a scene from We Are Who We Are, spend the afternoon like a guest on The White Lotus, and end the night with Kali Uchis drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "We Are Who We Are",
+            "name": "We Are Who We Are",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Kali Uchis",
+            "name": "Kali Uchis",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "'We Are Who We Are' is a weaker stand-in for the meticulously styled visual look that 'Wes Anderson film' conveys."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Coldplay",
+            "to": "Kali Uchis",
+            "percentile": 100
+          },
+          {
+            "from": "Wes Anderson",
+            "to": "We Are Who We Are",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 26,
+        "ms": 46169
+      }
+    },
+    {
+      "copyId": "hotel",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 8,
+            "verdict": "misses"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Coldplay",
+            "name": "Coldplay",
+            "type": "artist",
+            "percentile": 72,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Wake up somewhere that looks like a Hype Williams video, spend the afternoon like a guest on Atlanta, and end the night with Kendrick Lamar drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Hype Williams",
+            "name": "Hype Williams",
+            "type": "person",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "Atlanta",
+            "name": "Atlanta",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Kendrick Lamar",
+            "name": "Kendrick Lamar",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 3,
+          "natural": 4,
+          "note": "Being a 'guest on Atlanta' loses The White Lotus's luxury-resort connotation, so the afternoon line no longer signals pampered leisure."
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "Wake up somewhere that looks like a scene from Guava Island, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Guava Island",
+            "name": "Guava Island",
+            "type": "movie",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Coldplay",
+            "name": "Coldplay",
+            "type": "artist",
+            "percentile": 72,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Wes Anderson",
+            "to": "Guava Island",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 17,
+        "ms": 32837
+      }
+    },
+    {
+      "copyId": "hotel",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Coldplay",
+            "name": "Coldplay",
+            "type": "artist",
+            "percentile": 77,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Phoebe Bridgers drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Phoebe Bridgers",
+            "name": "Phoebe Bridgers",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Wake up somewhere that looks like a Wes Anderson film, spend the afternoon like a guest on The White Lotus, and end the night with Coldplay drifting from the rooftop speakers.",
+        "refs": [
+          {
+            "span": "Wes Anderson",
+            "name": "Wes Anderson",
+            "type": "person",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Coldplay",
+            "name": "Coldplay",
+            "type": "artist",
+            "percentile": 77,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 0,
+        "swaps": []
+      },
+      "stats": {
+        "qlooCalls": 11,
+        "ms": 3712
+      }
+    },
+    {
+      "copyId": "restaurant",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 93,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 15,
+            "verdict": "misses"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 93,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 93,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 15,
+            "verdict": "misses"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 93,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 0
+      },
+      "vernacular": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Gilligan's Island, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 93,
+            "verdict": "lands"
+          },
+          {
+            "span": "Gilligan's Island",
+            "name": "Gilligan's Island",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 93,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Swapping Grease for Gilligan's Island shifts the patio image from retro 50s diner vibe to a shipwrecked island, a slightly odd fit for a stylish patio."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Grease",
+            "to": "Gilligan's Island",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 18,
+        "ms": 33078
+      }
+    },
+    {
+      "copyId": "restaurant",
+      "audienceId": "country-45",
+      "original": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 23,
+            "verdict": "misses"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 70,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Yellowstone, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Yellowstone",
+            "name": "Yellowstone",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 70,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "A Yellowstone patio implies a rustic ranch look rather than Grease's retro diner fun, a slight shift in tone."
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Walk the Line, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Walk the Line",
+            "name": "Walk the Line",
+            "type": "movie",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 70,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Walk the Line works as a retro film reference, though it suggests a gritty biopic more than Grease's fun, nostalgic patio vibe."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Grease",
+            "to": "Walk the Line",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 16,
+        "ms": 27338
+      }
+    },
+    {
+      "copyId": "restaurant",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Opening night feels like a Karol G concert with better tacos: frozen margaritas, a patio straight out of Euphoria, and a crowd louder than an El Clásico watch party.",
+        "refs": [
+          {
+            "span": "Karol G",
+            "name": "Karol G",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Euphoria",
+            "name": "Euphoria",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 5,
+          "note": "Euphoria patio evokes a moodier vibe than Grease's retro fun, but the roles are mostly kept."
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "Opening night feels like a Rauw Alejandro concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a RuPaul's Drag Race All Stars watch party.",
+        "refs": [
+          {
+            "span": "Rauw Alejandro",
+            "name": "Rauw Alejandro",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "RuPaul's Drag Race All Stars",
+            "name": "RuPaul's Drag Race All Stars",
+            "type": "tv_show",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Drag Race watch party is plausible as a loud crowd but less natural than a sports reference, and keeping Grease is inconsistent."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Jimmy Buffett",
+            "to": "Rauw Alejandro",
+            "percentile": 100
+          },
+          {
+            "from": "Monday Night Football",
+            "to": "RuPaul's Drag Race All Stars",
+            "percentile": 95
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 24,
+        "ms": 46900
+      }
+    },
+    {
+      "copyId": "restaurant",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 23,
+            "verdict": "misses"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Opening night feels like a Kendrick Lamar concert with better tacos: frozen margaritas, a patio straight out of Friday, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Kendrick Lamar",
+            "name": "Kendrick Lamar",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Friday",
+            "name": "Friday",
+            "type": "movie",
+            "percentile": 80,
+            "verdict": "lands"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Kendrick concert loses Buffett's laid-back margarita-party vibe, though the structure and claims hold."
+        },
+        "changes": 2
+      },
+      "vernacular": {
+        "text": "Opening night feels like a Tyler, the Creator concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a National Basketball Association watch party.",
+        "refs": [
+          {
+            "span": "Tyler, the Creator",
+            "name": "Tyler, the Creator",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "National Basketball Association",
+            "name": "National Basketball Association",
+            "type": "brand",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 3,
+          "note": "'National Basketball Association watch party' is clunky; it should be 'NBA Finals watch party' or similar, and the Grease reference is left unchanged."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Jimmy Buffett",
+            "to": "Tyler, the Creator",
+            "percentile": 100
+          },
+          {
+            "from": "Monday Night Football",
+            "to": "National Basketball Association",
+            "percentile": 95
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 22,
+        "ms": 54988
+      }
+    },
+    {
+      "copyId": "restaurant",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "Opening night feels like a Jimmy Buffett concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a Monday Night Football watch party.",
+        "refs": [
+          {
+            "span": "Jimmy Buffett",
+            "name": "Jimmy Buffett",
+            "type": "artist",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 69,
+            "verdict": "lands"
+          },
+          {
+            "span": "Monday Night Football",
+            "name": "NFL Monday Night Football",
+            "type": "tv_show",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Opening night feels like a Vampire Weekend concert with better tacos: frozen margaritas, a patio straight out of Aftersun, and a crowd louder than a boygenius encore.",
+        "refs": [
+          {
+            "span": "Vampire Weekend",
+            "name": "Vampire Weekend",
+            "type": "artist",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Aftersun",
+            "name": "Aftersun",
+            "type": "movie",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "boygenius",
+            "name": "Boygenius",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Aftersun evokes a resort patio but its melancholy tone slightly undercuts the festive retro-fun role Grease played."
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "Opening night feels like a Charli XCX concert with better tacos: frozen margaritas, a patio straight out of Grease, and a crowd louder than a RuPaul's Drag Race UK watch party.",
+        "refs": [
+          {
+            "span": "Charli XCX",
+            "name": "Charli XCX",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grease",
+            "name": "Grease",
+            "type": "movie",
+            "percentile": 69,
+            "verdict": "lands"
+          },
+          {
+            "span": "RuPaul's Drag Race UK",
+            "name": "RuPaul's Drag Race UK",
+            "type": "tv_show",
+            "percentile": 70,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Jimmy Buffett",
+            "to": "Charli XCX",
+            "percentile": 100
+          },
+          {
+            "from": "Monday Night Football",
+            "to": "RuPaul's Drag Race UK",
+            "percentile": 70
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 24,
+        "ms": 41778
+      }
+    },
+    {
+      "copyId": "sneaker",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 93,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Built for the kind of energy you only get at an Eagles stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Eagles",
+            "name": "Eagles",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 93,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 3,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Built for the kind of energy you only get at a Tom Petty stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at Cracker Barrel.",
+        "refs": [
+          {
+            "span": "Tom Petty",
+            "name": "Tom Petty",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 93,
+            "verdict": "lands"
+          },
+          {
+            "span": "Cracker Barrel",
+            "name": "Cracker Barrel",
+            "type": "brand",
+            "percentile": 98,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 4,
+          "note": "Running late for a table at Cracker Barrel is slightly less punchy, since the chain rarely calls for reservations, but the role is preserved."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Beyoncé",
+            "to": "Tom Petty",
+            "percentile": 100
+          },
+          {
+            "from": "The Cheesecake Factory",
+            "to": "Cracker Barrel",
+            "percentile": 98
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 22,
+        "ms": 21154
+      }
+    },
+    {
+      "copyId": "sneaker",
+      "audienceId": "country-45",
+      "original": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 26,
+            "verdict": "misses"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 35,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Built for the kind of energy you only get at a Garth Brooks stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Garth Brooks",
+            "name": "Garth Brooks",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 35,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Built for the kind of energy you only get at a Travis Tritt show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at Ruth's Chris.",
+        "refs": [
+          {
+            "span": "Travis Tritt",
+            "name": "Travis Tritt",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 90,
+            "verdict": "lands"
+          },
+          {
+            "span": "Ruth's Chris",
+            "name": "Ruth's Chris Steak House",
+            "type": "brand",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Dropping 'stadium' weakens the big-arena energy image, and Ruth's Chris shifts the casual chain reference upscale."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Beyoncé",
+            "to": "Travis Tritt",
+            "percentile": 100
+          },
+          {
+            "from": "The Cheesecake Factory",
+            "to": "Ruth's Chris Steak House",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 22,
+        "ms": 28133
+      }
+    },
+    {
+      "copyId": "sneaker",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 83,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 0,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Euphoria soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Euphoria",
+            "name": "Euphoria",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 0,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Euphoria soundtrack is moodier than Top Gun's pump-up role, slightly shifting the energizing cue."
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late to grab your order at Starbucks.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 83,
+            "verdict": "lands"
+          },
+          {
+            "span": "Starbucks",
+            "name": "Starbucks",
+            "type": "brand",
+            "percentile": 82,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "The Cheesecake Factory",
+            "to": "Starbucks",
+            "percentile": 82
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 17,
+        "ms": 25498
+      }
+    },
+    {
+      "copyId": "sneaker",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 92,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 60,
+            "verdict": "mixed"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 20,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Black Panther soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 92,
+            "verdict": "lands"
+          },
+          {
+            "span": "Black Panther",
+            "name": "Black Panther",
+            "type": "movie",
+            "percentile": 55,
+            "verdict": "misses"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 20,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Uncut Gems soundtrack, and run like you're late for a table at Lo-Lo's Chicken and Waffles.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 92,
+            "verdict": "lands"
+          },
+          {
+            "span": "Uncut Gems",
+            "name": "Uncut Gems",
+            "type": "movie",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Lo-Lo's Chicken and Waffles",
+            "name": "Lo-Lo's Chicken & Waffles",
+            "type": "place",
+            "percentile": 59,
+            "verdict": "misses"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Uncut Gems' anxious synth score is a weaker fit for the pump-up soundtrack role than Top Gun's."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Top Gun",
+            "to": "Uncut Gems",
+            "percentile": 100
+          },
+          {
+            "from": "The Cheesecake Factory",
+            "to": "Lo-Lo's Chicken and Waffles",
+            "percentile": 97
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 25,
+        "ms": 45260
+      }
+    },
+    {
+      "copyId": "sneaker",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at The Cheesecake Factory.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 77,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Cheesecake Factory",
+            "name": "The Cheesecake Factory",
+            "type": "brand",
+            "percentile": 0,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "Built for the kind of energy you only get at a sold-out boygenius show. Lace up, cue the Challengers soundtrack, and run like you're late for a table at Lilia.",
+        "refs": [
+          {
+            "span": "boygenius",
+            "name": "Boygenius",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Challengers",
+            "name": "Challengers",
+            "type": "movie",
+            "percentile": 87,
+            "verdict": "lands"
+          },
+          {
+            "span": "Lilia",
+            "name": "Lilia",
+            "type": "place",
+            "percentile": 36,
+            "verdict": "mixed"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "Built for the kind of energy you only get at a Beyoncé stadium show. Lace up, cue the Top Gun soundtrack, and run like you're late for a table at Planet Hollywood.",
+        "refs": [
+          {
+            "span": "Beyoncé",
+            "name": "Beyoncé",
+            "type": "artist",
+            "percentile": 95,
+            "verdict": "lands"
+          },
+          {
+            "span": "Top Gun",
+            "name": "Top Gun",
+            "type": "movie",
+            "percentile": 77,
+            "verdict": "lands"
+          },
+          {
+            "span": "Planet Hollywood",
+            "name": "Planet Hollywood",
+            "type": "brand",
+            "percentile": 50,
+            "verdict": "mixed"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "Only one reference swapped (Cheesecake Factory to Planet Hollywood), and it plays the same role."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "The Cheesecake Factory",
+            "to": "Planet Hollywood",
+            "percentile": 50
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 18,
+        "ms": 26749
+      }
+    },
+    {
+      "copyId": "streaming",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Lost",
+            "name": "Lost",
+            "type": "tv_show",
+            "percentile": 66,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 66,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 55,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "One subscription, a whole winter of nights in: more twists than Twin Peaks, more laughs than Cheers, and more hospital drama than M*A*S*H. Your first month is free.",
+        "refs": [
+          {
+            "span": "Twin Peaks",
+            "name": "Twin Peaks",
+            "type": "tv_show",
+            "percentile": 83,
+            "verdict": "lands"
+          },
+          {
+            "span": "Cheers",
+            "name": "Cheers",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "M*A*S*H",
+            "name": "M*A*S*H",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than New Amsterdam. Your first month is free.",
+        "refs": [
+          {
+            "span": "Lost",
+            "name": "Lost",
+            "type": "tv_show",
+            "percentile": 66,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 66,
+            "verdict": "lands"
+          },
+          {
+            "span": "New Amsterdam",
+            "name": "New Amsterdam",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Grey's Anatomy",
+            "to": "New Amsterdam",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 15,
+        "ms": 29964
+      }
+    },
+    {
+      "copyId": "streaming",
+      "audienceId": "country-45",
+      "original": {
+        "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Lost",
+            "name": "Lost",
+            "type": "tv_show",
+            "percentile": 53,
+            "verdict": "mixed"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 84,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 66,
+            "verdict": "mixed"
+          }
+        ]
+      },
+      "claude": {
+        "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Lost",
+            "name": "Lost",
+            "type": "tv_show",
+            "percentile": 53,
+            "verdict": "mixed"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 84,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 66,
+            "verdict": "mixed"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 0
+      },
+      "vernacular": {
+        "text": "One subscription, a whole winter of nights in: more twists than The I-Land, more laughs than The Office, and more hospital drama than The Knick. Your first month is free.",
+        "refs": [
+          {
+            "span": "The I-Land",
+            "name": "The I-Land",
+            "type": "tv_show",
+            "percentile": 97,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Knick",
+            "name": "The Knick",
+            "type": "tv_show",
+            "percentile": 97,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "The I-Land and The Knick are obscure benchmarks, which weakens the 'more than' comparisons, but each still plays the same role."
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Lost",
+            "to": "The I-Land",
+            "percentile": 98
+          },
+          {
+            "from": "Grey's Anatomy",
+            "to": "The Knick",
+            "percentile": 98
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 21,
+        "ms": 43825
+      }
+    },
+    {
+      "copyId": "streaming",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Lost",
+            "name": "Lost",
+            "type": "tv_show",
+            "percentile": 13,
+            "verdict": "misses"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 47,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "One subscription, a whole winter of nights in: more twists than Elite, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Elite",
+            "name": "Elite",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 49,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "One subscription, a whole winter of nights in: more twists than The Wilds, more laughs than Sex Education, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "The Wilds",
+            "name": "The Wilds",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Sex Education",
+            "name": "Sex Education",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 95,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "The Office",
+            "to": "Sex Education",
+            "percentile": 100
+          },
+          {
+            "from": "Lost",
+            "to": "The Wilds",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 20,
+        "ms": 29285
+      }
+    },
+    {
+      "copyId": "streaming",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Lost",
+            "name": "Lost",
+            "type": "tv_show",
+            "percentile": 5,
+            "verdict": "misses"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 21,
+            "verdict": "misses"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 76,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "One subscription, a whole winter of nights in: more twists than Atlanta, more laughs than The Office, and more family drama than Empire. Your first month is free.",
+        "refs": [
+          {
+            "span": "Atlanta",
+            "name": "Atlanta",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 23,
+            "verdict": "misses"
+          },
+          {
+            "span": "Empire",
+            "name": "Empire",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 3,
+          "natural": 5,
+          "note": "Changing 'hospital drama' to 'family drama' alters the claim about the type of content offered."
+        },
+        "changes": 2
+      },
+      "vernacular": {
+        "text": "One subscription, a whole winter of nights in: more twists than Succession, more laughs than Insecure, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Succession",
+            "name": "Succession",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Insecure",
+            "name": "Insecure",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 78,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Lost",
+            "to": "Succession",
+            "percentile": 100
+          },
+          {
+            "from": "The Office",
+            "to": "Insecure",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 19,
+        "ms": 27500
+      }
+    },
+    {
+      "copyId": "streaming",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "One subscription, a whole winter of nights in: more twists than Lost, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Lost",
+            "name": "Lost",
+            "type": "tv_show",
+            "percentile": 11,
+            "verdict": "misses"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 11,
+            "verdict": "misses"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 92,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "One subscription, a whole winter of nights in: more twists than Severance, more laughs than The Office, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "Severance",
+            "name": "Severance",
+            "type": "tv_show",
+            "percentile": 5,
+            "verdict": "misses"
+          },
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 13,
+            "verdict": "misses"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 92,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "One subscription, a whole winter of nights in: more twists than The White Lotus, more laughs than Derry Girls, and more hospital drama than Grey's Anatomy. Your first month is free.",
+        "refs": [
+          {
+            "span": "The White Lotus",
+            "name": "The White Lotus",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Derry Girls",
+            "name": "Derry Girls",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Grey's Anatomy",
+            "name": "Grey's Anatomy",
+            "type": "tv_show",
+            "percentile": 93,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Lost",
+            "to": "The White Lotus",
+            "percentile": 100
+          },
+          {
+            "from": "The Office",
+            "to": "Derry Girls",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 21,
+        "ms": 34863
+      }
+    },
+    {
+      "copyId": "tour",
+      "audienceId": "classic-55",
+      "original": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Olive Garden",
+            "name": "Olive Garden",
+            "type": "brand",
+            "percentile": 5,
+            "verdict": "misses"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 80,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Eagles night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Olive Garden",
+            "name": "Olive Garden",
+            "type": "brand",
+            "percentile": 5,
+            "verdict": "misses"
+          },
+          {
+            "span": "Eagles",
+            "name": "Eagles",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Cracker Barrel, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Cracker Barrel",
+            "name": "Cracker Barrel",
+            "type": "brand",
+            "percentile": 98,
+            "verdict": "lands"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 80,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Olive Garden",
+            "to": "Cracker Barrel",
+            "percentile": 98
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 16,
+        "ms": 19761
+      }
+    },
+    {
+      "copyId": "tour",
+      "audienceId": "country-45",
+      "original": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "Olive Garden",
+            "name": "Olive Garden",
+            "type": "brand",
+            "percentile": 33,
+            "verdict": "misses"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Garth Brooks night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "Olive Garden",
+            "name": "Olive Garden",
+            "type": "brand",
+            "percentile": 33,
+            "verdict": "misses"
+          },
+          {
+            "span": "Garth Brooks",
+            "name": "Garth Brooks",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 1
+      },
+      "vernacular": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Bubba Gump, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 85,
+            "verdict": "lands"
+          },
+          {
+            "span": "Bubba Gump",
+            "name": "Bubba Gump Shrimp Company",
+            "type": "brand",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 4,
+          "note": "'Bubba Gump' reads slightly less natural than the full 'Bubba Gump Shrimp Co.' as a Friday dinner spot."
+        },
+        "changes": 1,
+        "swaps": [
+          {
+            "from": "Olive Garden",
+            "to": "Bubba Gump Shrimp Company",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 16,
+        "ms": 24151
+      }
+    },
+    {
+      "copyId": "tour",
+      "audienceId": "genz-latin",
+      "original": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 40,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Olive Garden",
+            "name": "Olive Garden",
+            "type": "brand",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 60,
+            "verdict": "mixed"
+          }
+        ]
+      },
+      "claude": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a The Office marathon with a live crowd, dinner like a Friday at Chipotle, and a sing-along that feels like Bad Bunny night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "The Office",
+            "name": "The Office",
+            "type": "tv_show",
+            "percentile": 49,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Chipotle",
+            "name": "Chipotle",
+            "type": "brand",
+            "percentile": 45,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Bad Bunny",
+            "name": "Bad Bunny",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 4,
+          "note": "\"a The Office marathon\" is a slightly awkward article clash."
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Derry Girls marathon with a live crowd, dinner like a Friday at Hard Rock, and a sing-along that feels like Kali Uchis night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Derry Girls",
+            "name": "Derry Girls",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Hard Rock",
+            "name": "Hard Rock",
+            "type": "brand",
+            "percentile": 48,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Kali Uchis",
+            "name": "Kali Uchis",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 3,
+        "swaps": [
+          {
+            "from": "Seinfeld",
+            "to": "Derry Girls",
+            "percentile": 100
+          },
+          {
+            "from": "Olive Garden",
+            "to": "Hard Rock",
+            "percentile": 48
+          },
+          {
+            "from": "Frank Sinatra",
+            "to": "Kali Uchis",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 30,
+        "ms": 44741
+      }
+    },
+    {
+      "copyId": "tour",
+      "audienceId": "hiphop-30s",
+      "original": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 28,
+            "verdict": "misses"
+          },
+          {
+            "span": "Olive Garden",
+            "name": "Olive Garden",
+            "type": "brand",
+            "percentile": 13,
+            "verdict": "misses"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 68,
+            "verdict": "lands"
+          }
+        ]
+      },
+      "claude": {
+        "text": "This summer the funniest night of your year rolls into town. Picture an Atlanta marathon with a live crowd, dinner like a Friday at Busy Bee Cafe, and a sing-along that feels like Kendrick Lamar night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Atlanta",
+            "name": "Atlanta",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Busy Bee Cafe",
+            "name": "Busy Bee Cafe",
+            "type": "place",
+            "percentile": 5,
+            "verdict": "misses"
+          },
+          {
+            "span": "Kendrick Lamar",
+            "name": "Kendrick Lamar",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "A Kendrick Lamar 'sing-along' night is a slightly awkward fit, and 'Atlanta marathon' could read as a race."
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "This summer the funniest night of your year rolls into town. Picture an Insecure marathon with a live crowd, dinner like a Friday at Hard Rock, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Insecure",
+            "name": "Insecure",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Hard Rock",
+            "name": "Hard Rock",
+            "type": "brand",
+            "percentile": 40,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 68,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 2,
+        "swaps": [
+          {
+            "from": "Seinfeld",
+            "to": "Insecure",
+            "percentile": 100
+          },
+          {
+            "from": "Olive Garden",
+            "to": "Hard Rock",
+            "percentile": 40
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 24,
+        "ms": 29859
+      }
+    },
+    {
+      "copyId": "tour",
+      "audienceId": "indie-25",
+      "original": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Seinfeld marathon with a live crowd, dinner like a Friday at Olive Garden, and a sing-along that feels like Frank Sinatra night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Seinfeld",
+            "name": "Seinfeld",
+            "type": "tv_show",
+            "percentile": 20,
+            "verdict": "misses"
+          },
+          {
+            "span": "Olive Garden",
+            "name": "Olive Garden",
+            "type": "brand",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Frank Sinatra",
+            "name": "Frank Sinatra",
+            "type": "artist",
+            "percentile": 23,
+            "verdict": "misses"
+          }
+        ]
+      },
+      "claude": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Fleabag marathon with a live crowd, dinner like a Friday at Shake Shack, and a sing-along that feels like Mitski night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Fleabag",
+            "name": "Fleabag",
+            "type": "tv_show",
+            "percentile": 60,
+            "verdict": "misses"
+          },
+          {
+            "span": "Shake Shack",
+            "name": "Shake Shack",
+            "type": "brand",
+            "percentile": 0,
+            "verdict": "misses"
+          },
+          {
+            "span": "Mitski",
+            "name": "Mitski",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 5,
+          "natural": 5,
+          "note": "None"
+        },
+        "changes": 3
+      },
+      "vernacular": {
+        "text": "This summer the funniest night of your year rolls into town. Picture a Derry Girls marathon with a live crowd, dinner like a Friday at Planet Hollywood, and a sing-along that feels like Mitski night at the lounge. Tickets go fast.",
+        "refs": [
+          {
+            "span": "Derry Girls",
+            "name": "Derry Girls",
+            "type": "tv_show",
+            "percentile": 100,
+            "verdict": "lands"
+          },
+          {
+            "span": "Planet Hollywood",
+            "name": "Planet Hollywood",
+            "type": "brand",
+            "percentile": 50,
+            "verdict": "mixed"
+          },
+          {
+            "span": "Mitski",
+            "name": "Mitski",
+            "type": "artist",
+            "percentile": 100,
+            "verdict": "lands"
+          }
+        ],
+        "fidelity": {
+          "meaning": 4,
+          "natural": 4,
+          "note": "Planet Hollywood reads as a novelty theme restaurant rather than a casual Friday-night chain, which slightly shifts the role of the reference."
+        },
+        "changes": 3,
+        "swaps": [
+          {
+            "from": "Seinfeld",
+            "to": "Derry Girls",
+            "percentile": 100
+          },
+          {
+            "from": "Olive Garden",
+            "to": "Planet Hollywood",
+            "percentile": 50
+          },
+          {
+            "from": "Frank Sinatra",
+            "to": "Mitski",
+            "percentile": 100
+          }
+        ]
+      },
+      "stats": {
+        "qlooCalls": 33,
+        "ms": 67124
+      }
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import {
   type Equivalent,
   type Evidence,
 } from "../qloo/tools";
+import { ENTITY_TYPES } from "../qloo/params";
 import { changeOf } from "./diff";
 import { claude, FALLBACK, MODEL, RefusalError } from "./llm";
 import { verdictFor } from "./score";
@@ -34,14 +35,23 @@ const SYSTEM = `You are Vernacular's swap agent. Copy is being adapted for a spe
 
 How to work:
 1. Call find_equivalents for the reference. By default it filters to the original's genre tags. If the results don't fit the reference's role in the sentence (a crooner swapped for a rapper, a sitcom for a drama), call search_tags to find tags that capture the role (e.g. "sitcom", "crooner", "steakhouse") and call find_equivalents again with those tag_ids.
+   Some references can't be replaced like for like. A director usually stands for a visual style, a public figure for a trait, and Qloo's people results lean heavily toward musicians. When same-type candidates don't fit the role, call find_equivalents with a different type (e.g. a movie or tv_show for a director, a tv_show or brand for a personality) and rephrase only as much as the new type needs ("looks like a Wes Anderson film" → "looks like a scene from <film>").
 2. Pick up to 3 candidates that fit the role and would read naturally, and call verify_candidates.
 3. Call submit_swap with the best verified candidate. It must score "lands", or at least "mixed" and clearly above the original. If nothing qualifies after a couple of attempts, call keep_reference and explain plainly.
 
 Rules:
 - Only use candidates returned by find_equivalents in this run. Never invent or rename entities.
-- The rewritten sentence must keep the original's meaning, tone and length, change only what the swap needs, and name the replacement exactly as Qloo spells it (or its common short form).
+- The rewritten sentence must keep the original's meaning, tone and length, change only what the swap needs, and name the replacement the way people actually say it: Qloo's spelling or its common short form ("NBA", not "National Basketball Association").
 - If two references share a sentence, rewrite from the sentence's current version, which submit_swap returns.
 - Finish every reference you were given with exactly one submit_swap or keep_reference.`;
+
+/** Does the sentence name the entity, by its first words or its usual acronym ("NBA")? */
+export function namesEntity(sentence: string, name: string) {
+  const words = name.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ");
+  const said = ` ${sentence.toLowerCase().replace(/[^a-z0-9]+/g, " ")} `;
+  const acronym = words.filter((w) => !["of", "the", "and", "a"].includes(w)).map((w) => w[0]).join("");
+  return said.includes(words.slice(0, 2).join(" ")) || (acronym.length >= 2 && said.includes(` ${acronym} `));
+}
 
 export async function runSwapAgent(
   text: string,
@@ -97,9 +107,10 @@ export async function runSwapAgent(
 
   const findTool = betaZodTool({
     name: "find_equivalents",
-    description: "Ask Qloo for same-type entities this audience over-indexes on, optionally constrained to tag ids. Returns candidates with their affinity for the audience.",
+    description: "Ask Qloo for entities this audience over-indexes on, of the reference's type unless you pass another, optionally constrained to tag ids. Returns candidates with their affinity for the audience.",
     inputSchema: z.object({
       reference_id: z.string(),
+      type: z.enum(ENTITY_TYPES).optional().describe("Look in a different entity type when like-for-like can't fill the role. Omit for the reference's own type."),
       tag_ids: z.array(z.string()).max(4).optional().describe("Tag ids from search_tags. Omit to use the original's genre tags."),
       popularity_floor: z.number().min(0.2).max(0.95).optional().describe("Minimum Qloo popularity, 0–1. Higher means more recognisable. Default 0.6."),
     }),
@@ -107,8 +118,14 @@ export async function runSwapAgent(
       safe(async () => {
         const r = ref(input.reference_id);
         spend(3);
-        emit({ type: "agent_step", message: `Looking for ${r.type.replace("_", " ")} equivalents to ${r.entity?.name ?? r.span}` });
-        const res = await findEquivalents(r.entity!, audience, { take: 8, popularityFloor: input.popularity_floor ?? 0.6, tagIds: input.tag_ids });
+        const type = input.type ?? r.type;
+        emit({
+          type: "agent_step",
+          message: type === r.type
+            ? `Looking for ${type.replace("_", " ")} equivalents to ${r.entity?.name ?? r.span}`
+            : `Looking for a ${type.replace("_", " ")} that could stand in for ${r.entity?.name ?? r.span}`,
+        });
+        const res = await findEquivalents(r.entity!, audience, { take: 8, popularityFloor: input.popularity_floor ?? 0.6, tagIds: input.tag_ids, type });
         qlooCalls += res.evidence.length - 3; // reconcile with actual calls made
         addEvidence(r.id, res.evidence);
         const map = candidates.get(r.id) ?? new Map();
@@ -119,6 +136,7 @@ export async function runSwapAgent(
           candidates: res.candidates.map((c) => ({
             id: c.id,
             name: c.name,
+            type: c.type,
             popularity: c.popularity && Number(c.popularity.toFixed(2)),
             affinity: c.affinity && Number(c.affinity.toFixed(3)),
             tags: c.tags.slice(0, 6).map((t) => t.name),
@@ -137,9 +155,15 @@ export async function runSwapAgent(
         const pool = candidates.get(r.id) ?? new Map<string, Equivalent>();
         const unknown = input.candidate_ids.filter((id) => !pool.has(id));
         if (unknown.length) throw new Error(`Not returned by find_equivalents for ${r.id}: ${unknown.join(", ")}`);
-        spend(1 + (audience.age ? input.candidate_ids.length : 0));
+        spend(new Set(input.candidate_ids.map((id) => pool.get(id)!.type)).size + (audience.age ? input.candidate_ids.length : 0));
         emit({ type: "agent_step", message: `Verifying ${input.candidate_ids.map((id) => pool.get(id)!.name).join(", ")}` });
-        const { results, evidence } = await scoreWithPanel(input.candidate_ids, r.type, audience);
+        // Each candidate is ranked among well-known peers of its own type.
+        const types = [...new Set(input.candidate_ids.map((id) => pool.get(id)!.type))];
+        const scored = await Promise.all(
+          types.map((t) => scoreWithPanel(input.candidate_ids.filter((id) => pool.get(id)!.type === t), t, audience)),
+        );
+        const results = scored.flatMap((x) => x.results);
+        const evidence = scored.flatMap((x) => x.evidence);
         addEvidence(r.id, evidence);
         const out = [];
         for (const id of input.candidate_ids) {
@@ -184,10 +208,7 @@ export async function runSwapAgent(
         if (!better) {
           throw new Error(`${v.candidate.name} scores ${v.verdict} (${v.percentile}); it must land, or be mixed and clearly above the original (${r.percentile}).`);
         }
-        const name = v.candidate.name.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-        const said = input.rewritten_sentence.toLowerCase().replace(/[^a-z0-9]+/g, " ");
-        const firstWords = name.split(" ").slice(0, 2).join(" ");
-        if (!said.includes(firstWords)) throw new Error(`The rewritten sentence must name ${v.candidate.name}.`);
+        if (!namesEntity(input.rewritten_sentence, v.candidate.name)) throw new Error(`The rewritten sentence must name ${v.candidate.name}.`);
         if (input.rewritten_sentence.includes(r.span)) throw new Error(`The rewritten sentence still contains "${r.span}".`);
 
         const raw = (v.candidate.explainability as { "signal.interests.entities"?: { entity_id: string; score: number }[] } | undefined)?.[

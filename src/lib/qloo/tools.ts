@@ -174,18 +174,27 @@ export interface EquivalentsResult {
 }
 
 /**
- * Same-type entities this audience over-indexes on, constrained to the
- * original's genre tags and a recognisability floor. Relaxes the tag filter,
+ * Entities this audience over-indexes on, by default of the original's type and
+ * constrained to its genre tags, with a recognisability floor. Relaxes the tag filter,
  * then the popularity floor, if Qloo returns nothing.
  */
 export async function findEquivalents(
   original: ResolvedEntity,
   audience: Audience,
-  { take = 8, popularityFloor = 0.5, maxGenreTags = 3, tagIds }: { take?: number; popularityFloor?: number; maxGenreTags?: number; tagIds?: string[] } = {},
+  {
+    take = 8,
+    popularityFloor = 0.5,
+    maxGenreTags = 3,
+    tagIds,
+    type = original.type,
+  }: { take?: number; popularityFloor?: number; maxGenreTags?: number; tagIds?: string[]; type?: EntityType } = {},
 ): Promise<EquivalentsResult> {
+  // The original's genre tags only make sense when looking within its own type.
   const genre = tagIds?.length
     ? tagIds
-    : original.tags.filter((t) => t.id.includes(":genre:")).slice(0, maxGenreTags).map((t) => t.id);
+    : type !== original.type
+      ? []
+      : original.tags.filter((t) => t.id.includes(":genre:")).slice(0, maxGenreTags).map((t) => t.id);
   const attempts: { tags?: string; floor?: number; relaxed: EquivalentsResult["relaxed"] }[] = [
     { tags: genre.length ? genre.join(",") : undefined, floor: popularityFloor, relaxed: [] },
     { floor: popularityFloor, relaxed: ["genre_tags"] },
@@ -194,8 +203,8 @@ export async function findEquivalents(
   const ev: Evidence[] = [];
   for (const a of genre.length ? attempts : attempts.slice(1)) {
     const call = await qlooGet<{ results?: { entities?: RawEntity[] } }>("/v2/insights", {
-      "filter.type": urn(original.type),
-      ...audienceSignals(audience, original.type),
+      "filter.type": urn(type),
+      ...audienceSignals(audience, type),
       "filter.tags": a.tags,
       "filter.popularity.min": a.floor,
       "filter.exclude.entities": original.id,
@@ -204,7 +213,7 @@ export async function findEquivalents(
     });
     ev.push(evidence(call));
     const candidates = (call.data.results?.entities ?? []).map((e) => ({
-      ...toEntity(e, original.type),
+      ...toEntity(e, type),
       affinity: affinityOf(e),
       explainability: e.query?.explainability,
     }));

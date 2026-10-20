@@ -43,3 +43,12 @@ describe("contextOf", () => {
     expect(ctx.tail).toBe(" night.");
   });
 });
+
+describe("namesEntity", () => {
+  it("accepts the first words or the usual acronym", async () => {
+    const { namesEntity } = await import("../agent");
+    expect(namesEntity("a crowd louder than an NBA Finals watch party", "National Basketball Association")).toBe(true);
+    expect(namesEntity("dinner like a Friday at Bubba Gump", "Bubba Gump Shrimp Co.")).toBe(true);
+    expect(namesEntity("dinner like a Friday at Applebee's", "Bubba Gump Shrimp Co.")).toBe(false);
+  });
+});
