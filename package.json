@@ -15,7 +15,8 @@
     "mcp:smoke": "tsx scripts/mcp-smoke.ts",
     "benchmark": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/benchmark.ts",
     "edge-cases": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/edge-cases.ts",
-    "build:extension": "node scripts/build-extension.mjs"
+    "build:extension": "node scripts/build-extension.mjs",
+    "warm": "tsx scripts/warm.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

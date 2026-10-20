@@ -88,7 +88,7 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 **5. Heatmaps for creative placement.** Qloo's locality heatmaps, drawn from Qloo's own neighbourhood boundaries, compare where an audience lives with where each reference's fans live: Kali Uchis reaches 8 of Gen Z Latin-pop fans' 10 strongest Chicago neighbourhoods; Seinfeld reaches none.
 
 </td>
-<td><img src="docs/screenshots/map.png" alt="Chicago neighbourhood map: green where the audience and Kali Uchis fans overlap" /></td>
+<td><img src="docs/screenshots/map.png" alt="Chicago map of where Gen Z Latin-pop fans over-index, with each reference's overlap: Kali Uchis 8 of 10, Seinfeld 0 of 10" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -452,6 +452,7 @@ Then open http://localhost:3000.
 | `npx tsx scripts/load-test.ts http://localhost:3000 5` | Simultaneous fresh checks |
 | `npm run mcp:smoke` | Calls the local MCP server like an agent would |
 | `npm run build:extension` | Prepares `extension/` |
+| `npm run warm -- <url>` | Fills a deployment's caches (landing sample and all scenarios) so first visitors don't wait |
 
 `scripts/make-sample-media.py` regenerates the sample storyboard and animatic. It's optional and needs Python 3, ffmpeg and Google Chrome at the default macOS path.
 
@@ -463,7 +464,7 @@ Then open http://localhost:3000.
 
 ## Deploying
 
-The live demo runs on Vercel and deploys automatically from `main`. To deploy your own copy, import the repository in Vercel and add the environment variables above. No other configuration is needed.
+The live demo runs on Vercel and deploys automatically from `main`. To deploy your own copy, import the repository in Vercel and add the environment variables above. No other configuration is needed. After a deploy, `npm run warm -- https://your-deployment` fills the server caches so the gallery opens instantly.
 
 ## Data and privacy
 
