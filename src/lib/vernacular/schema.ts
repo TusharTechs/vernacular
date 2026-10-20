@@ -51,3 +51,18 @@ export const TourInputSchema = z.object({
   text: Text,
   audiences: z.array(AudienceSchema).min(2, "Pick at least 2 audiences to compare.").max(5, "Tour Mode compares up to 5 audiences."),
 });
+
+export const MapInputSchema = z.object({
+  city: z.string().trim().min(2, "Name a city.").max(60),
+  audience: AudienceSchema,
+  references: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(120),
+        entityId: z.string().regex(/^[A-F0-9-]{36}$/i, "Unknown entity id."),
+        role: z.enum(["original", "swap"]),
+        replaces: z.string().max(120).optional(),
+      }),
+    )
+    .max(12),
+});

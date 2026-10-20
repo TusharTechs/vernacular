@@ -22,6 +22,15 @@ const main = async () => {
     },
   });
   console.log("\ncompare_audiences →\n" + (grid.content as { text: string }[])[0].text);
+  const map = await client.callTool({
+    name: "where_it_lands",
+    arguments: {
+      city: "Chicago",
+      audience: { label: "Gen Z Latin-pop fans", anchors: [{ query: "Bad Bunny", type: "artist" }], age: "24_and_younger" },
+      references: [{ query: "Seinfeld", type: "tv_show" }, { query: "Kali Uchis", type: "artist" }],
+    },
+  });
+  console.log("\nwhere_it_lands →\n" + (map.content as { text: string }[])[0].text);
   await client.close();
 };
 main().catch((e) => {

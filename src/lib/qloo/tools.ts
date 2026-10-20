@@ -285,3 +285,40 @@ export async function searchTags(query: string, take = 8) {
   }));
   return { tags: tags.filter((t) => t.id), evidence: evidence(call) };
 }
+
+// ------------------------------------------------------------------ heatmap
+
+export interface Locality {
+  id: string;
+  name: string;
+  /** Qloo's affinity for this neighbourhood under the signals, 0–1 (it behaves like a rank). */
+  affinity: number;
+  boundary: string;
+}
+
+/**
+ * Neighbourhoods of a city ranked by how strongly the given signals over-index
+ * there (Qloo heatmap with locality boundaries). Signals are entity ids plus
+ * optional demographics, segments and tags.
+ */
+export async function localityHeatmap(
+  city: string,
+  signals: { entityIds: string[]; age?: AgeBand; gender?: "male" | "female"; segments?: string[]; tags?: string[] },
+) {
+  const call = await qlooGet<{ results?: { entities?: (RawEntity & { boundary?: string })[] } }>("/v2/insights", {
+    "filter.type": "urn:heatmap",
+    "filter.location.query": city,
+    "output.heatmap.boundary": "urn:entity:locality",
+    "signal.interests.entities": signals.entityIds.length ? signals.entityIds.join(",") : undefined,
+    "signal.demographics.age": signals.age,
+    "signal.demographics.gender": signals.gender,
+    "signal.demographics.audiences": signals.segments?.length ? signals.segments.join(",") : undefined,
+    "signal.interests.tags": signals.tags?.length ? signals.tags.join(",") : undefined,
+    take: 50,
+  });
+  const localities: Locality[] = (call.data.results?.entities ?? []).flatMap((e) => {
+    const a = affinityOf(e);
+    return a === undefined || !e.boundary ? [] : [{ id: e.entity_id, name: e.name, affinity: a, boundary: e.boundary }];
+  });
+  return { localities, evidence: evidence(call) };
+}

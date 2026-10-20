@@ -8,6 +8,7 @@ import { applyChange } from "@/lib/vernacular/diff";
 import type { AudienceSpec, CheckResult, Verdict } from "@/lib/vernacular/types";
 import { AGE_LABEL, AudienceBuilder } from "./audience-builder";
 import { ComparePanel } from "./compare-panel";
+import { CultureMap } from "./culture-map";
 import { FeedPreview } from "./feed-preview";
 import { Filmstrip } from "./filmstrip";
 import { MediaInput, type StoryboardRead } from "./media-input";
@@ -311,6 +312,10 @@ export function Workbench() {
               media={board && board.text === state.text ? board.frames[0]?.src : undefined}
               audience={audience.label}
             />
+          )}
+
+          {state.phase === "done" && Object.values(state.scored).some((r) => r.entity) && (
+            <CultureMap audience={state.result?.input.audience ?? audience} references={Object.values(state.scored)} swaps={swapsInOrder} />
           )}
 
           {state.phase === "done" && swapsInOrder.length > 0 && (

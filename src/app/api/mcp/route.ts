@@ -7,7 +7,9 @@ import { z } from "zod";
 import { AGE_BANDS, ENTITY_TYPES } from "@/lib/qloo/params";
 import { admit } from "@/lib/rate-limit";
 import { publicMessage } from "@/lib/sse";
+import { resolveEntity } from "@/lib/qloo/tools";
 import { proposeAudience } from "@/lib/vernacular/audience";
+import { buildCityMap, MAP_TOP } from "@/lib/vernacular/map";
 import { runCheck } from "@/lib/vernacular/run";
 import { runTour, type TourEvent } from "@/lib/vernacular/tour";
 import type { AudienceSpec, CheckResult } from "@/lib/vernacular/types";
@@ -130,6 +132,43 @@ function buildServer(ip: string) {
           .map(([ref, cols]) => `- ${ref}: ${Object.entries(cols).map(([a, v]) => `${a} ${v}`).join("; ")}`)
           .join("\n");
         return { content: [{ type: "text" as const, text: text_ || "No named cultural references found." }], structuredContent: { grid } };
+      }),
+  );
+
+  server.registerTool(
+    "where_it_lands",
+    {
+      title: "Map an audience and references onto a city's neighbourhoods",
+      description:
+        "Uses Qloo's neighbourhood heatmaps to list where in a city the audience over-indexes, and, for each reference, how many of those neighbourhoods its fans also live in. Use it to plan out-of-home or geo-targeted runs. Where fans live is not the same as taste; pair it with check_copy.",
+      inputSchema: {
+        city: z.string().min(2).max(60).describe("A large city, e.g. 'Chicago' or 'Los Angeles'."),
+        audience: AudienceInput,
+        references: z.array(z.object({ query: z.string().max(80), type: z.enum(ENTITY_TYPES) })).max(8),
+      },
+    },
+    async ({ city, audience, references }) =>
+      guarded(async () => {
+        const spec = await toSpec(audience);
+        const resolved = await Promise.all(references.map((r) => resolveEntity(r.query, r.type)));
+        const refs = resolved.flatMap((r) => (r.entity ? [{ name: r.entity.name, entityId: r.entity.id, role: "original" as const }] : []));
+        const map = await buildCityMap(city, spec, refs);
+        const name = (id: string) => map.hoods.find((h) => h.id === id)?.name ?? id;
+        const audienceTop = map.audience.ranked.slice(0, MAP_TOP.audience).map(name);
+        const layers = map.references.map((r) => ({
+          name: r.name,
+          overlap: r.ranked.length < 5 ? null : r.overlap,
+          strongest: r.ranked.slice(0, 5).map(name),
+        }));
+        const text = [
+          `${spec.label} in ${city}: strongest in ${audienceTop.join(", ")}.`,
+          ...layers.map((l) =>
+            l.overlap === null
+              ? `- ${l.name}: too little local data in ${city}.`
+              : `- ${l.name}: fans live in ${l.overlap} of the audience's ${MAP_TOP.audience} strongest neighbourhoods (its own strongest: ${l.strongest.join(", ")}).`,
+          ),
+        ].join("\n");
+        return { content: [{ type: "text" as const, text }], structuredContent: { city, audienceTop, references: layers } };
       }),
   );
 
