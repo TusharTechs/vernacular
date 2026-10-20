@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vernacular Anywhere</title>
+    <style>
+      body { width: 280px; margin: 0; padding: 14px; font: 13px system-ui, sans-serif; color: #161a23; }
+      h1 { margin: 0 0 6px; font: italic 600 18px Georgia, serif; }
+      p { margin: 0 0 10px; color: #5d6475; line-height: 1.4; }
+      label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #5d6475; }
+      select { font-size: 13px; padding: 5px; }
+      a { color: #3047d6; }
+    </style>
+  </head>
+  <body>
+    <h1>Vernacular</h1>
+    <p>Click into any text box and start writing. A pill in the corner scores your cultural references for the audience below.</p>
+    <label>Writing for
+      <select id="audience">
+        <option value="genz-latin">Gen Z Latin-pop fans</option>
+        <option value="hiphop-30s">30–34 hip-hop heads</option>
+        <option value="indie-25">25–29 indie &amp; A24 fans</option>
+        <option value="country-45">45–54 country fans</option>
+        <option value="classic-55">55+ classic-rock fans</option>
+      </select>
+    </label>
+    <p style="margin-top: 10px">Text is sent to Vernacular only while you write in a box, never stored. <a href="https://vernacular-lime.vercel.app" target="_blank" rel="noopener">Open the app</a></p>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -98,10 +98,12 @@ export async function scoreReferences(refs: ExtractedReference[], audience: Audi
   for (const s of scored) if (s.entity) byType.set(s.type, [...(byType.get(s.type) ?? []), s]);
   await Promise.all(
     [...byType.entries()].map(async ([, group]) => {
-      const { results, evidence } = await scoreWithPanel(group.map((g) => g.entity!.id), group[0].type, audience);
+      const { results, evidence, scope } = await scoreWithPanel(group.map((g) => g.entity!.id), group[0].type, audience);
       for (const g of group) {
         const r = results.find((x) => x.entityId === g.entity!.id);
         g.evidence.push(...evidence);
+        if (scope === "local") g.notes.push(`Ranked among well-known ${g.type === "place" ? "places" : "names"} in ${audience.location}.`);
+        if (scope === "taste-only") g.notes.push(`Qloo had too few local peers in ${audience.location}, so this is scored on taste alone.`);
         if (r?.isAnchor) {
           g.percentile = 100;
           g.verdict = "lands";

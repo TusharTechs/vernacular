@@ -3,6 +3,7 @@
 // back to the exact request that produced it.
 
 import { qlooGet, type QlooCall } from "./client";
+import { plausibleMatch } from "./names";
 import { urn, type AgeBand, type EntityType } from "./params";
 
 export interface Evidence {
@@ -96,9 +97,12 @@ export function audienceSignals(audience: Audience, targetType: EntityType) {
 // ------------------------------------------------------------------ resolve
 
 export async function resolveEntity(query: string, type: EntityType, take = 3) {
-  const call = await qlooGet<{ results?: RawEntity[] }>("/search", { query, types: urn(type), take });
-  const candidates = (call.data.results ?? []).map((e) => toEntity(e, type));
-  return { entity: candidates[0] ?? null, candidates, evidence: evidence(call) };
+  const call = await qlooGet<{ results?: (RawEntity & { properties?: { akas?: { value?: string }[] } })[] }>("/search", { query, types: urn(type), take });
+  const raw = call.data.results ?? [];
+  const candidates = raw.map((e) => toEntity(e, type));
+  // Take the first hit whose name (or an alternative name) plausibly matches; never a lookalike.
+  const i = raw.findIndex((e) => plausibleMatch(query, [e.name, ...(e.properties?.akas ?? []).flatMap((a) => (a.value ? [a.value] : []))]));
+  return { entity: i >= 0 ? candidates[i] : null, candidates, evidence: evidence(call) };
 }
 
 // ------------------------------------------------------------------ score
@@ -224,49 +228,77 @@ export async function findEquivalents(
 
 // ------------------------------------------------------------------ panel
 
-const panels = new Map<EntityType, ResolvedEntity[]>();
+const panels = new Map<string, ResolvedEntity[]>();
 
 /**
  * Well-known entities of a type (no audience signal), used as the yardstick for
  * percentiles: raw affinity is not comparable across audiences, but a
  * reference's standing among the same famous peers within one audience is.
+ * With `near`, the panel is well-known entities in that city instead.
  */
-export async function referencePanel(type: EntityType, take = 40, popularityFloor = 0.85) {
-  const cached = panels.get(type);
+export async function referencePanel(type: EntityType, take = 40, popularityFloor = 0.85, near?: string) {
+  const key = `${type}|${near ?? ""}`;
+  const cached = panels.get(key);
   if (cached) return { panel: cached, evidence: null };
   const call = await qlooGet<{ results?: { entities?: RawEntity[] } }>("/v2/insights", {
     "filter.type": urn(type),
-    "filter.popularity.min": popularityFloor,
+    "filter.popularity.min": near ? Math.min(popularityFloor, 0.5) : popularityFloor,
+    "filter.location.query": near,
     take,
   });
   const panel = (call.data.results?.entities ?? []).map((e) => toEntity(e, type));
-  if (panel.length) panels.set(type, panel);
+  if (panel.length) panels.set(key, panel);
   return { panel, evidence: evidence(call) };
+}
+
+const MIN_BASELINE = 10;
+
+async function scoreAgainst(entityIds: string[], type: EntityType, audience: Audience, panel: ResolvedEntity[]) {
+  const anchorIds = new Set(audience.anchors.map((a) => a.id));
+  const ids = new Set(entityIds);
+  const panelIds = panel.map((p) => p.id).filter((id) => !ids.has(id) && !anchorIds.has(id));
+  const room = Math.max(0, 50 - entityIds.length);
+  const { scores, evidence: ev } = await scoreForAudience([...entityIds, ...panelIds.slice(0, room)], type, audience);
+  const byId = new Map(scores.map((s) => [s.entityId, s.affinity]));
+  const baseline = panelIds.map((id) => byId.get(id)).filter((a): a is number => a !== undefined).sort((a, b) => a - b);
+  return { byId, baseline, anchorIds, evidence: ev };
 }
 
 /**
  * Affinity of `entityIds` for the audience, plus each one's percentile among
  * the type's reference panel scored in the same request.
+ *
+ * With a location, Qloo only scores places and brands near it, so a global panel
+ * leaves almost nothing to compare against. Places are then ranked among
+ * well-known places in that city; anything still short of a baseline is scored
+ * on taste alone, without the location, and flagged.
  */
 export async function scoreWithPanel(entityIds: string[], type: EntityType, audience: Audience) {
-  const { panel, evidence: panelEvidence } = await referencePanel(type);
-  const anchorIds = new Set(audience.anchors.map((a) => a.id));
-  const ids = new Set(entityIds);
-  const panelIds = panel.map((p) => p.id).filter((id) => !ids.has(id) && !anchorIds.has(id));
-  const room = Math.max(0, 50 - entityIds.length);
-  const { scores, evidence: scoreEvidence } = await scoreForAudience([...entityIds, ...panelIds.slice(0, room)], type, audience);
-  const byId = new Map(scores.map((s) => [s.entityId, s.affinity]));
-  const baseline = panelIds.map((id) => byId.get(id)).filter((a): a is number => a !== undefined).sort((a, b) => a - b);
+  const local = !!audience.location && LOCATION_TYPES.includes(type);
+  const evidenceList: Evidence[] = [];
+  const { panel, evidence: panelEvidence } = await referencePanel(type, 40, 0.85, local && type === "place" ? audience.location : undefined);
+  if (panelEvidence) evidenceList.push(panelEvidence);
+  let scored = await scoreAgainst(entityIds, type, audience, panel);
+  evidenceList.push(scored.evidence);
+  let scope: "local" | "global" | "taste-only" = local ? "local" : "global";
+  if (local && scored.baseline.length < MIN_BASELINE) {
+    const global = await referencePanel(type);
+    if (global.evidence) evidenceList.push(global.evidence);
+    scored = await scoreAgainst(entityIds, type, { ...audience, location: undefined }, global.panel);
+    evidenceList.push(scored.evidence);
+    scope = "taste-only";
+  }
+  const { byId, baseline, anchorIds } = scored;
   const results = entityIds.map((id) => {
     const affinity = byId.get(id);
     return {
       entityId: id,
       affinity: affinity ?? null,
-      percentile: affinity === undefined || baseline.length < 10 ? null : percentileOf(affinity, baseline),
+      percentile: affinity === undefined || baseline.length < MIN_BASELINE ? null : percentileOf(affinity, baseline),
       isAnchor: anchorIds.has(id),
     };
   });
-  return { results, baselineSize: baseline.length, evidence: [panelEvidence, scoreEvidence].filter((e): e is Evidence => !!e) };
+  return { results, baselineSize: baseline.length, scope, evidence: evidenceList };
 }
 
 // ------------------------------------------------------------------ tags

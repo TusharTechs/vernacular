@@ -1,5 +1,6 @@
 "use client";
 
+import { TastePath } from "./taste-path";
 import { AGE_BANDS, type AgeBand } from "@/lib/qloo/params";
 import { contextOf } from "@/lib/vernacular/diff";
 import type { Kept, ScoredReference, Swap, Verdict } from "@/lib/vernacular/types";
@@ -170,13 +171,15 @@ export function ReferenceCard({
             <span>{swap.rationale}</span>
           </p>
           <SwapPreview swap={swap} />
-          {swap.drivers.length > 1 && (
-            <p className="flex items-start gap-2 text-xs text-muted">
+          {swap.drivers.length > 0 && (
+            <div className="flex items-start gap-2">
               <Source kind="qloo" />
-              <span>
-                Driven by {swap.drivers.map((d) => `${d.name} ${Math.round(d.share * 100)}%`).join(" · ")}
-              </span>
-            </p>
+              <TastePath
+                drivers={swap.drivers}
+                original={{ name: reference?.entity?.name ?? span, percentile: reference?.percentile ?? null }}
+                replacement={{ name: swap.replacement.name, percentile: swap.replacement.percentile }}
+              />
+            </div>
           )}
           <div className="flex gap-2 pt-1">
             {accepted ? (

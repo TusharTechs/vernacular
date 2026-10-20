@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import type { Verdict } from "@/lib/vernacular/types";
+import type { CommentInput } from "@/lib/vernacular/comments";
 import type { Located } from "./copy-view";
+import { PredictedComments } from "./predicted-comments";
 
 type Format = "photo" | "video" | "pro" | "micro";
 
@@ -98,6 +100,7 @@ export function FeedPreview({
   swapNames,
   media,
   audience,
+  comments,
 }: {
   original: string;
   rewritten: string;
@@ -106,6 +109,7 @@ export function FeedPreview({
   swapNames: string[];
   media?: string;
   audience: string;
+  comments?: CommentInput;
 }) {
   const [format, setFormat] = useState<Format>("photo");
   const [after, setAfter] = useState(false);
@@ -254,6 +258,7 @@ export function FeedPreview({
           </article>
         )}
       </div>
+      {comments && <PredictedComments key={comments.original.text + comments.swaps.text} input={comments} after={after} />}
     </section>
   );
 }

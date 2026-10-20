@@ -66,3 +66,23 @@ export const MapInputSchema = z.object({
     )
     .max(12),
 });
+
+export const VoiceInputSchema = z.object({
+  text: z.string().trim().min(1, "Nothing to read.").max(1200, "The Dial Test reads up to 1,200 characters."),
+});
+
+const CommentRefs = z
+  .array(z.object({ name: z.string().max(120), percentile: z.number().min(0).max(100).nullable(), verdict: z.enum(["lands", "mixed", "misses", "unmeasured"]) }))
+  .max(12);
+
+export const CommentInputSchema = z.object({
+  audience: AudienceSchema,
+  original: z.object({ text: Text, refs: CommentRefs }),
+  swaps: z.object({ text: Text, refs: CommentRefs }),
+});
+
+export const LintInputSchema = z.object({
+  text: Text,
+  /** A preset id, or a full audience. */
+  audience: z.union([z.string().max(40), AudienceSchema]),
+});

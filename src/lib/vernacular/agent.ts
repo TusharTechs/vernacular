@@ -41,6 +41,7 @@ How to work:
 
 Rules:
 - Only use candidates returned by find_equivalents in this run. Never invent or rename entities.
+- When the reference is a yardstick ("funnier than X", "as strong as X", "bigger than X"), the replacement must be a household name for this audience. Prefer the most widely known candidate that lands over a niche one that scores a little higher; Qloo's popularity numbers don't capture this, so use your judgment.
 - The rewritten sentence must keep the original's meaning, tone and length, change only what the swap needs, and name the replacement the way people actually say it: Qloo's spelling or its common short form ("NBA", not "National Basketball Association").
 - If two references share a sentence, rewrite from the sentence's current version, which submit_swap returns.
 - Finish every reference you were given with exactly one submit_swap or keep_reference.`;

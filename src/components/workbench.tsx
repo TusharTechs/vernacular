@@ -9,11 +9,15 @@ import type { AudienceSpec, CheckResult, Verdict } from "@/lib/vernacular/types"
 import { AGE_LABEL, AudienceBuilder } from "./audience-builder";
 import { ComparePanel } from "./compare-panel";
 import { CultureMap } from "./culture-map";
+import { DialTest, type Take } from "./dial-test";
+import { verdictOfPercentile } from "@/lib/vernacular/dial";
 import { FeedPreview } from "./feed-preview";
 import { Filmstrip } from "./filmstrip";
 import { MediaInput, type StoryboardRead } from "./media-input";
 import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
 import { ReferenceCard } from "./reference-card";
+import { ScenarioGallery } from "./scenario-gallery";
+import type { Scenario } from "@/lib/vernacular/scenarios";
 import { ShareButton } from "./share-dialog";
 import { SwipeReview } from "./swipe-review";
 import { TourView } from "./tour-view";
@@ -41,7 +45,29 @@ export function Workbench() {
   const [board, setBoard] = useState<StoryboardRead | null>(null);
   const { state, run, reset, load } = useCheck();
   const [sampleAt, setSampleAt] = useState<string | null>(null);
+  const [scenario, setScenario] = useState<string | null>("tour");
+  const [opening, setOpening] = useState<string | null>(null);
   const touched = useRef(false);
+
+  // Deep link from the extension: #check={"text":…,"audience":presetId} opens and runs a check.
+  // It's a fragment, so the copy never reaches a server log.
+  useEffect(() => {
+    const m = /^#check=(.+)$/.exec(window.location.hash);
+    if (!m) return;
+    try {
+      const { text: t, audience: a } = JSON.parse(decodeURIComponent(m[1])) as { text?: string; audience?: string };
+      const preset = AUDIENCE_PRESETS.find((p) => p.id === a)?.spec ?? AUDIENCE_PRESETS[0].spec;
+      if (!t?.trim()) return;
+      touched.current = true;
+      history.replaceState(null, "", window.location.pathname);
+      setText(t.slice(0, MAX_TEXT_CHARS));
+      setAudience(structuredClone(preset));
+      check(structuredClone(preset), t.slice(0, MAX_TEXT_CHARS));
+    } catch {
+      // ignore a malformed link
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Open on a real, server-cached check of the sample so the first view shows results.
   useEffect(() => {
@@ -73,6 +99,40 @@ export function Workbench() {
   const accepted = swapsInOrder.filter((s) => decisions[s.referenceId]);
   const rewritten = accepted.reduce((t, s) => applyChange(t, s.change), state.text);
   const trace = traceOf(state);
+  // Dial Test takes: the original and the copy with every suggested swap.
+  const takes = useMemo<Take[]>(() => {
+    if (state.phase !== "done" || !located.length) return [];
+    const original: Take = {
+      key: "original",
+      label: "Original",
+      text: state.text,
+      refs: located.map((r) => ({ start: r.start, end: r.end, name: state.scored[r.id]?.entity?.name ?? r.span, percentile: state.scored[r.id]?.percentile ?? null, verdict: state.scored[r.id]?.verdict ?? "unmeasured" })),
+    };
+    if (!swapsInOrder.length) return [original];
+    const text = swapsInOrder.reduce((t, sw) => applyChange(t, sw.change), state.text);
+    const refs: Take["refs"] = [];
+    let cursor = 0;
+    for (const r of located) {
+      const sw = swapsInOrder.find((s) => s.referenceId === r.id);
+      const name = sw ? sw.replacement.name : r.span;
+      const candidates = sw ? [name, name.split(" ").slice(0, 2).join(" ")] : [r.span];
+      let at = -1;
+      let len = 0;
+      for (const c of candidates) {
+        at = text.indexOf(c, cursor);
+        if (at >= 0) {
+          len = c.length;
+          break;
+        }
+      }
+      if (at < 0) continue;
+      const scored = state.scored[r.id];
+      const percentile = sw ? sw.replacement.percentile : (scored?.percentile ?? null);
+      refs.push({ start: at, end: at + len, name: sw ? sw.replacement.name : (scored?.entity?.name ?? r.span), percentile, verdict: sw ? verdictOfPercentile(percentile) : (scored?.verdict ?? "unmeasured") });
+      cursor = at + len;
+    }
+    return [original, { key: "swaps", label: "With swaps", text, refs }];
+  }, [state.phase, state.text, state.scored, located, swapsInOrder]);
   const counts = Object.values(state.scored).reduce<Record<string, number>>((c, r) => ({ ...c, [r.verdict]: (c[r.verdict] ?? 0) + 1 }), {});
 
   const selectFromCopy = (id: string) => {
@@ -82,6 +142,31 @@ export function Workbench() {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       card.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
       card.focus({ preventScroll: true });
+    }
+  };
+
+  // Open a gallery scenario from its server-cached check; fall back to a live check.
+  const openScenario = async (sc: Scenario) => {
+    touched.current = true;
+    setScenario(sc.id);
+    setOpening(sc.id);
+    setText(sc.text);
+    setAudience(structuredClone(sc.audience));
+    setBoard(null);
+    setInput("copy");
+    setSelected(null);
+    setDecisions({});
+    try {
+      const res = await fetch(`/api/scenario/${sc.id}`);
+      if (!res.ok) throw new Error();
+      const d: { checkedAt: string; result: CheckResult } = await res.json();
+      load(d.result);
+      setEditing(false);
+      setSampleAt(d.checkedAt);
+    } catch {
+      check(sc.audience, sc.text);
+    } finally {
+      setOpening(null);
     }
   };
 
@@ -97,6 +182,7 @@ export function Workbench() {
   };
   const edit = () => {
     touched.current = true;
+    setScenario(null);
     setSampleAt(null);
     reset();
     setEditing(true);
@@ -135,6 +221,7 @@ export function Workbench() {
           ))}
         </div>
         <div className="flex gap-3 text-xs text-muted">
+          <Link href="/anywhere" className="text-accent hover:underline">Anywhere</Link>
           <Link href="/benchmark" className="text-accent hover:underline">Benchmark vs Claude alone →</Link>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-lands" /> Lands</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-mixed" /> Mixed</span>
@@ -155,12 +242,14 @@ export function Workbench() {
         />
       )}
 
+      {mode === "editor" && <ScenarioGallery active={scenario} loading={opening} onOpen={openScenario} />}
+
       <div className={`grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] ${mode === "tour" ? "hidden" : ""}`}>
         <main className="flex min-w-0 flex-col gap-4">
           {sampleAt && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent-soft px-4 py-3 text-sm">
               <span>
-                Example: this sample was checked live on Qloo{" "}
+                Example: this scenario was checked live on Qloo{" "}
                 {new Date(sampleAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}. Click a marked reference to see why.
               </span>
               <button type="button" onClick={edit} className="font-medium text-accent hover:underline">
@@ -302,6 +391,8 @@ export function Workbench() {
             </section>
           )}
 
+          {takes.length > 0 && <DialTest key={takes.map((t) => t.text).join("|")} takes={takes} audience={audience.label} />}
+
           {state.phase === "done" && state.extracted.length > 0 && (
             <FeedPreview
               original={state.text}
@@ -311,6 +402,18 @@ export function Workbench() {
               swapNames={swapsInOrder.map((s) => s.replacement.name)}
               media={board && board.text === state.text ? board.frames[0]?.src : undefined}
               audience={audience.label}
+              comments={
+                takes.length
+                  ? {
+                      audience: state.result?.input.audience ?? audience,
+                      original: { text: takes[0].text, refs: takes[0].refs.map(({ name, percentile, verdict }) => ({ name, percentile, verdict })) },
+                      swaps: {
+                        text: (takes[1] ?? takes[0]).text,
+                        refs: (takes[1] ?? takes[0]).refs.map(({ name, percentile, verdict }) => ({ name, percentile, verdict })),
+                      },
+                    }
+                  : undefined
+              }
             />
           )}
 
