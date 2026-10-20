@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 import Script from "next/script";
 import { AnywhereDemo } from "@/components/anywhere-demo";
 
@@ -11,10 +11,8 @@ export const metadata: Metadata = {
 export default function AnywherePage() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 lg:py-10">
+      <SiteHeader />
       <header className="flex flex-col gap-3">
-        <Link href="/" className="text-sm text-muted hover:text-ink">
-          ← Vernacular
-        </Link>
         <h1 className="font-serif text-4xl italic tracking-tight text-balance sm:text-5xl">Vernacular, everywhere you write</h1>
         <p className="max-w-2xl text-muted">
           The browser extension puts a culture check in every text box: social posts, email, docs, chat. Click into a box below, or press an example,

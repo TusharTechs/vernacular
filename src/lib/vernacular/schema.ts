@@ -86,3 +86,7 @@ export const LintInputSchema = z.object({
   /** A preset id, or a full audience. */
   audience: z.union([z.string().max(40), AudienceSchema]),
 });
+
+export const TranslateInputSchema = z.object({
+  query: z.string().trim().min(2, "Type a reference to translate.").max(80, "Keep it to one reference."),
+});

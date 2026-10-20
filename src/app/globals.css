@@ -3,38 +3,39 @@
 /* Proofreader's desk: the copy sits on a sheet, cultural references get proof marks,
    and the right margin holds one note per reference. */
 :root {
-  --desk: #f3f4f7;
-  --sheet: #ffffff;
-  --ink: #161a23;
-  --muted: #5d6475;
-  --rule: #dfe2ea;
-  --accent: #3047d6;
-  --accent-soft: #e8ecff;
-  --lands: #1d7f47;
-  --lands-soft: #e2f3e9;
-  --mixed: #a86a12;
-  --mixed-soft: #fbf0db;
-  --misses: #c0391b;
-  --misses-soft: #fde6df;
-  --unmeasured: #8a90a0;
+  /* Warm paper, deep ink, and verdict colours tuned to the mark's squiggle-to-check gradient. */
+  --desk: #f6f3ec;
+  --sheet: #fffdf8;
+  --ink: #14121f;
+  --muted: #6b6577;
+  --rule: #e6dfd2;
+  --accent: #4438d6;
+  --accent-soft: #ecebfd;
+  --lands: #13875a;
+  --lands-soft: #ddf3e8;
+  --mixed: #b06a10;
+  --mixed-soft: #fcefd8;
+  --misses: #d4402a;
+  --misses-soft: #fde4dc;
+  --unmeasured: #8b8697;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --desk: #0f1117;
-    --sheet: #171a22;
-    --ink: #e7e9ef;
-    --muted: #9aa1b2;
-    --rule: #2a2f3c;
-    --accent: #8d9cff;
-    --accent-soft: #222a4d;
-    --lands: #5ccf8e;
-    --lands-soft: #16301f;
-    --mixed: #e6b35a;
-    --mixed-soft: #33280f;
-    --misses: #ff8566;
-    --misses-soft: #3a1d14;
-    --unmeasured: #7d8496;
+    --desk: #0f0e16;
+    --sheet: #18161f;
+    --ink: #f1ede4;
+    --muted: #a39fae;
+    --rule: #2b2836;
+    --accent: #9d95ff;
+    --accent-soft: #241f48;
+    --lands: #3ddc97;
+    --lands-soft: #12301f;
+    --mixed: #f0b45a;
+    --mixed-soft: #33270f;
+    --misses: #ff7a5c;
+    --misses-soft: #3a1b14;
+    --unmeasured: #7f7a8c;
     color-scheme: dark;
   }
 }
@@ -129,3 +130,23 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .taste-flow { animation: none; stroke-dasharray: none; }
 }
+
+/* Hero: soft glows in the mark's two colours. */
+.hero-glow::before,
+.hero-glow::after {
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(10px);
+}
+.hero-glow::before { left: -220px; top: -260px; background: radial-gradient(circle, color-mix(in srgb, #ff5a3c 16%, transparent), transparent 65%); }
+.hero-glow::after { right: -200px; bottom: -280px; background: radial-gradient(circle, color-mix(in srgb, #22c27a 16%, transparent), transparent 65%); }
+.ticker-caret { animation: caret 0.8s steps(1) infinite; color: var(--lands); }
+@keyframes caret { 50% { opacity: 0; } }
+
+/* Culture Translator compass. */
+.compass-spoke { transition: stroke 300ms ease, stroke-width 300ms ease; }
+.compass-word { animation: comment-in 360ms ease-out both; }

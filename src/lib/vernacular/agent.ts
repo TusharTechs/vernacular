@@ -40,6 +40,7 @@ How to work:
 3. Call submit_swap with the best verified candidate. It must score "lands", or at least "mixed" and clearly above the original. If nothing qualifies after a couple of attempts, call keep_reference and explain plainly.
 
 Rules:
+- Keep a reference that states a fact rather than making a comparison: credits ("from the studio that made X", "from the director of X"), sponsors and partners, where the product is sold, or where the event actually takes place. Swapping it would make the copy untrue, so call keep_reference and say so.
 - Only use candidates returned by find_equivalents in this run. Never invent or rename entities.
 - When the reference is a yardstick ("funnier than X", "as strong as X", "bigger than X"), the replacement must be a household name for this audience. Prefer the most widely known candidate that lands over a niche one that scores a little higher; Qloo's popularity numbers don't capture this, so use your judgment.
 - The rewritten sentence must keep the original's meaning, tone and length, change only what the swap needs, and name the replacement the way people actually say it: Qloo's spelling or its common short form ("NBA", not "National Basketball Association").

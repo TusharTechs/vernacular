@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MAX_TEXT_CHARS } from "@/lib/vernacular/limits";
 import { AUDIENCE_PRESETS, SAMPLE_COPY } from "@/lib/vernacular/presets";
@@ -16,7 +15,9 @@ import { Filmstrip } from "./filmstrip";
 import { MediaInput, type StoryboardRead } from "./media-input";
 import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
 import { ReferenceCard } from "./reference-card";
+import { Hero } from "./hero";
 import { ScenarioGallery } from "./scenario-gallery";
+import { SiteHeader } from "./site-header";
 import type { Scenario } from "@/lib/vernacular/scenarios";
 import { ShareButton } from "./share-dialog";
 import { SwipeReview } from "./swipe-review";
@@ -33,7 +34,7 @@ const PHASE_TEXT: Record<Phase, string> = {
   error: "",
 };
 
-export function Workbench() {
+export function Workbench({ stats }: { stats: { lift: number | null; missRate: number | null } }) {
   const [text, setText] = useState(SAMPLE_COPY[0].text);
   const [audience, setAudience] = useState<AudienceSpec>(structuredClone(AUDIENCE_PRESETS[0].spec));
   const [editing, setEditing] = useState(true);
@@ -198,15 +199,11 @@ export function Workbench() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:py-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-serif text-4xl italic tracking-tight sm:text-5xl">Vernacular</h1>
-          <p className="max-w-xl text-muted">
-            The spell-checker for culture. Every reference in your copy, scored for the audience you&apos;re writing for on Qloo&apos;s taste graph, and the ones that miss swapped for verified equivalents.
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-3">
-        <div className="flex rounded-lg border border-rule bg-sheet p-1 text-sm" role="tablist" aria-label="Mode">
+      <SiteHeader />
+      <Hero lift={stats.lift} missRate={stats.missRate} />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex rounded-full border border-rule bg-sheet p-1 text-sm" role="tablist" aria-label="Mode">
           {(["editor", "tour"] as const).map((m) => (
             <button
               key={m}
@@ -214,21 +211,18 @@ export function Workbench() {
               role="tab"
               aria-selected={mode === m}
               onClick={() => setMode(m)}
-              className={`rounded-md px-3 py-1.5 transition-colors ${mode === m ? "bg-ink text-sheet" : "text-muted hover:text-ink"}`}
+              className={`rounded-full px-4 py-1.5 transition-colors ${mode === m ? "bg-ink text-sheet" : "text-muted hover:text-ink"}`}
             >
-              {m === "editor" ? "Editor" : "Tour Mode"}
+              {m === "editor" ? "Check one audience" : "Tour Mode · compare five"}
             </button>
           ))}
         </div>
         <div className="flex gap-3 text-xs text-muted">
-          <Link href="/anywhere" className="text-accent hover:underline">Anywhere</Link>
-          <Link href="/benchmark" className="text-accent hover:underline">Benchmark vs Claude alone →</Link>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-lands" /> Lands</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-mixed" /> Mixed</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-misses" /> Misses</span>
         </div>
-        </div>
-      </header>
+      </div>
 
       {mode === "tour" && (
         <TourView

@@ -4,7 +4,7 @@
 import { AUDIENCE_PRESETS } from "./presets";
 import type { AudienceSpec } from "./types";
 
-export const SCENARIOS_VERSION = 2;
+export const SCENARIOS_VERSION = 3;
 
 const preset = (id: string, extra: Partial<AudienceSpec> = {}): AudienceSpec => ({
   ...structuredClone(AUDIENCE_PRESETS.find((p) => p.id === id)!.spec),

@@ -11,6 +11,8 @@ import { resolveEntity } from "@/lib/qloo/tools";
 import { proposeAudience } from "@/lib/vernacular/audience";
 import { buildCityMap, MAP_TOP } from "@/lib/vernacular/map";
 import { runCheck } from "@/lib/vernacular/run";
+import { AUDIENCE_PRESETS } from "@/lib/vernacular/presets";
+import { translate, type TranslateEvent } from "@/lib/vernacular/translate";
 import { runTour, type TourEvent } from "@/lib/vernacular/tour";
 import type { AudienceSpec, CheckResult } from "@/lib/vernacular/types";
 
@@ -169,6 +171,30 @@ function buildServer(ip: string) {
           ),
         ].join("\n");
         return { content: [{ type: "text" as const, text }], structuredContent: { city, audienceTop, references: layers } };
+      }),
+  );
+
+  server.registerTool(
+    "translate_reference",
+    {
+      title: "Translate a cultural reference across audiences",
+      description:
+        "Scores one reference (a show, artist, brand, film, place) for five audience presets on Qloo and, where it misses, returns the Qloo-verified equivalent that plays the same role for that audience. Use it to localise a single reference or to brief a campaign across demographics.",
+      inputSchema: { reference: z.string().min(2).max(80).describe("e.g. 'Seinfeld' or 'Olive Garden'") },
+    },
+    async ({ reference }) =>
+      guarded(async () => {
+        const rows: string[] = [];
+        let subject = reference;
+        const out: { audience: string; original: number | null; translation: string | null; keep: boolean; why: string }[] = [];
+        const scores: Record<number, number | null> = {};
+        await translate(reference, AUDIENCE_PRESETS.map((p) => p.spec), (e: TranslateEvent) => {
+          if (e.type === "subject") subject = e.name;
+          if (e.type === "scored") scores[e.index] = e.percentile;
+          if (e.type === "translation") out.push({ audience: e.audience, original: scores[e.index] ?? null, translation: e.keep ? subject : e.name, keep: e.keep, why: e.why });
+        });
+        for (const o of out) rows.push(`- ${o.audience}: ${o.keep ? `${subject} already lands` : o.translation ? `${o.translation} (${o.why})` : "no clean equivalent"}${o.original !== null ? ` [original p${o.original}]` : ""}`);
+        return { content: [{ type: "text" as const, text: `${subject}, translated:\n${rows.join("\n")}` }], structuredContent: { subject, translations: out } };
       }),
   );
 

@@ -1,12 +1,13 @@
 // GET /api/card?d=<token>: renders the 1200x630 share image for a check.
 
 import { ImageResponse } from "next/og";
+import { MARK_PATH, MARK_STOPS } from "@/components/logo";
 import { decodeShare, scoreOf } from "@/lib/vernacular/share";
 import type { Verdict } from "@/lib/vernacular/types";
 
 export const runtime = "nodejs";
 
-const COLORS = { bg: "#2a3fc4", ink: "#0f1330", paper: "#ffffff", soft: "#dfe4ff" };
+const COLORS = { bg: "#14121f", ink: "#14121f", paper: "#fffdf8", soft: "#bdb7c9" };
 const PILL: Record<Verdict, { bg: string; fg: string; label: string }> = {
   lands: { bg: "#d8f2e2", fg: "#14653a", label: "LANDS" },
   mixed: { bg: "#fbecd0", fg: "#8a560c", label: "MIXED" },
@@ -41,7 +42,20 @@ export async function GET(req: Request) {
     (
       <div style={{ width: 1200, height: 630, display: "flex", background: COLORS.bg, color: COLORS.paper, padding: 56, fontFamily: sans ? "Instrument Sans" : undefined }}>
         <div style={{ display: "flex", flexDirection: "column", width: 640, justifyContent: "space-between" }}>
-          <div style={{ display: "flex", fontSize: 22, letterSpacing: 4, color: COLORS.soft }}>VERNACULAR · CULTURE CHECK</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <svg width="52" height="52" viewBox="0 0 64 64">
+              <defs>
+                <linearGradient id="g" x1="10" y1="14" x2="54" y2="44" gradientUnits="userSpaceOnUse">
+                  {MARK_STOPS.map(([o, c]) => (
+                    <stop key={o} offset={o} stopColor={c} />
+                  ))}
+                </linearGradient>
+              </defs>
+              <path d={MARK_PATH} fill="none" stroke="url(#g)" strokeWidth={4.6} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span style={{ display: "flex", fontSize: 40, fontFamily: serif ? "Newsreader" : undefined, fontStyle: "italic", color: COLORS.paper }}>vernacular</span>
+            <span style={{ display: "flex", fontSize: 18, letterSpacing: 3, color: COLORS.soft, marginLeft: 8 }}>CULTURE CHECK</span>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div style={{ display: "flex", fontFamily: serif ? "Newsreader" : undefined, fontStyle: "italic", fontSize: summary.audience.length > 30 ? 58 : 68, lineHeight: 1.05 }}>
               {s.headline}
@@ -56,7 +70,7 @@ export async function GET(req: Request) {
               <div style={{ display: "flex", alignItems: "baseline", gap: 16, fontSize: 96, lineHeight: 1 }}>
                 <span>{s.before ?? "–"}</span>
                 {s.swaps > 0 && <span style={{ fontSize: 56, color: COLORS.soft }}>→</span>}
-                {s.swaps > 0 && <span>{s.after ?? "–"}</span>}
+                {s.swaps > 0 && <span style={{ color: "#3ddc97" }}>{s.after ?? "–"}</span>}
               </div>
             </div>
             <div style={{ display: "flex", fontSize: 18, color: COLORS.soft, paddingBottom: 14 }}>Average percentile on Qloo&apos;s taste graph</div>

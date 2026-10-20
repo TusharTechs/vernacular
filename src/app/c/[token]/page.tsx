@@ -2,6 +2,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 import { notFound } from "next/navigation";
 import { decodeShare, scoreOf } from "@/lib/vernacular/share";
 
@@ -30,9 +31,7 @@ export default async function SharedCheck({ params }: Params) {
   const score = scoreOf(s);
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-      <Link href="/" className="font-serif text-3xl italic">
-        Vernacular
-      </Link>
+      <SiteHeader />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`/api/card?d=${token}`}

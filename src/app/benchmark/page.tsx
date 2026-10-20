@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 import { BenchmarkExplorer } from "@/components/benchmark-explorer";
 import data from "@/lib/vernacular/benchmark/results.json";
 import { summarize, type ArmKey } from "@/lib/vernacular/benchmark/summarize";
@@ -60,10 +60,8 @@ export default function BenchmarkPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-6 sm:px-6 lg:py-10">
+      <SiteHeader />
       <header className="flex flex-col gap-3">
-        <Link href="/" className="text-sm text-muted hover:text-ink">
-          ← Vernacular
-        </Link>
         <h1 className="font-serif text-4xl italic tracking-tight text-balance sm:text-5xl">Does a frontier model know your audience?</h1>
         <p className="max-w-2xl text-muted">
           {run.copy.length} pieces of ad copy × {run.audiences.length} audiences. Claude alone and Vernacular each rewrote every piece for every

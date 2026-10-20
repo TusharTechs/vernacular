@@ -1,0 +1,1 @@
+Vernacular: the spell-checker for culture. A wavy underline under "Seinfeld" is swapped for "Derry Girls".

@@ -92,6 +92,17 @@ async function main() {
     }
   }
 
+  if (full && (!only || only === "factual")) {
+    const text = "This summer, from the studio that gave you Jurassic Park, comes a story funnier than Ghostbusters.";
+    try {
+      const r = await runCheck({ text, audience: genz });
+      const ok = r.rewrittenText.includes("Jurassic Park");
+      report("factual", ok, "a factual credit (the studio's own film) is never swapped", r.rewrittenText);
+    } catch (e) {
+      report("factual", false, "a factual credit (the studio's own film) is never swapped", `error: ${(e as Error).message}`);
+    }
+  }
+
   const u = qlooUsage();
   console.log(`\n${pass} passed, ${fail} failed · ${u.networkCalls} Qloo network calls`);
   process.exit(fail ? 1 : 0);
