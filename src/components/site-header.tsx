@@ -9,6 +9,8 @@ const NAV = [
   { href: "/translate", label: "Translator" },
   { href: "/anywhere", label: "Anywhere" },
   { href: "/benchmark", label: "Benchmark" },
+  { href: "/how", label: "How it works" },
+  { href: "/pitch", label: "Why Vernacular" },
 ];
 
 export function SiteHeader() {

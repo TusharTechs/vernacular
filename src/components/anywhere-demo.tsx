@@ -42,7 +42,7 @@ export function AnywhereDemo() {
         </div>
         <textarea ref={post} rows={6} placeholder="What do you want to talk about?" className="resize-none rounded-lg border border-rule bg-sheet p-3 text-[15px] outline-none focus:border-accent" />
         <div className="flex justify-end">
-          <span className="rounded-full bg-accent px-4 py-1.5 text-sm text-white opacity-70">Post</span>
+          <span className="rounded-full bg-accent px-4 py-1.5 text-sm text-white" aria-hidden>Post</span>
         </div>
       </section>
 

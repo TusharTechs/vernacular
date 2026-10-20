@@ -2,7 +2,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { QlooError } from "./qloo/client";
-import { admit } from "./rate-limit";
+import { admitQueued } from "./rate-limit";
 import { RefusalError } from "./vernacular/llm";
 
 export function publicMessage(err: unknown): string {
@@ -24,9 +24,9 @@ export function publicMessage(err: unknown): string {
  * Admit the request, then run `work` and stream every event it emits as one
  * `data:` line. Failures become a final `{type: "error"}` event.
  */
-export function streamEvents<E>(req: Request, work: (send: (e: E) => void) => Promise<unknown>): Response {
+export async function streamEvents<E>(req: Request, work: (send: (e: E) => void) => Promise<unknown>): Promise<Response> {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  const admission = admit(ip);
+  const admission = await admitQueued(ip);
   if (!admission.ok) {
     return Response.json({ error: admission.message }, { status: admission.status, headers: { "Retry-After": String(admission.retryAfter) } });
   }

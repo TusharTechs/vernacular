@@ -15,10 +15,13 @@ import { Filmstrip } from "./filmstrip";
 import { MediaInput, type StoryboardRead } from "./media-input";
 import { HighlightedNames, locate, MarkedCopy } from "./copy-view";
 import { ReferenceCard } from "./reference-card";
+import { GuidedTour, type TourStep } from "./guided-tour";
 import { Hero } from "./hero";
+import { useHistory, YourChecks } from "./history";
 import { ScenarioGallery } from "./scenario-gallery";
+import { SectionBar } from "./section-bar";
 import { SiteHeader } from "./site-header";
-import type { Scenario } from "@/lib/vernacular/scenarios";
+import { SCENARIOS, type Scenario } from "@/lib/vernacular/scenarios";
 import { ShareButton } from "./share-dialog";
 import { SwipeReview } from "./swipe-review";
 import { TourView } from "./tour-view";
@@ -48,11 +51,23 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
   const [sampleAt, setSampleAt] = useState<string | null>(null);
   const [scenario, setScenario] = useState<string | null>("tour");
   const [opening, setOpening] = useState<string | null>(null);
+  const [touring, setTouring] = useState(false);
+  const yourChecks = useHistory();
+  const liveCheck = useRef(false); // true only for checks the visitor ran themselves
+  const [tourInvite, setTourInvite] = useState(false);
   const touched = useRef(false);
 
   // Deep link from the extension: #check={"text":…,"audience":presetId} opens and runs a check.
   // It's a fragment, so the copy never reaches a server log.
   useEffect(() => {
+    // #scenario=<id> opens a gallery scenario (linked from the pitch page).
+    const sc = /^#scenario=([a-z-]+)$/.exec(window.location.hash);
+    const found = sc && SCENARIOS.find((x) => x.id === sc[1]);
+    if (found) {
+      history.replaceState(null, "", window.location.pathname);
+      openScenario(found);
+      return;
+    }
     const m = /^#check=(.+)$/.exec(window.location.hash);
     if (!m) return;
     try {
@@ -88,6 +103,44 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
       alive = false;
     };
   }, [load]);
+
+  // Save checks the visitor ran themselves to "Your checks" (this browser only).
+  useEffect(() => {
+    if (state.phase === "done" && state.result && liveCheck.current) {
+      liveCheck.current = false;
+      yourChecks.add(state.result);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.phase, state.result]);
+
+  // Invite first-time visitors to the tour once the sample's results are on screen.
+  useEffect(() => {
+    if (state.phase !== "done" || !sampleAt) return;
+    try {
+      if (!localStorage.getItem("vernacular-tour-seen")) setTourInvite(true);
+    } catch {
+      // storage unavailable: skip the invite
+    }
+  }, [state.phase, sampleAt]);
+  const startTour = () => {
+    setTourInvite(false);
+    setMode("editor");
+    try {
+      localStorage.setItem("vernacular-tour-seen", "1");
+    } catch {
+      // ignore
+    }
+    setTouring(true);
+  };
+  const TOUR: TourStep[] = [
+    { target: 'section[aria-label="Real-world scenarios"]', title: "Real copy, real audiences", body: "Each card is a live check of a real format (ads, emails, captions, a Spanish promo) sent to an audience it wasn't written for." },
+    { target: "#sec-copy", title: "Proof marks for culture", body: "Every named reference gets a wavy underline: green lands, amber is mixed, red misses. Scores are Qloo percentiles for this exact audience." },
+    { target: 'aside[aria-label="Audience and references"] figure', title: "Why this swap", body: "Each card shows the Qloo evidence (score, age skew) and a verified swap. The taste path shows which of the audience's favourites pulled it in." },
+    { target: '[data-tour="dial-play"]', title: "Hear it land", body: "Press play: an AI voice reads the copy while the audience's reaction curve dips on misses and spikes on swaps." },
+    { target: '[data-tour="comments"]', title: "See the comments before you post", body: "Preview the post in a feed, then predict the comments: simulated commenters built from Qloo, reacting in line with each score." },
+    { target: '[data-tour="map"]', title: "Where it lands", body: "Qloo's neighbourhood heatmaps show where your audience lives in a city, and whether each reference's fans live there too." },
+    { target: 'nav[aria-label="Main"] a[href="/translate"]', title: "Translate any reference", body: "Type a reference and see what it means to five audiences at once. Also try the browser extension and the benchmark." },
+  ];
 
   const busy = state.phase === "reading" || state.phase === "scoring" || state.phase === "swapping";
   const located = useMemo(() => locate(state.text, state.extracted), [state.text, state.extracted]);
@@ -149,6 +202,7 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
   // Open a gallery scenario from its server-cached check; fall back to a live check.
   const openScenario = async (sc: Scenario) => {
     touched.current = true;
+    liveCheck.current = false;
     setScenario(sc.id);
     setOpening(sc.id);
     setText(sc.text);
@@ -173,6 +227,7 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
 
   const check = (forAudience: AudienceSpec = audience, forText: string = text) => {
     touched.current = true;
+    liveCheck.current = true;
     setSampleAt(null);
     const spec: AudienceSpec = { ...forAudience, anchors: forAudience.anchors.filter((a) => a.query.trim()) };
     setEditing(false);
@@ -199,10 +254,34 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:py-10">
+      <GuidedTour steps={TOUR} open={touring} onClose={() => setTouring(false)} />
+      {tourInvite && !touring && (
+        <div role="status" className="fixed bottom-4 right-4 z-40 flex max-w-[calc(100vw-32px)] items-center gap-3 rounded-full border border-rule bg-sheet py-2 pl-4 pr-2 text-sm shadow-lg">
+          <span>New here? See the best parts in 60 seconds.</span>
+          <button type="button" onClick={startTour} className="rounded-full bg-ink px-3 py-1.5 text-sheet">
+            Start tour
+          </button>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={() => {
+              setTourInvite(false);
+              try {
+                localStorage.setItem("vernacular-tour-seen", "1");
+              } catch {
+                // ignore
+              }
+            }}
+            className="px-2 text-muted hover:text-ink"
+          >
+            ×
+          </button>
+        </div>
+      )}
       <SiteHeader />
-      <Hero lift={stats.lift} missRate={stats.missRate} />
+      <Hero lift={stats.lift} missRate={stats.missRate} onTour={state.phase === "done" ? startTour : undefined} />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <section aria-label="Mode" className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex rounded-full border border-rule bg-sheet p-1 text-sm" role="tablist" aria-label="Mode">
           {(["editor", "tour"] as const).map((m) => (
             <button
@@ -222,7 +301,7 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-mixed" /> Mixed</span>
           <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-misses" /> Misses</span>
         </div>
-      </div>
+      </section>
 
       {mode === "tour" && (
         <TourView
@@ -237,9 +316,40 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
       )}
 
       {mode === "editor" && <ScenarioGallery active={scenario} loading={opening} onOpen={openScenario} />}
+      {mode === "editor" && (
+        <YourChecks
+          items={yourChecks.items}
+          onClear={yourChecks.clear}
+          onOpen={(h) => {
+            touched.current = true;
+            liveCheck.current = false;
+            load(h.result);
+            setText(h.result.input.text);
+            setAudience(structuredClone(h.result.input.audience));
+            setBoard(null);
+            setEditing(false);
+            setSelected(null);
+            setDecisions({});
+            setScenario(null);
+            setSampleAt(null);
+          }}
+        />
+      )}
 
       <div className={`grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] ${mode === "tour" ? "hidden" : ""}`}>
         <main className="flex min-w-0 flex-col gap-4">
+          {state.phase === "done" && (
+            <SectionBar
+              sections={[
+                { id: "sec-copy", label: "Copy" },
+                ...(swapsInOrder.length ? [{ id: "sec-rewrite", label: "Rewrite" }] : []),
+                ...(takes.length ? [{ id: "sec-dial", label: "▶ Hear it" }] : []),
+                ...(state.extracted.length ? [{ id: "sec-feed", label: "In the feed" }] : []),
+                ...(Object.values(state.scored).some((r) => r.entity) ? [{ id: "sec-map", label: "Map" }] : []),
+                ...(swapsInOrder.length ? [{ id: "sec-compare", label: "vs Claude alone" }] : []),
+              ]}
+            />
+          )}
           {sampleAt && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent-soft px-4 py-3 text-sm">
               <span>
@@ -252,7 +362,7 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
             </div>
           )}
 
-          <section className="rounded-xl border border-rule bg-sheet p-6 shadow-sm sm:p-8" aria-label="Copy">
+          <section id="sec-copy" className="scroll-mt-16 rounded-xl border border-rule bg-sheet p-6 shadow-sm sm:p-8" aria-label="Copy">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted">
                 {editing ? "Your copy" : `${board && board.text === state.text ? "Shot notes checked" : "Checked"} for ${audience.label}`}
@@ -348,9 +458,18 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
           {state.phase === "error" && (
             <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-misses/40 bg-misses-soft px-4 py-3 text-sm">
               <span>{state.error}</span>
-              <button type="button" onClick={() => check()} className="rounded-md border border-misses/40 px-3 py-1 hover:bg-sheet">
-                Try again
-              </button>
+              <span className="flex gap-2">
+                <button type="button" onClick={() => check()} className="rounded-md border border-misses/40 px-3 py-1 hover:bg-sheet">
+                  Try again
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openScenario(SCENARIOS.find((sc) => sc.audience.label === audience.label) ?? SCENARIOS[0])}
+                  className="rounded-md border border-misses/40 px-3 py-1 hover:bg-sheet"
+                >
+                  Open a ready-made example
+                </button>
+              </span>
             </div>
           )}
 
@@ -361,7 +480,7 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
           )}
 
           {swapsInOrder.length > 0 && (
-            <section className="flex flex-col gap-3 rounded-xl border border-rule bg-sheet p-6" aria-label="Rewritten copy">
+            <section id="sec-rewrite" className="flex scroll-mt-16 flex-col gap-3 rounded-xl border border-rule bg-sheet p-6" aria-label="Rewritten copy">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <span className="text-xs font-medium uppercase tracking-wider text-muted">
                   Rewritten · {accepted.length} of {swapsInOrder.length} swaps accepted
@@ -385,9 +504,14 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
             </section>
           )}
 
-          {takes.length > 0 && <DialTest key={takes.map((t) => t.text).join("|")} takes={takes} audience={audience.label} />}
+          {takes.length > 0 && (
+            <div id="sec-dial" className="scroll-mt-16">
+              <DialTest key={takes.map((t) => t.text).join("|")} takes={takes} audience={audience.label} />
+            </div>
+          )}
 
           {state.phase === "done" && state.extracted.length > 0 && (
+            <div id="sec-feed" className="scroll-mt-16">
             <FeedPreview
               original={state.text}
               rewritten={swapsInOrder.reduce((t, sw) => applyChange(t, sw.change), state.text)}
@@ -409,14 +533,19 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
                   : undefined
               }
             />
+            </div>
           )}
 
           {state.phase === "done" && Object.values(state.scored).some((r) => r.entity) && (
-            <CultureMap audience={state.result?.input.audience ?? audience} references={Object.values(state.scored)} swaps={swapsInOrder} />
+            <div id="sec-map" className="scroll-mt-16">
+              <CultureMap audience={state.result?.input.audience ?? audience} references={Object.values(state.scored)} swaps={swapsInOrder} />
+            </div>
           )}
 
           {state.phase === "done" && swapsInOrder.length > 0 && (
-            <ComparePanel text={state.text} audience={audience} references={state.extracted} scored={state.scored} swaps={state.swaps} />
+            <div id="sec-compare" className="scroll-mt-16">
+              <ComparePanel text={state.text} audience={audience} references={state.extracted} scored={state.scored} swaps={state.swaps} />
+            </div>
           )}
 
           <TraceDrawer calls={trace} />

@@ -277,7 +277,7 @@ export async function runSwapAgent(
     model: MODEL,
     max_tokens: 16000,
     ...FALLBACK,
-    output_config: { effort: "medium" },
+    output_config: { effort: (process.env.VERNACULAR_AGENT_EFFORT as "low" | "medium") ?? "low" },
     max_iterations: AGENT_LIMITS.maxIterations,
     system: SYSTEM,
     tools: [searchTagsTool, findTool, verifyTool, submitTool, keepTool],

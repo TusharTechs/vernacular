@@ -137,9 +137,12 @@ export function Translator() {
                       strokeWidth={r?.why && (r.keep || r.name) ? 3 : 1.5}
                       strokeDasharray={r?.why ? undefined : "4 5"}
                     />
-                    <circle cx={x} cy={y} r={r?.why ? 9 : 6} className={r?.why && (r.keep || r.name) ? "fill-lands" : r ? "fill-mixed" : "fill-rule"}>
-                      {!r && busy && <animate attributeName="r" values="5;8;5" dur="1.2s" repeatCount="indefinite" />}
-                    </circle>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={r?.why ? 9 : 6}
+                      className={`${r?.why && (r.keep || r.name) ? "fill-lands" : r ? "fill-mixed" : "fill-rule"} ${!r && busy ? "compass-pulse" : ""}`}
+                    />
                     <text x={lx} y={ly} textAnchor={anchor} className="fill-muted" fontSize={15} letterSpacing={0.4}>
                       {a.toUpperCase()}
                     </text>

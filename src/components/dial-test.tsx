@@ -165,6 +165,7 @@ export function DialTest({ takes, audience }: { takes: Take[]; audience: string 
         ) : (
           <button
             type="button"
+            data-tour="dial-play"
             onClick={() => start()}
             disabled={loading}
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-50"

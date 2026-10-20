@@ -183,7 +183,9 @@ export default function BenchmarkPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-muted">
-                <th className="py-1 font-normal" />
+                <th className="py-1 font-normal">
+                  <span className="sr-only">Measure</span>
+                </th>
                 <th className="py-1 font-normal">Claude alone</th>
                 <th className="py-1 font-normal">Vernacular</th>
               </tr>

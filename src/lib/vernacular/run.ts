@@ -30,7 +30,13 @@ export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void 
   for (const s of scored) emit({ type: "scored", reference: s });
 
   const weak = scored.filter((s) => s.entity && (s.verdict === "misses" || s.verdict === "mixed"));
-  const { swaps, kept, llmCalls } = await runSwapAgent(text, weak, audience, emit);
+  // One agent per sentence, in parallel: references in the same sentence share an
+  // agent so their rewrites build on each other; different sentences can't clash.
+  const groups = [...new Map(weak.map((w) => [w.sentence, weak.filter((x) => x.sentence === w.sentence)])).values()];
+  const runs = await Promise.all(groups.map((g) => runSwapAgent(text, g, audience, emit)));
+  const swaps = runs.flatMap((r) => r.swaps);
+  const kept = runs.flatMap((r) => r.kept);
+  const llmCalls = runs.reduce((n, r) => n + r.llmCalls, 0);
 
   const rewrittenText = swaps.reduce((t, sw) => applyChange(t, sw.change), text);
 

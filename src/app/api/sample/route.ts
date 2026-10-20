@@ -5,6 +5,7 @@
 import { unstable_cache } from "next/cache";
 import { AUDIENCE_PRESETS, SAMPLE_COPY } from "@/lib/vernacular/presets";
 import { runCheck } from "@/lib/vernacular/run";
+import { slimResult } from "@/lib/vernacular/slim";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -17,7 +18,8 @@ const cachedSample = unstable_cache(
 
 export async function GET() {
   try {
-    return Response.json(await cachedSample());
+    const d = await cachedSample();
+    return Response.json({ ...d, result: slimResult(d.result) });
   } catch (err) {
     console.error("sample failed:", err instanceof Error ? err.message : err);
     return Response.json({ error: "The sample isn't available right now." }, { status: 503 });

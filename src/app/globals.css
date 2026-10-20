@@ -11,11 +11,11 @@
   --rule: #e6dfd2;
   --accent: #4438d6;
   --accent-soft: #ecebfd;
-  --lands: #13875a;
+  --lands: #0f744c;
   --lands-soft: #ddf3e8;
-  --mixed: #b06a10;
+  --mixed: #94570a;
   --mixed-soft: #fcefd8;
-  --misses: #d4402a;
+  --misses: #b8321e;
   --misses-soft: #fde4dc;
   --unmeasured: #8b8697;
 }
@@ -150,3 +150,12 @@ body {
 /* Culture Translator compass. */
 .compass-spoke { transition: stroke 300ms ease, stroke-width 300ms ease; }
 .compass-word { animation: comment-in 360ms ease-out both; }
+.compass-pulse { animation: compass-pulse 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes compass-pulse { 50% { transform: scale(1.4); opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) {
+  .compass-word, .compass-pulse, .ticker-caret { animation: none; }
+  .compass-spoke { transition: none; }
+}
+
+/* Guided tour: the dimmed page around the spotlight. */
+.tour-dim { background: rgba(10, 9, 20, 0.55); }

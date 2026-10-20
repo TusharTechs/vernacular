@@ -62,9 +62,9 @@ function SwapTicker() {
   );
 }
 
-export function Hero({ lift, missRate }: { lift: number | null; missRate: number | null }) {
+export function Hero({ lift, missRate, onTour }: { lift: number | null; missRate: number | null; onTour?: () => void }) {
   return (
-    <section className="hero-glow relative overflow-hidden rounded-2xl border border-rule bg-sheet px-6 py-8 sm:px-10 sm:py-10">
+    <section aria-label="Introduction" className="hero-glow relative overflow-hidden rounded-2xl border border-rule bg-sheet px-6 py-8 sm:px-10 sm:py-10">
       <div className="relative grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-center">
         <div className="flex flex-col gap-4">
           <h1 className="font-serif text-4xl italic leading-[1.05] tracking-tight text-balance sm:text-6xl">The spell-checker for culture.</h1>
@@ -72,6 +72,13 @@ export function Hero({ lift, missRate }: { lift: number | null; missRate: number
             Grammarly fixes your grammar. Vernacular fixes your references: every artist, show, brand and place in your copy, scored for the exact
             audience you&apos;re writing for on Qloo&apos;s taste graph, and the ones that miss swapped for ones that land.
           </p>
+          {onTour && (
+            <div>
+              <button type="button" onClick={onTour} className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-sheet shadow-sm hover:opacity-90">
+                ▶ Take the 60-second tour
+              </button>
+            </div>
+          )}
           <div className="flex flex-wrap gap-2 text-xs">
             {lift !== null && (
               <a href="/benchmark" className="rounded-full border border-rule bg-desk px-3 py-1 hover:border-accent">

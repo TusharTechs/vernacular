@@ -2,9 +2,9 @@
 // Each check costs roughly 20–40 Qloo calls and several Claude calls.
 
 const WINDOW_MS = 10 * 60 * 1000;
-const PER_IP: Record<Bucket, number> = { check: 8, audience: 20, vision: 10 };
+const PER_IP: Record<Bucket, number> = { check: 12, audience: 20, vision: 12 };
 export type Bucket = "check" | "audience" | "vision";
-const MAX_CONCURRENT = 4;
+const MAX_CONCURRENT = 6;
 
 const hits = new Map<string, number[]>();
 let running = 0;
@@ -36,4 +36,17 @@ export function admit(ip: string, bucket: Bucket = "check"): Admission {
       }
     },
   };
+}
+
+/**
+ * Like admit, but when the instance is merely busy (not rate-limited), wait in a
+ * short queue for a free slot instead of turning the visitor away.
+ */
+export async function admitQueued(ip: string, bucket: Bucket = "check", maxWaitMs = 20_000): Promise<Admission> {
+  const until = Date.now() + maxWaitMs;
+  for (;;) {
+    const a = admit(ip, bucket);
+    if (a.ok || a.status === 429 || Date.now() > until) return a;
+    await new Promise((r) => setTimeout(r, 400));
+  }
 }

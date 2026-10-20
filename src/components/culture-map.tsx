@@ -145,6 +145,7 @@ export function CultureMap({ audience, references, swaps }: { audience: Audience
       </div>
 
       <form
+        data-tour="map"
         className="flex flex-wrap items-center gap-2"
         onSubmit={(e) => {
           e.preventDefault();

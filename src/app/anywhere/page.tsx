@@ -25,7 +25,7 @@ export default function AnywherePage() {
         <p className="text-muted">
           It&apos;s in the repository&apos;s <code className="font-mono text-ink">extension/</code> folder. In Chrome, open{" "}
           <code className="font-mono text-ink">chrome://extensions</code>, turn on Developer mode, choose <em>Load unpacked</em> and pick that folder.
-          It sends text to Vernacular only while you&apos;re writing in a box, and never stores it.
+          It sends text to Vernacular only while you&apos;re writing in a box. Nothing is saved: the server keeps results in memory for up to 30 minutes so repeat checks are instant, and the extension remembers only which audience you picked.
         </p>
       </section>
       <Script id="vernacular-anywhere-config" strategy="afterInteractive">

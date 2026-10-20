@@ -43,6 +43,7 @@ export function PredictedComments({ input, after }: { input: CommentInput; after
       <div className="flex flex-col items-start gap-2 border-t border-rule pt-4">
         <button
           type="button"
+          data-tour="comments"
           onClick={load}
           disabled={loading}
           className="rounded-md border border-rule px-3 py-1.5 text-sm hover:border-accent disabled:opacity-60"
