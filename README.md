@@ -107,7 +107,7 @@ Nine things Vernacular does with Qloo that a recommendations call alone wouldn't
 **6. A dictionary between audiences.** The Culture Translator scores one reference for five audiences and, where it misses, finds the Qloo-verified equivalent that plays the same role: in the run shown, Seinfeld becomes *Sex Education* for Gen Z Latin-pop fans and *Insecure* for 30–34 hip-hop heads, and already lands with 55+ classic-rock fans.
 
 </td>
-<td><img src="docs/screenshots/translator.png" alt="Culture Translator compass for Seinfeld across five audiences" /></td>
+<td><img src="docs/screenshots/translator.png" alt="Culture Translator resonance radar for Seinfeld: the original shape across five audiences and the translated shape reaching the lands band" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -149,7 +149,7 @@ Nine things Vernacular does with Qloo that a recommendations call alone wouldn't
 | **Dial Test** | The copy read aloud (AI voice, disclosed) while a reaction curve swings to each reference's Qloo percentile as it is spoken; then the swapped version. Words are timed by transcribing the generated audio. |
 | **Predicted comments** | Five simulated commenters whose favourites come from Qloo for this audience, reacting in line with each reference's score, before and after swaps. Labelled as simulated. |
 | **Where it lands** | Qloo locality heatmaps: the neighbourhoods of a city where the audience over-indexes, and how many of them each reference's fans also live in, drawn from Qloo's own boundaries. |
-| **Culture Translator** | One reference scored for five audiences; where it misses, the verified equivalent that plays the same role, on a streaming radial compass. |
+| **Culture Translator** | One reference scored for five audiences; where it misses, the verified equivalent that plays the same role. A resonance radar plots the reference's Qloo percentile per audience over the misses / mixed / lands bands and morphs into the translated shape; each audience is a button linked to its card. Opens on a saved Seinfeld run. |
 | **Tour Mode** | The same copy against two to five audiences side by side. |
 | **Campaign check** | Up to five versions of an ad × up to five audiences in one grid: each version's average Qloo percentile per audience, the best version for each audience, and every cell one click from the full check with swaps. Imports a CSV; exports one. |
 | **Audience from a sentence** | A plain description becomes Qloo audience segments (from `/v2/audiences`), interest tags, anchors and, when stated, a gender skew, with a cross-domain fingerprint. |
@@ -288,7 +288,7 @@ The prompt adds judgment the data can't make: keep references that state a fact 
 - Strips unused Qloo tags from everything sent to the browser.
 - Offers a ready-made example when a check fails.
 
-**Front end:** React 19 Server and Client Components, Tailwind CSS v4 with light and dark themes, and SVG visualisations drawn by hand (no chart or map libraries): the Dial Test curve, the translator compass, taste paths and neighbourhood maps. Animations respect reduced-motion settings.
+**Front end:** React 19 Server and Client Components, Tailwind CSS v4 with light and dark themes, and SVG visualisations drawn by hand (no chart or map libraries): the Dial Test curve, the translator's resonance radar, taste paths and neighbourhood maps. Animations respect reduced-motion settings.
 
 ## Evidence
 

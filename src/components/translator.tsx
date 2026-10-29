@@ -2,43 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { TranslateEvent } from "@/lib/vernacular/translate";
-import type { Verdict } from "@/lib/vernacular/types";
+import { ResonanceRadar, type RadarRow } from "./resonance-radar";
 import { streamPost } from "./use-check";
 
-interface Row {
-  audience: string;
-  percentile: number | null;
-  verdict: Verdict;
-  keep?: boolean;
-  name?: string | null;
-  to?: number | null;
-  why?: string;
-}
+type Row = RadarRow;
 
 const EXAMPLES = ["Seinfeld", "Frank Sinatra", "Olive Garden", "Top Gun", "Fleetwood Mac", "Patagonia", "Jeopardy!"];
 const AUDIENCES = ["Gen Z Latin-pop fans", "30–34 hip-hop heads", "25–29 indie & A24 fans", "45–54 country fans", "55+ classic-rock fans"];
-const VERDICT_STROKE: Record<Verdict, string> = { lands: "stroke-lands", mixed: "stroke-mixed", misses: "stroke-misses", unmeasured: "stroke-unmeasured" };
-
-const W = 900;
-const H = 540;
-const CX = W / 2;
-const CY = H / 2;
-const R = 180;
-
-function wrap(s: string, n = 18) {
-  const words = s.split(" ");
-  const lines: string[] = [];
-  let cur = "";
-  for (const w of words) {
-    if ((cur + " " + w).trim().length > n && cur) {
-      lines.push(cur);
-      cur = w;
-    } else cur = (cur + " " + w).trim();
-  }
-  if (cur) lines.push(cur);
-  return lines.slice(0, 3);
-}
-
 export function Translator() {
   const [query, setQuery] = useState("");
   const [subject, setSubject] = useState<{ name: string; role: string; entityType: string } | null>(null);
@@ -47,6 +17,9 @@ export function Translator() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [hover, setHover] = useState<number | null>(null);
+  const [pinned, setPinned] = useState<number | null>(null);
+  const active = hover ?? pinned;
   const abort = useRef<AbortController | null>(null);
   const touched = useRef(false);
 
@@ -86,6 +59,7 @@ export function Translator() {
     setError(null);
     setCopied(false);
     setSavedAt(null);
+    setPinned(null);
     setBusy(true);
     const err = await streamPost<TranslateEvent>("/api/translate", { query: q }, ctrl.signal, apply);
     if (err) setError(err);
@@ -141,80 +115,16 @@ export function Translator() {
 
       {(subject || busy) && (
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-          <div className="rounded-2xl border border-rule bg-sheet p-2">
-            <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={subject ? `${subject.name} translated for five audiences` : "Translating"}>
-              <circle cx={CX} cy={CY} r={R} fill="none" className="stroke-rule" strokeDasharray="2 6" />
-              {AUDIENCES.map((a, i) => {
-                const ang = -Math.PI / 2 + (i * 2 * Math.PI) / AUDIENCES.length;
-                const x = CX + R * Math.cos(ang);
-                const y = CY + R * Math.sin(ang);
-                const r = rows[i];
-                const right = Math.cos(ang) > 0.2;
-                const left = Math.cos(ang) < -0.2;
-                const anchor = right ? "start" : left ? "end" : "middle";
-                const lx = x + (right ? 16 : left ? -16 : 0);
-                const ly = y + (Math.sin(ang) < -0.5 ? -74 : 26);
-                const final = r?.why ? (r.keep ? subject?.name : r.name) : null;
-                return (
-                  <g key={a}>
-                    <line
-                      x1={CX}
-                      y1={CY}
-                      x2={x}
-                      y2={y}
-                      className={`${r ? VERDICT_STROKE[r.why ? (r.keep || r.name ? "lands" : "unmeasured") : r.verdict] : "stroke-rule"} compass-spoke`}
-                      strokeWidth={r?.why && (r.keep || r.name) ? 3 : 1.5}
-                      strokeDasharray={r?.why ? undefined : "4 5"}
-                    />
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={r?.why ? 9 : 6}
-                      className={`${r?.why && (r.keep || r.name) ? "fill-lands" : r ? "fill-mixed" : "fill-rule"} ${!r && busy ? "compass-pulse" : ""}`}
-                    />
-                    <text x={lx} y={ly} textAnchor={anchor} className="fill-muted" fontSize={15} letterSpacing={0.4}>
-                      {a.toUpperCase()}
-                    </text>
-                    {r && (
-                      <text x={lx} y={ly + 19} textAnchor={anchor} className={r.verdict === "lands" ? "fill-lands" : r.verdict === "misses" ? "fill-misses" : "fill-mixed"} fontSize={13} fontFamily="var(--font-data)">
-                        {subject?.name} · {r.percentile === null ? "n/a" : `p${r.percentile}`} · {r.verdict}
-                      </text>
-                    )}
-                    {final !== null && final !== undefined && (
-                      <text x={lx} y={ly + 46} textAnchor={anchor} className="compass-word fill-ink" fontSize={26} fontStyle="italic" fontFamily="var(--font-copy)">
-                        {r?.keep ? "✓ " : "→ "}
-                        {final}
-                        {!r?.keep && r?.to !== null && r?.to !== undefined && (
-                          <tspan className="fill-lands" fontSize={14} fontStyle="normal" fontFamily="var(--font-data)">{`  p${r.to}`}</tspan>
-                        )}
-                      </text>
-                    )}
-                    {r?.why && !final && (
-                      <text x={lx} y={ly + 46} textAnchor={anchor} className="fill-muted" fontSize={16} fontStyle="italic">
-                        no clean equivalent
-                      </text>
-                    )}
-                  </g>
-                );
-              })}
-              <circle cx={CX} cy={CY} r={86} className="fill-ink" />
-              {subject ? (
-                <>
-                  {wrap(subject.name, 14).map((l, k, all) => (
-                    <text key={k} x={CX} y={CY - (all.length - 1) * 11 + k * 22 - 4} textAnchor="middle" className="fill-sheet" fontSize={24} fontStyle="italic" fontFamily="var(--font-copy)">
-                      {l}
-                    </text>
-                  ))}
-                  <text x={CX} y={CY + 34} textAnchor="middle" className="fill-sheet" opacity={0.6} fontSize={10} letterSpacing={1}>
-                    {subject.entityType.replace("_", " ").toUpperCase()}
-                  </text>
-                </>
-              ) : (
-                <text x={CX} y={CY + 5} textAnchor="middle" className="fill-sheet" opacity={0.7} fontSize={13}>
-                  Reading…
-                </text>
-              )}
-            </svg>
+          <div className="self-start rounded-2xl border border-rule bg-sheet p-2 lg:sticky lg:top-4">
+            <ResonanceRadar
+              subject={subject}
+              audiences={AUDIENCES}
+              rows={rows}
+              busy={busy}
+              active={active}
+              onHover={setHover}
+              onPick={(i) => setPinned((p) => (p === i ? null : i))}
+            />
           </div>
 
           <div className="flex flex-col gap-3">
@@ -228,7 +138,13 @@ export function Translator() {
               {AUDIENCES.map((a, i) => {
                 const r = rows[i];
                 return (
-                  <li key={a} className="flex flex-col gap-1 rounded-xl border border-rule bg-sheet p-3">
+                  <li
+                    key={a}
+                    onMouseEnter={() => setHover(i)}
+                    onMouseLeave={() => setHover(null)}
+                    onClick={() => setPinned((p) => (p === i ? null : i))}
+                    className={`flex cursor-pointer flex-col gap-1 rounded-xl border bg-sheet p-3 transition-colors ${active === i ? "border-ink shadow-sm" : "border-rule"}`}
+                  >
                     <span className="flex items-baseline justify-between gap-2">
                       <span className="text-xs font-medium uppercase tracking-wider text-muted">{a}</span>
                       {r && <span className="font-mono text-[11px] text-muted">original {r.percentile === null ? "n/a" : `p${r.percentile}`}</span>}

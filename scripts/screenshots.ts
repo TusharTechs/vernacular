@@ -70,7 +70,9 @@ async function seenTour(page: Page) {
 
   // Culture Translator, live for one reference.
   await page.goto(base + "/translate", { waitUntil: "networkidle" });
-  await page.waitForTimeout(2500); // opens on the saved Seinfeld run
+  await page.waitForTimeout(3200); // opens on the saved Seinfeld run, then morphs to the translation
+  await page.evaluate(() => window.scrollTo(0, 330));
+  await page.waitForTimeout(400);
   await page.screenshot({ path: `${OUT}/translator.png` });
 
   // Vernacular Anywhere: the extension's check on a chat box. Its pill lives in a
