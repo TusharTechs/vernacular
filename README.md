@@ -64,7 +64,7 @@ Every Qloo request behind a result is listed under **"Qloo calls back what you s
 
 ## Qloo, used unusually
 
-Eight things Vernacular does with Qloo that a recommendations call alone wouldn't give you. Every screenshot is from the running app.
+Nine things Vernacular does with Qloo that a recommendations call alone wouldn't give you. Every screenshot is from the running app.
 
 <table>
 <tr>
@@ -72,10 +72,10 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 
 **1. A dictionary for a spell-checker.** Raw affinity isn't comparable across audiences, so each reference is ranked against ~40 well-known peers scored for the same audience in the same request. That turns affinity into a verdict a writer can act on (lands, mixed, misses), adjusted by Qloo's demographic age skew.
 
-**2. Evidence for every swap.** Each swap shows the Qloo tags it shares with the original (*Sitcom*, *Comedy*, *Friendship*), so "plays the same role" is something you can check, not take on trust. Qloo's `feature.explainability` is drawn as a taste path when the audience's anchors pulled the swap in unequally.
+**2. Evidence for every swap.** Each swap shows the Qloo tags it shares with the original (*Comedy*, *Dating*, *Friendship* for Seinfeld → *Never Have I Ever*), so "plays the same role" is something you can check, not take on trust. Qloo's `feature.explainability` is drawn as a taste path when the audience's anchors pulled the swap in unequally.
 
 </td>
-<td width="50%"><img src="docs/screenshots/reference-card.png" alt="A reference card: Seinfeld scores p40 for Gen Z Latin-pop fans, with age-skew bars, a swap for Boy Meets World at p98, and a taste path from Bad Bunny and Euphoria" /></td>
+<td width="50%"><img src="docs/screenshots/reference-card.png" alt="A reference card: Seinfeld scores p40 for Gen Z Latin-pop fans, with age-skew bars and a verified swap for Never Have I Ever at p100; Qloo tags both Comedy, Dating, Friendship and Humorous" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -83,7 +83,7 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 **3. Taste on a timeline.** In the Dial Test, Qloo percentiles are placed on the exact words where each reference is spoken, so you hear and watch Olive Garden sink and Kali Uchis land.
 
 </td>
-<td><img src="docs/screenshots/dial-test.png" alt="Dial Test: the original copy's curve dips at Seinfeld and Olive Garden; the swapped version spikes at Boy Meets World and Kali Uchis" /></td>
+<td><img src="docs/screenshots/dial-test.png" alt="Dial Test: the original copy's curve dips at Seinfeld and Olive Garden; the swapped version spikes at Never Have I Ever and Kali Uchis" /></td>
 </tr>
 <tr>
 <td valign="top">
@@ -104,7 +104,7 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 <tr>
 <td valign="top">
 
-**6. A dictionary between audiences.** The Culture Translator scores one reference for five audiences and, where it misses, finds the Qloo-verified equivalent that plays the same role: Seinfeld becomes *On My Block* for Gen Z Latin-pop fans and *Insecure* for 30–34 hip-hop heads.
+**6. A dictionary between audiences.** The Culture Translator scores one reference for five audiences and, where it misses, finds the Qloo-verified equivalent that plays the same role: in the run shown, Seinfeld becomes *Sex Education* for Gen Z Latin-pop fans and *Insecure* for 30–34 hip-hop heads, and already lands with 55+ classic-rock fans.
 
 </td>
 <td><img src="docs/screenshots/translator.png" alt="Culture Translator compass for Seinfeld across five audiences" /></td>
@@ -112,12 +112,20 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 <tr>
 <td valign="top">
 
-**7. Qloo as the referee.** The benchmark uses Qloo to grade Claude alone against Vernacular on the same copy and briefs, and shows what a model does without taste data: it repeats the audience's own examples back.
-
-**8. Taste in every text box and every agent.** The same Qloo-backed check runs in a browser extension on any page, and as MCP tools any AI agent can call before it publishes.
+**7. One grid for a whole campaign.** Campaign check scores every version of an ad for every audience in a single pass per audience, so an agency sees which version runs where: in the example, the classic-rock route wins with 55+ fans, the Latin-pop route with Gen Z, and the indie route doesn't even win with indie fans.
 
 </td>
-<td><img src="docs/screenshots/benchmark.png" alt="Benchmark page: original p51, Claude alone p73, Vernacular p88" /><br /><img src="docs/screenshots/anywhere.png" alt="The extension's panel on a chat box: Wes Anderson misses, Coldplay mixed, try Kali Uchis" /></td>
+<td><img src="docs/screenshots/campaign.png" alt="Campaign check: four cold-brew versions by five audiences, each cell a Qloo percentile, with the best version per audience starred" /></td>
+</tr>
+<tr>
+<td valign="top">
+
+**8. Qloo as the referee, checked from outside.** The benchmark uses Qloo to grade Claude alone against Vernacular on the same copy and briefs, and shows what a model does without taste data: it repeats the audience's own examples back. Because Qloo grades its own suggestions there, a non-Claude model also rates recognition blind, and that check changed how swaps are picked.
+
+**9. Taste in every text box and every agent.** The same Qloo-backed check runs in a browser extension on any page, and as MCP tools any AI agent can call before it publishes.
+
+</td>
+<td><img src="docs/screenshots/benchmark.png" alt="Benchmark page: original p51, Claude alone p73, Vernacular p85" /><br /><img src="docs/screenshots/anywhere.png" alt="The extension's panel on a chat box: Wes Anderson misses, Coldplay mixed, try SZA, with the Qloo tags they share" /></td>
 </tr>
 </table>
 
@@ -551,7 +559,7 @@ The author directed the work, made the product decisions, reviewed the results, 
 - **Anthropic Claude** (`claude-opus-5-5`) reads copy and frames, runs the swap agent, picks translations, writes the simulated comments, and is the benchmark's blind fidelity judge.
 - **OpenAI** `gpt-4o-mini-tts` reads copy aloud in the Dial Test, and `whisper-1` transcribes voiceovers. Both are labelled in the interface.
 - **OpenAI** `gpt-5.5` is the benchmark's outside recognition judge (not part of the product).
-- **The sample animatic's voiceover** is AI-generated (OpenAI text-to-speech). Its storyboard panels were drawn as SVG in code.
+- **The sample animatic's voiceover, and the demo video's narration,** are AI-generated (OpenAI text-to-speech). Its storyboard panels were drawn as SVG in code.
 - **Predicted comments** are simulated by Claude and labelled as such. They are not real people.
 
 What is not generated by a model: every audience score, verdict and percentile comes from Qloo's Taste AI API, and every swap is verified against Qloo before it is suggested.

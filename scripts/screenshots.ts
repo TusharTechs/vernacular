@@ -30,6 +30,9 @@ async function seenTour(page: Page) {
   await settle(page);
   await page.screenshot({ path: `${OUT}/check.png` });
 
+  // Element shots below shouldn't have the sticky results bar over them.
+  await page.addStyleTag({ content: 'nav[aria-label="Results"] { visibility: hidden !important; }' });
+
   // A reference card with its swap.
   const card = page.locator('aside[aria-label="Audience and references"] article').filter({ has: page.locator('[data-tour="swap"]') }).first();
   await card.scrollIntoViewIfNeeded();
@@ -41,7 +44,8 @@ async function seenTour(page: Page) {
   if (await play.count()) {
     await play.scrollIntoViewIfNeeded();
     await play.click();
-    await page.waitForTimeout(14000);
+    // Original take, then the take with swaps; capture once both curves are drawn.
+    await page.waitForTimeout(34000);
     await page.locator("#sec-dial").screenshot({ path: `${OUT}/dial-test.png` });
   }
 
@@ -64,12 +68,29 @@ async function seenTour(page: Page) {
     await page.locator("#sec-map").screenshot({ path: `${OUT}/map.png` });
   }
 
+  // Culture Translator, live for one reference.
+  await page.goto(base + "/translate", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Seinfeld", exact: true }).click();
+  await page.waitForTimeout(70000);
+  await page.screenshot({ path: `${OUT}/translator.png` });
+
+  // Vernacular Anywhere: the extension's check on a chat box. Its pill lives in a
+  // closed shadow root, so it's clicked by position, where the script places it.
+  await page.goto(base + "/anywhere", { waitUntil: "networkidle" });
+  const chat = page.locator('textarea[placeholder="Message #launch-video"]');
+  await chat.scrollIntoViewIfNeeded();
+  await page.locator('section:has(textarea[placeholder="Message #launch-video"]) button', { hasText: "Use an example" }).click();
+  await page.waitForTimeout(25000);
+  const r = (await chat.boundingBox())!;
+  await page.mouse.click(Math.min(1280 - 90, r.x + r.width - 80), Math.min(847 - 20, r.y + r.height - 1));
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${OUT}/anywhere.png` });
+
   // Other pages.
   for (const [path, name, wait] of [
     ["/campaign", "campaign", 2500],
     ["/benchmark", "benchmark", 1500],
     ["/how", "how", 1500],
-    ["/anywhere", "anywhere", 1500],
   ] as const) {
     await page.goto(base + path, { waitUntil: "networkidle" });
     await settle(page, wait);
