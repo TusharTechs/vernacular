@@ -1,15 +1,63 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { SCENARIOS, type Scenario } from "@/lib/vernacular/scenarios";
 
 export function ScenarioGallery({ active, loading, onOpen }: { active: string | null; loading: string | null; onOpen: (s: Scenario) => void }) {
+  const row = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ start: true, end: false });
+
+  // Track whether the row can scroll further each way, for the arrows and the edge fades.
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const update = () => setEdges({ start: el.scrollLeft <= 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  const scrollBy = (dir: 1 | -1) => {
+    const el = row.current;
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollBy({ left: dir * Math.max(260, el.clientWidth * 0.8), behavior: reduce ? "auto" : "smooth" });
+  };
+
+  // Fade only the right edge, and only while a card is cut off there: cards snap flush left.
+  const fade = edges.end ? undefined : "linear-gradient(to right, black calc(100% - 56px), transparent)";
+
   return (
-    <section className="flex flex-col gap-2" aria-label="Real-world scenarios">
-      <div className="flex items-baseline justify-between gap-3">
+    <section className="flex min-w-0 flex-col gap-2" aria-label="Real-world scenarios">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-muted">Real-world scenarios</h2>
-        <span className="hidden text-xs text-muted sm:inline">Each one is a real check, saved so it opens instantly</span>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-xs text-muted md:inline">Each one is a real check, saved so it opens instantly</span>
+          <div className="hidden gap-1 sm:flex">
+            {([-1, 1] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => scrollBy(d)}
+                disabled={d < 0 ? edges.start : edges.end}
+                aria-label={d < 0 ? "Earlier scenarios" : "More scenarios"}
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-rule text-sm text-muted transition-colors hover:border-ink hover:text-ink disabled:opacity-30"
+              >
+                {d < 0 ? "←" : "→"}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
+      <div
+        ref={row}
+        className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:thin]"
+        style={{ maskImage: fade, WebkitMaskImage: fade }}
+      >
         {SCENARIOS.map((s) => (
           <button
             key={s.id}

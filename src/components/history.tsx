@@ -57,7 +57,7 @@ export function YourChecks({ items, onOpen, onClear }: { items: HistoryItem[]; o
           Clear · kept only in this browser
         </button>
       </div>
-      <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
+      <div className="flex snap-x gap-3 overflow-x-auto pb-2">
         {items.map((h) => (
           <button
             key={h.id}
