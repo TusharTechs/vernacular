@@ -37,6 +37,7 @@ Every artist, show, film, brand and place in your copy, scored for the exact aud
 | Vernacular Anywhere: the browser extension's check, in mock composers | https://vernacular-lime.vercel.app/anywhere |
 | Benchmark: Vernacular vs Claude alone, plus an outside recognition check | https://vernacular-lime.vercel.app/benchmark |
 | Findings log: what we tested before and while building, failures included | [docs/FINDINGS.md](docs/FINDINGS.md) |
+| Judges' pack: the film, evidence, benchmark data, gallery and the extension as downloads | https://github.com/TusharTechs/vernacular/releases/tag/v1.0.0 |
 | How it works: the pipeline, the scoring method, what we learned | https://vernacular-lime.vercel.app/how |
 | Why Vernacular: the problem, the product, the business | https://vernacular-lime.vercel.app/pitch |
 | MCP server for AI agents (for MCP clients; a browser gets a 406) | https://vernacular-lime.vercel.app/api/mcp |
