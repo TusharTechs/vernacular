@@ -29,10 +29,12 @@ Every artist, show, film, brand and place in your copy, scored for the exact aud
 
 | What | Link |
 |---|---|
-| Live demo (no sign-in; opens on a real, cached check) | https://vernacular-lime.vercel.app |
+| Live demo (no sign-in; opens on a real, saved check) | https://vernacular-lime.vercel.app |
+| Campaign check: every ad variant × every audience, in one grid | https://vernacular-lime.vercel.app/campaign |
 | Culture Translator: one reference, five audiences | https://vernacular-lime.vercel.app/translate |
 | Vernacular Anywhere: the browser extension's check, in mock composers | https://vernacular-lime.vercel.app/anywhere |
-| Benchmark: Vernacular vs Claude alone, every pair browsable | https://vernacular-lime.vercel.app/benchmark |
+| Benchmark: Vernacular vs Claude alone, plus an outside recognition check | https://vernacular-lime.vercel.app/benchmark |
+| Findings log: what we tested before and while building, failures included | [docs/FINDINGS.md](docs/FINDINGS.md) |
 | How it works: the pipeline, the scoring method, what we learned | https://vernacular-lime.vercel.app/how |
 | Why Vernacular: the problem, the product, the business | https://vernacular-lime.vercel.app/pitch |
 | MCP server for AI agents (for MCP clients; a browser gets a 406) | https://vernacular-lime.vercel.app/api/mcp |
@@ -43,13 +45,22 @@ Every artist, show, film, brand and place in your copy, scored for the exact aud
 
 ## Contents
 
-[What it does](#what-it-does) · [Qloo, used unusually](#qloo-used-unusually) · [Screenshots](#screenshots) · [Features](#features) · [How it uses Qloo](#how-it-uses-qloo) · [Architecture](#architecture) · [Engineering notes](#engineering-notes) · [Evidence](#evidence) · [Tech stack](#tech-stack) · [Project structure](#project-structure) · [HTTP API](#http-api) · [MCP](#use-it-from-an-agent-mcp) · [Extension](#browser-extension) · [Run it locally](#run-it-locally) · [Data and privacy](#data-and-privacy) · [AI disclosure](#ai-disclosure) · [License](#license)
+[Judge it in two minutes](#judge-it-in-two-minutes) · [What it does](#what-it-does) · [Qloo, used unusually](#qloo-used-unusually) · [Screenshots](#screenshots) · [Features](#features) · [How it uses Qloo](#how-it-uses-qloo) · [Architecture](#architecture) · [Engineering notes](#engineering-notes) · [Evidence](#evidence) · [Known limitations](#known-limitations) · [Tech stack](#tech-stack) · [Project structure](#project-structure) · [HTTP API](#http-api) · [MCP](#use-it-from-an-agent-mcp) · [Extension](#browser-extension) · [Run it locally](#run-it-locally) · [Data and privacy](#data-and-privacy) · [AI disclosure](#ai-disclosure) · [License](#license)
+
+## Judge it in two minutes
+
+1. **Open [the live demo](https://vernacular-lime.vercel.app).** It opens on a saved check of a comedy-tour ad for *Gen Z Latin-pop fans*. Click any underlined reference: the card shows its Qloo percentile, its age skew, the verified swap and the Qloo tags that show the swap plays the same role. Press **Re-run it live** to watch the agent work (about 40 seconds).
+2. **Open [Campaign check](https://vernacular-lime.vercel.app/campaign).** Four creative routes for one product × five audiences, in one grid: which version should run where, and which cell to fix first.
+3. **Open [the benchmark](https://vernacular-lime.vercel.app/benchmark).** Vernacular against the same model without Qloo on 40 copy × audience pairs, plus the outside check that made us change the product ([findings log](docs/FINDINGS.md)).
+4. **For agents:** `claude mcp add --transport http vernacular https://vernacular-lime.vercel.app/api/mcp`, then ask your agent to check some copy for an audience.
+
+Every Qloo request behind a result is listed under **"Qloo calls back what you see here"** on the check page; [Known limitations](#known-limitations) says what the numbers don't show.
 
 ## What it does
 
 1. **Finds the references.** Claude reads the copy (or storyboard frames, or a video ad's frames and voiceover) and extracts every named cultural reference with the role it plays in its sentence.
 2. **Scores them on Qloo.** Each reference is resolved on Qloo and ranked against about 40 well-known peers of the same type *for this audience*: its taste anchors, age band, Qloo audience segments and interest tags. Raw affinity isn't comparable across audiences, so the score is a within-audience percentile, then adjusted for the reference's demographic age skew. Lands is p65 or above, misses is below p35.
-3. **Swaps the weak ones.** A Claude agent with Qloo tools finds equivalents the audience over-indexes on, verifies each one with the same scoring, picks the one that plays the same role, and rewrites only the words it needs. Each swap carries Qloo's explainability: which of the audience's favourites pulled it in.
+3. **Swaps the weak ones.** A Claude agent with Qloo tools finds equivalents the audience over-indexes on that are at least as well-known as the peers they're ranked against, verifies each one with the same scoring, picks the one that plays the same role, and rewrites only the words it needs. Each swap shows the Qloo tags it shares with the original, the evidence that it plays the same role.
 
 ## Qloo, used unusually
 
@@ -61,7 +72,7 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 
 **1. A dictionary for a spell-checker.** Raw affinity isn't comparable across audiences, so each reference is ranked against ~40 well-known peers scored for the same audience in the same request. That turns affinity into a verdict a writer can act on (lands, mixed, misses), adjusted by Qloo's demographic age skew.
 
-**2. Explainability you can see.** Qloo's `feature.explainability` becomes a *taste path*: which of the audience's favourites pulled each swap in, and by how much.
+**2. Evidence for every swap.** Each swap shows the Qloo tags it shares with the original (*Sitcom*, *Comedy*, *Friendship*), so "plays the same role" is something you can check, not take on trust. Qloo's `feature.explainability` is drawn as a taste path when the audience's anchors pulled the swap in unequally.
 
 </td>
 <td width="50%"><img src="docs/screenshots/reference-card.png" alt="A reference card: Seinfeld scores p40 for Gen Z Latin-pop fans, with age-skew bars, a swap for Boy Meets World at p98, and a taste path from Bad Bunny and Euphoria" /></td>
@@ -115,7 +126,7 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 | | |
 |---|---|
 | <img src="docs/screenshots/home.png" alt="Home: hero, swap ticker and real-world scenarios" /> | <img src="docs/screenshots/home-dark.png" alt="Home in dark mode" /> |
-| **Home.** A live ticker of real swaps, twelve one-click scenarios and a guided tour. | **Dark mode.** Every page has a light and a dark theme. |
+| **Home.** A ticker of real swaps from the gallery, twelve one-click scenarios and a guided tour. | **Dark mode.** Every page has a light and a dark theme. |
 | <img src="docs/screenshots/check.png" alt="A check: marked copy, verdict cards and the section bar" /> | <img src="docs/screenshots/how.png" alt="How it works page" /> |
 | **A check.** Proof marks on each reference, Qloo evidence per card, and a bar to jump between results. | **How it works.** The pipeline, one show's standing across five audiences, and what we learned. |
 
@@ -124,7 +135,7 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 | Feature | What it does |
 |---|---|
 | **Check** | Copy in, every reference marked lands / mixed / misses with the Qloo evidence behind it, verified swaps you accept or dismiss one by one. |
-| **Real-world scenarios** | Twelve one-click cases across formats (event promo, podcast read, trailer voiceover, radio spot, email, launch post, short-video caption, Chicago billboard, App Store blurb, charity appeal, Spanish promo, LinkedIn post), each a real check cached on the server. |
+| **Real-world scenarios** | Twelve one-click cases across formats (event promo, podcast read, trailer voiceover, radio spot, email, launch post, short-video caption, Chicago billboard, App Store blurb, charity appeal, Spanish promo, LinkedIn post), each a real check saved with its date so it opens instantly, and re-runnable live. |
 | **Guided tour** | A 60-second walkthrough of the best moments for first-time visitors. |
 | **Your checks** | Your recent checks, kept only in this browser, reopen instantly with their before and after scores. |
 | **Dial Test** | The copy read aloud (AI voice, disclosed) while a reaction curve swings to each reference's Qloo percentile as it is spoken; then the swapped version. Words are timed by transcribing the generated audio. |
@@ -132,12 +143,13 @@ Eight things Vernacular does with Qloo that a recommendations call alone wouldn'
 | **Where it lands** | Qloo locality heatmaps: the neighbourhoods of a city where the audience over-indexes, and how many of them each reference's fans also live in, drawn from Qloo's own boundaries. |
 | **Culture Translator** | One reference scored for five audiences; where it misses, the verified equivalent that plays the same role, on a streaming radial compass. |
 | **Tour Mode** | The same copy against two to five audiences side by side. |
-| **Audience from a sentence** | A plain description becomes Qloo audience segments, interest tags and anchors, with a cross-domain fingerprint. |
+| **Campaign check** | Up to five versions of an ad × up to five audiences in one grid: each version's average Qloo percentile per audience, the best version for each audience, and every cell one click from the full check with swaps. Imports a CSV; exports one. |
+| **Audience from a sentence** | A plain description becomes Qloo audience segments (from `/v2/audiences`), interest tags, anchors and, when stated, a gender skew, with a cross-domain fingerprint. |
 | **Storyboards and video** | Frames are sampled in the browser; Claude reads on-screen brands, settings and text; the voiceover is transcribed and each line attached to its frame. |
 | **Social layer** | Shareable result cards with social previews, swipe review of swaps, and a feed preview that marks the fold. |
 | **Claude alone comparison** | The same model and brief without Qloo, scored the same way, side by side with Vernacular. |
-| **Vernacular Anywhere** | A Chrome extension: a culture-check pill on any text box, one-click swaps that Undo can reverse, and a link into the full check. |
-| **MCP server** | Five tools for any agent: `check_copy`, `build_audience`, `compare_audiences`, `where_it_lands`, `translate_reference`. |
+| **Vernacular Anywhere** | A Chrome extension: a culture-check pill on any text box, one-click swaps that Undo can reverse (each must share Qloo tags with the original, so a coffee chain is swapped for a coffee chain), and a link into the full check. |
+| **MCP server** | Six tools for any agent: `check_copy`, `build_audience`, `compare_audiences`, `check_campaign`, `where_it_lands`, `translate_reference`. |
 
 ## How it uses Qloo
 
@@ -157,26 +169,28 @@ Vernacular would not work without Qloo: the model writes, Qloo decides what land
 
 ### A real trace
 
-One run of the landing sample (*Gen Z Latin-pop fans*: anchors Bad Bunny and *Euphoria*, age 24 and younger): 30 Qloo calls, 9 Claude calls, 38 seconds. IDs are shortened here.
+The saved landing sample (*Gen Z Latin-pop fans*: anchors Bad Bunny and *Euphoria*, age 24 and younger), run on 2026-10-29: 27 Qloo calls, 7 Claude calls, 43 seconds. IDs are shortened here; the full call list is in the app.
 
 ```text
 GET /search?query=Seinfeld&take=3&types=urn:entity:tv_show
-GET /v2/insights?filter.popularity.min=0.85&filter.type=urn:entity:tv_show&take=40        ← reference panel
+GET /v2/insights?filter.popularity.min=0.85&filter.type=urn:entity:tv_show&take=40        ← reference panel (once per type)
 GET /v2/insights?filter.results.entities=<Seinfeld, panel…>&filter.type=urn:entity:tv_show
                 &signal.demographics.age=24_and_younger&signal.interests.entities=<Bad Bunny, Euphoria>&take=41
 GET /v2/insights?filter.type=urn:demographics&signal.interests.entities=<Seinfeld>        ← age skew
-GET /v2/insights?feature.explainability=true&filter.exclude.entities=<Seinfeld>&filter.popularity.min=0.6
-                &filter.tags=urn:tag:subgenre:qloo:sitcom,urn:tag:keyword:qloo:sitcom
+GET /v2/insights?feature.explainability=true&filter.exclude.entities=<Seinfeld>&filter.popularity.min=0.85
+                &filter.tags=urn:tag:genre:qloo:comedy,urn:tag:genre:media:comedy
                 &filter.type=urn:entity:tv_show&signal.demographics.age=24_and_younger
                 &signal.interests.entities=<Bad Bunny, Euphoria>&take=8                    ← candidates
+GET /v2/insights?filter.results.entities=<3 candidates, panel…>&filter.type=urn:entity:tv_show&…&take=43   ← verify
 …
 
 Seinfeld      → mixed  p40   "Scores higher with this audience than 40% of well-known peers of the same type."
 Olive Garden  → misses p0
 Frank Sinatra → mixed  p60   "Its audience over-indexes for 24 and younger (+0.35)."
 
-Seinfeld      → iCarly      p98   drivers: Euphoria 50%, Bad Bunny 50%
-Frank Sinatra → Kali Uchis  p100  drivers: Euphoria 51%, Bad Bunny 49%
+Seinfeld      → Never Have I Ever  p100  shares Comedy, Dating, Friendship, Humorous
+Olive Garden  → Hard Rock          p48   mixed, but 48 points above the original; shares Dining, Hospitality
+Frank Sinatra → Kali Uchis         p100  shares Love, Heartbreak, Nostalgia
 ```
 
 Every Qloo call behind a result is listed in the app: open **"Qloo calls back what you see here"** under any check.
@@ -227,7 +241,7 @@ sequenceDiagram
     S->>CL: extract references (structured output)
   end
   S->>Q: resolve, score against panel, age skew
-  S-->>U: verdicts stream in (about 7 s)
+  S-->>U: verdicts stream in (within seconds)
   loop one agent per sentence with weak references, in parallel
     S->>CL: agent turn
     CL->>S: tool call (search_tags · find_equivalents · verify_candidates · submit_swap · keep_reference)
@@ -270,19 +284,25 @@ The prompt adds judgment the data can't make: keep references that state a fact 
 
 ## Evidence
 
-**Benchmark.** Run with `npm run benchmark`; results at [`/benchmark`](https://vernacular-lime.vercel.app/benchmark). It covers 8 pieces of original ad copy × 5 audiences, run on 2026-10-20. Each pair is written three ways: the original, Claude alone (same model and brief, no Qloo) and Vernacular. Every final text is graded by one pass (extract, then score on Qloo), plus a blind judge for meaning and fluency.
+**Benchmark.** Run with `npm run benchmark`, then `npm run benchmark:recognition`; results at [`/benchmark`](https://vernacular-lime.vercel.app/benchmark), every pair browsable. It covers 8 pieces of original ad copy × 5 audiences, run on the current code on 2026-10-29. Each pair is written three ways: the original, Claude alone (same model and brief, no Qloo) and Vernacular. Every final text is graded by one pass (extract, then score on Qloo), a blind Claude judge for meaning and fluency, and an outside recognition judge from a different model family.
 
 | | Original | Claude alone | Vernacular |
 |---|---|---|---|
-| Mean percentile | p51 | p73 | **p88** |
-| References that miss | 49% | 24% | **4%** |
-| Meaning kept (blind judge, /5) | | 4.65 | 4.60 |
-| Reads naturally (blind judge, /5) | | 4.70 | 4.50 |
+| Mean percentile (Qloo) | p51 | p73 | **p85** |
+| References that miss (Qloo) | 49% | 25% | **8%** |
+| Recognition, outside judge (/5) | 3.11 | 4.13 | 3.69 |
+| Recognition, brief examples left out (/5) | 3.11 | 3.75 | 3.69 |
+| Meaning kept (blind judge, /5) | | 4.75 | 4.60 |
+| Reads naturally (blind judge, /5) | | 4.70 | 4.55 |
 
-- Vernacular scored higher than Claude alone in 26 of 40 pairs (+14.4 points on average, 95% bootstrap interval 9.0 to 19.7).
-- 36 of Claude alone's references simply repeated the audience examples from the brief, which score p100 by definition. Leaving those out of both sides, the gap is +27.3 points.
-- Qloo is both Vernacular's source and the grader, so this measures the distance from what Qloo's data says about an audience, not human reactions. The benchmark page says so.
-- The published run predates later changes: parallel agents, lower agent effort, the factual-reference rule, the name-plausibility check and city-local place scoring.
+- Vernacular scored higher than Claude alone on Qloo in 24 of 40 pairs, tied in 8 and lower in 8 (+11.9 points on average, 95% bootstrap interval 5.6 to 17.9).
+- 36 of Claude alone's references simply repeated the audience examples from the brief (Bad Bunny for Bad Bunny fans), which score p100 on Qloo by definition. Leaving those out of both sides, the gap is +27.0 points (17.9 to 35.8).
+- **The outside check.** Qloo is both Vernacular's source and the grader, so `gpt-5.5` (not Claude, which wrote the Claude-alone versions) rated every reference, blind to which version used it: would this audience recognise it and like it? With the brief's examples left out, Vernacular and Claude alone are level (+0.03 per pair, −0.19 to +0.26). Counting them, Claude alone leads.
+- That check changed the product. On the Oct 20 run it showed Vernacular's swaps were often real Qloo favourites few people would know (*The Knick* for country fans). Swaps must now be at least as well-known as the peers they're ranked against; recognition rose from 3.56 to 3.69 at a cost of three percentile points (p88 to p85). The full before and after is in [docs/FINDINGS.md](docs/FINDINGS.md#outside-recognition-check-oct-29).
+- 43% of Vernacular's references and 47% of Claude alone's score p100, the top of the scale, where percentiles can't separate them.
+- Fluency is the trade: Vernacular's rewrites are rated a little lower on meaning and naturalness than Claude alone's.
+
+**Validated before it was built.** Before writing the product we tested whether Qloo's audience-conditioned affinity can tell which references land, with thresholds written into the scripts in advance. The first test failed, and showed that raw affinity can't be compared across audiences; a confirmatory test on new references and audiences then passed all three thresholds (88% of within-audience pairs ordered correctly). Vernacular's percentile scoring is built on that result. Log and scripts: [docs/FINDINGS.md](docs/FINDINGS.md).
 
 **Edge cases.** `npm run edge-cases -- --full` runs 16 cases live against Claude and Qloo, each with its expectation written in the script:
 
@@ -297,13 +317,30 @@ The prompt adds judgment the data can't make: keep references that state a fact 
 - swaps that keep Spanish copy in Spanish
 - a factual credit that must not be swapped
 
-All 16 pass.
+All 16 pass ([latest output](docs/evidence/edge-cases.txt)).
 
-**Unit tests.** 63 tests in 11 files (`npm test`): parameter whitelisting, scoring verdicts, the diff engine, share tokens, the benchmark statistics, Dial Test alignment, name plausibility, map geometry and payload slimming. GitHub Actions runs lint, typecheck, the tests and a production build on every push to `main`.
+**Unit tests.** 75 tests in 13 files (`npm test`): parameter whitelisting, scoring verdicts, the diff engine, share tokens, the benchmark statistics, Dial Test alignment, name plausibility, map geometry, payload slimming, the role check behind swaps (shared Qloo tags), the article guard, campaign cells and CSV import.
 
-**Load.** `scripts/load-test.ts` fires simultaneous fresh checks as distinct visitors. Five at once on one server instance all completed: first scores in 8–10 seconds, all finished within 44 seconds.
+**Load.** `scripts/load-test.ts` fires simultaneous fresh checks as distinct visitors. Five at once on one local production server all completed: first scores in 8–10 seconds, all finished within 36 seconds ([output](docs/evidence/load-test.txt)).
 
-**Accessibility.** axe-core 4.10 reports no violations on the main pages (`/`, `/translate`, `/benchmark`, `/anywhere`, `/how`, `/pitch`), and each fits a 375 px screen without sideways scrolling.
+**Accessibility.** `npm run a11y` runs axe-core 4.14 (WCAG 2.1 A and AA rules plus best practices) in Chromium on the seven main pages, and checks that each fits a 375 px screen without sideways scrolling. All pass ([output](docs/evidence/a11y.txt)).
+
+**CI.** GitHub Actions runs lint, typecheck, the unit tests, a production build and the accessibility audit (the saved checks let every page render without API keys) on every push to `main`, and scans the full git history for leaked keys with gitleaks.
+
+## Known limitations
+
+What the results do and don't establish:
+
+- **Qloo grades its own suggestions in the benchmark.** Percentiles measure distance from what Qloo's data says about an audience, not human reactions. The outside recognition check uses a model from another family (OpenAI), which is independent of both Qloo and Claude but is still a model, not a human panel.
+- **Percentiles top out.** A reference that beats every well-known peer scores p100, so a share of results sit at the ceiling and can't be told apart; the benchmark page reports that share per version.
+- **Over-indexing isn't recognition.** Qloo's affinity says an audience likes something more than the average person does, not that most of them know it. Swaps must be at least as well-known as the panel they're ranked against (popularity 0.85); the agent can lower that only when nothing at the default fits the role.
+- **Explainability is thin with two anchors.** The preset audiences have two taste anchors, and Qloo splits credit between them almost evenly, so cards explain a swap with the Qloo tags it shares with the original instead, and draw the anchor split only when it differs.
+- **Audiences are descriptions, not customer data.** An audience is taste anchors, an age band and optional Qloo segments, interest tags, gender skew and city, not a brand's first-party segments.
+- **Reference finding is model-based.** Claude can miss a reference or misread its role. The 16 edge cases cover the failure modes we found, not every possible input.
+- **Language and place.** English and Spanish copy are tested; other languages aren't. City-local scoring applies to places and brands. The map shows where an audience and a reference's fans live, which is about placement, not taste.
+- **Simulated and saved content is labelled.** Predicted comments are written by Claude from Qloo data, not real people. Gallery examples are saved runs (with the date shown); "Re-run it live" runs the same copy fresh, and live runs can pick different swaps.
+- **Aggregate, not personal.** Qloo affinities describe audiences in aggregate. Nothing here says anything about an individual.
+- **Demo limits.** Twelve full checks per IP every ten minutes; the hackathon Qloo key has its own rate and monthly limits.
 
 ## Tech stack
 
@@ -318,7 +355,7 @@ All 16 pass.
 | Agents | Model Context Protocol server, `@modelcontextprotocol/sdk` 1.32, Streamable HTTP |
 | Validation | Zod 4 |
 | Images | `next/og` for share cards |
-| Testing | Vitest 5, live edge-case and load scripts |
+| Testing | Vitest 5; live edge-case, load and benchmark scripts; Playwright 1.64 with axe-core 4.14 for accessibility |
 | CI and hosting | GitHub Actions, Vercel |
 
 ## Project structure
@@ -330,6 +367,7 @@ vernacular/
 │   │   ├── page.tsx              # Check (home)
 │   │   ├── translate/            # Culture Translator
 │   │   ├── anywhere/             # Extension demo
+│   │   ├── campaign/             # Campaign check
 │   │   ├── benchmark/            # Benchmark results
 │   │   ├── how/                  # How it works
 │   │   ├── pitch/                # Why Vernacular
@@ -338,14 +376,18 @@ vernacular/
 │   ├── components/               # UI: workbench, Dial Test, map, compass, tour…
 │   └── lib/
 │       ├── qloo/                 # Qloo client, parameter whitelist, tools, geometry, name matching
-│       └── vernacular/           # Extraction, scoring, swap agent, translator, comments, voice,
-│           ├── benchmark/        #   lint, scenarios; benchmark corpus, grader, judge, stats, results
+│       └── vernacular/           # Extraction, scoring, swap agent, campaign, translator, comments, voice,
+│           ├── benchmark/        #   lint, scenarios; benchmark corpus, grader, judges, stats, results
+│           ├── snapshots/        #   saved gallery, landing and campaign checks (npm run snapshot)
 │           └── __tests__/        # Unit tests
 ├── extension/                    # Chrome extension (Manifest V3)
 ├── public/                       # Extension script for the demo page, sample storyboard and animatic
-├── scripts/                      # CLI check, benchmark, edge cases, load test, MCP smoke, sample media
+├── scripts/                      # CLI check, benchmark, data tests, edge cases, load test, a11y, snapshots, MCP smoke
 ├── docs/brand/                   # Logo files
 ├── docs/screenshots/             # README screenshots
+├── docs/evidence/                # Saved output of the a11y audit, edge cases and load test
+├── docs/FINDINGS.md              # Pre-registered data tests and the outside recognition check
+├── docs/CLAIMS.md                # Each claim in the submission and what backs it
 └── .github/workflows/ci.yml      # Lint, typecheck, tests, build
 ```
 
@@ -356,6 +398,7 @@ All routes are `POST` with JSON unless noted. Streaming routes send server-sent 
 | Route | Purpose |
 |---|---|
 | `/api/check` (SSE) | Full check: extract, score, swap |
+| `/api/campaign` (SSE) | Up to 5 variants × 5 audiences, one audience column at a time |
 | `/api/tour` (SSE) | Score one copy for 2–5 audiences |
 | `/api/translate` (SSE) | One reference across five audiences |
 | `/api/lint` | Fast check for the extension (CORS open) |
@@ -366,7 +409,7 @@ All routes are `POST` with JSON unless noted. Streaming routes send server-sent 
 | `/api/voice` | AI voice with word timings |
 | `/api/storyboard` | Read storyboard or video frames |
 | `/api/transcribe` | Voiceover transcription (multipart) |
-| `GET /api/sample`, `GET /api/scenario/:id` | Cached example checks |
+| `GET /api/sample`, `GET /api/scenario/:id`, `GET /api/campaign/sample` | Saved example checks (live and cached for a day if the example has changed) |
 | `GET /api/card?d=…` | Share-card image |
 | `/api/mcp` (GET, POST, DELETE) | MCP server |
 
@@ -380,7 +423,7 @@ The server speaks MCP over Streamable HTTP at `https://vernacular-lime.vercel.ap
 claude mcp add --transport http vernacular https://vernacular-lime.vercel.app/api/mcp
 ```
 
-Tools: `check_copy`, `build_audience`, `compare_audiences`, `where_it_lands`, `translate_reference`. To try them against a local server, run `npm run mcp:smoke`.
+Tools: `check_copy`, `build_audience`, `compare_audiences`, `check_campaign`, `where_it_lands`, `translate_reference`. To try them against a local server, run `npm run mcp:smoke`.
 
 ## Browser extension
 
@@ -432,10 +475,12 @@ Then open http://localhost:3000.
 | `QLOO_API_KEY` | Yes | Every Qloo call |
 | `QLOO_BASE_URL` | Yes (prefilled) | `https://hackathon.api.qloo.com`; hackathon keys work only on this host |
 | `ANTHROPIC_API_KEY` | Yes | Extraction, the swap agent, storyboards, comments, translator |
-| `OPENAI_API_KEY` | No | Dial Test voice, video voiceover transcription, sample-media voiceover |
+| `OPENAI_API_KEY` | No | Dial Test voice, video voiceover transcription, sample-media voiceover, the benchmark's recognition judge |
 | `NEXT_PUBLIC_SITE_URL` | No | Absolute URLs for share previews when not on Vercel |
 | `VERNACULAR_AGENT_EFFORT` | No | `low` (default) or `medium` effort for the swap agent |
 | `QLOO_DISK_CACHE` | No | Scripts only: a folder for caching Qloo responses on disk |
+| `QLOO_RETRY_BASE_MS` | No | Base delay for Qloo retries (default 500 ms; tests set it low) |
+| `VERCEL_PROJECT_PRODUCTION_URL` | No | Set by Vercel; used for absolute share-preview URLs |
 
 ### Scripts
 
@@ -449,6 +494,11 @@ Then open http://localhost:3000.
 | `npm run qloo:smoke` | Live sanity check of the Qloo key and host |
 | `npm run edge-cases` | Live adversarial suite (`-- --full` adds the two swap cases) |
 | `npm run benchmark` | Re-runs the benchmark. Qloo responses are cached on disk; Claude calls are not, so it costs Claude usage |
+| `npm run benchmark:recognition` | Adds the outside recognition ratings (OpenAI) to the benchmark results |
+| `npm run qloo:data-test` · `npm run qloo:confirm-test` | The day-1 pre-registered data tests ([docs/FINDINGS.md](docs/FINDINGS.md)) |
+| `npm run snapshot` | Re-saves the landing sample, the twelve scenarios and the example campaign, then rebuilds the home ticker |
+| `npm run a11y -- <url>` | axe-core audit and 375 px check of the main pages |
+| `npm run screenshots -- <url>` | Re-captures the README screenshots |
 | `npx tsx scripts/load-test.ts http://localhost:3000 5` | Simultaneous fresh checks |
 | `npm run mcp:smoke` | Calls the local MCP server like an agent would |
 | `npm run build:extension` | Prepares `extension/` |
@@ -477,10 +527,10 @@ The live demo runs on Vercel and deploys automatically from `main`. To deploy yo
   - Qloo responses, for up to 1 hour;
   - quick-check results, for 30 minutes;
   - generated voice audio, until evicted.
-- **Cached server-side:** only our own sample copy, the gallery scenarios and the landing sample.
+- **Saved in the repository:** checks of our own sample copy only (the landing sample, the twelve scenarios and the example campaign), as names, scores, verdicts, swaps and the Qloo call log.
 - **Share links** carry names and scores in the URL itself; nothing is stored for them.
 - **Rate limiting** keeps request times per IP address in memory for 10 minutes.
-- **The repository** contains no raw Qloo responses (`.cache/` is git-ignored). The benchmark publishes derived names, percentiles, verdicts and texts.
+- **The repository** contains no raw Qloo responses (`.cache/` is git-ignored). The benchmark and the saved checks publish derived names, percentiles, verdicts and texts.
 
 ## AI disclosure
 
@@ -500,6 +550,7 @@ The author directed the work, made the product decisions, reviewed the results, 
 
 - **Anthropic Claude** (`claude-opus-5-5`) reads copy and frames, runs the swap agent, picks translations, writes the simulated comments, and is the benchmark's blind fidelity judge.
 - **OpenAI** `gpt-4o-mini-tts` reads copy aloud in the Dial Test, and `whisper-1` transcribes voiceovers. Both are labelled in the interface.
+- **OpenAI** `gpt-5.5` is the benchmark's outside recognition judge (not part of the product).
 - **The sample animatic's voiceover** is AI-generated (OpenAI text-to-speech). Its storyboard panels were drawn as SVG in code.
 - **Predicted comments** are simulated by Claude and labelled as such. They are not real people.
 

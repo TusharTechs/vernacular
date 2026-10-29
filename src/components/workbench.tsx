@@ -133,9 +133,9 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
     setTouring(true);
   };
   const TOUR: TourStep[] = [
-    { target: 'section[aria-label="Real-world scenarios"]', title: "Real copy, real audiences", body: "Each card is a live check of a real format (ads, emails, captions, a Spanish promo) sent to an audience it wasn't written for." },
+    { target: 'section[aria-label="Real-world scenarios"]', title: "Real copy, real audiences", body: "Each card is a real check of a real format (ads, emails, captions, a Spanish promo) sent to an audience it wasn't written for, saved so it opens instantly. Re-run any of them live." },
     { target: "#sec-copy", title: "Proof marks for culture", body: "Every named reference gets a wavy underline: green lands, amber is mixed, red misses. Scores are Qloo percentiles for this exact audience." },
-    { target: 'aside[aria-label="Audience and references"] figure', title: "Why this swap", body: "Each card shows the Qloo evidence (score, age skew) and a verified swap. The taste path shows which of the audience's favourites pulled it in." },
+    { target: 'aside[aria-label="Audience and references"] [data-tour="swap"]', title: "Why this swap", body: "Each card shows the Qloo evidence (score, age skew) and a verified swap, with the Qloo tags that show it plays the same role as the original." },
     { target: '[data-tour="dial-play"]', title: "Hear it land", body: "Press play: an AI voice reads the copy while the audience's reaction curve dips on misses and spikes on swaps." },
     { target: '[data-tour="comments"]', title: "See the comments before you post", body: "Preview the post in a feed, then predict the comments: simulated commenters built from Qloo, reacting in line with each score." },
     { target: '[data-tour="map"]', title: "Where it lands", body: "Qloo's neighbourhood heatmaps show where your audience lives in a city, and whether each reference's fans live there too." },
@@ -353,12 +353,17 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
           {sampleAt && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent-soft px-4 py-3 text-sm">
               <span>
-                Example: this scenario was checked live on Qloo{" "}
+                Example: a saved check, run live on Qloo{" "}
                 {new Date(sampleAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}. Click a marked reference to see why.
               </span>
-              <button type="button" onClick={edit} className="font-medium text-accent hover:underline">
-                Try your own copy
-              </button>
+              <span className="flex flex-wrap gap-4">
+                <button type="button" onClick={() => check(audience, text)} className="font-medium text-accent hover:underline">
+                  Re-run it live
+                </button>
+                <button type="button" onClick={edit} className="font-medium text-accent hover:underline">
+                  Try your own copy
+                </button>
+              </span>
             </div>
           )}
 

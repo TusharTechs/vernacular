@@ -1,0 +1,8 @@
+axe-core 4.14.0 · http://localhost:3000 · 2026-10-29T05:02:17.425Z
+pass /: 0 axe violations; 375 px fits
+pass /translate: 0 axe violations; 375 px fits
+pass /anywhere: 0 axe violations; 375 px fits
+pass /benchmark: 0 axe violations; 375 px fits
+pass /how: 0 axe violations; 375 px fits
+pass /pitch: 0 axe violations; 375 px fits
+pass /campaign: 0 axe violations; 375 px fits

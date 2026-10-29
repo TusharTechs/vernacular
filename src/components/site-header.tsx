@@ -6,6 +6,7 @@ import { Logo } from "./logo";
 
 const NAV = [
   { href: "/", label: "Check" },
+  { href: "/campaign", label: "Campaign" },
   { href: "/translate", label: "Translator" },
   { href: "/anywhere", label: "Anywhere" },
   { href: "/benchmark", label: "Benchmark" },

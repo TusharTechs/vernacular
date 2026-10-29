@@ -24,3 +24,28 @@ jobs:
         run: npm test
       - name: Production build
         run: npm run build
+      # No API keys here: every page opens on saved snapshots, so the real UI can be audited.
+      - name: Accessibility and 375 px layout (axe-core in Chromium)
+        run: |
+          npx playwright install --with-deps chromium
+          npm start &
+          npx --yes wait-on@8 http://localhost:3000 --timeout 60000
+          npm run a11y -- http://localhost:3000 | tee a11y-report.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a11y-report
+          path: a11y-report.txt
+          if-no-files-found: ignore
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan the full git history for leaked keys
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

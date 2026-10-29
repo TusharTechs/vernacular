@@ -16,5 +16,5 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0]?.message ?? "Send the copy and audience as JSON." }, { status: 400 });
   }
-  return streamEvents<CheckEvent>(req, (send) => runCheck(parsed.data, (e) => send(slimEvent(e))));
+  return streamEvents<CheckEvent>(req, (send, signal) => runCheck(parsed.data, (e) => send(slimEvent(e)), signal));
 }

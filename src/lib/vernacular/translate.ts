@@ -2,7 +2,7 @@
 // For each audience Qloo scores the original; if it doesn't land, Qloo proposes
 // same-type equivalents the audience over-indexes on and verifies them, and the
 // model picks the one that plays the same role. The output is a small cultural
-// dictionary: "Seinfeld, in Gen Z" → "Derry Girls".
+// dictionary: "Seinfeld, for Gen Z Latin-pop fans" → a comedy that audience over-indexes on.
 
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
@@ -67,7 +67,7 @@ export async function translate(query: string, audiences: AudienceSpec[], emit: 
       const verdict = results[0]?.isAnchor ? "lands" : verdictFor(p, skew, audience.age).verdict;
       emit({ type: "scored", index, audience: spec.label, percentile: p, verdict });
       if (verdict === "lands") return { index, spec, keep: true as const, candidates: [] };
-      const { candidates } = await findEquivalents(original, audience, { take: 8, popularityFloor: 0.6 });
+      const { candidates } = await findEquivalents(original, audience, { take: 8 });
       const top = candidates.slice(0, 5);
       const scored = top.length ? (await scoreWithPanel(top.map((c) => c.id), subject.type, audience)).results : [];
       const verified = top

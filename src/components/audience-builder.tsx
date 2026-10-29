@@ -228,7 +228,7 @@ export function AudienceBuilder({ value, onChange, disabled }: { value: Audience
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-xs font-medium uppercase tracking-wider text-muted">Age</span>
           <select
@@ -246,6 +246,19 @@ export function AudienceBuilder({ value, onChange, disabled }: { value: Audience
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted">Gender skew</span>
+          <select
+            id="audience-gender"
+            value={value.gender ?? ""}
+            onChange={(e) => onChange({ ...value, gender: (e.target.value || undefined) as "male" | "female" | undefined })}
+            className="rounded-md border border-rule bg-sheet px-2 py-2 outline-none focus:border-accent"
+          >
+            <option value="">Any</option>
+            <option value="female">Mostly women</option>
+            <option value="male">Mostly men</option>
+          </select>
+        </label>
+        <label className="col-span-2 flex flex-col gap-1 text-sm sm:col-span-1">
           <span className="text-xs font-medium uppercase tracking-wider text-muted">City (brands &amp; places)</span>
           <input
             id="audience-location"

@@ -16,6 +16,11 @@ export interface ArmSummary {
   meanPercentile: number | null;
   landRate: number | null;
   missRate: number | null;
+  /** Share of measured references at p100, the top of the scale, where percentiles can't separate them. */
+  topShare: number | null;
+  /** Outside check: mean 1–5 recognition from a non-Claude model, when rated. */
+  recognition: number | null;
+  recognitionWithoutEchoes: number | null;
 }
 
 export interface Paired {
@@ -37,6 +42,10 @@ export interface Summary {
   fidelity: Record<"claude" | "vernacular", { meaning: number | null; natural: number | null }>;
   changes: Record<"claude" | "vernacular", number | null>;
   speed: { meanMs: number | null; meanQlooCalls: number | null };
+  /** Per pair, Vernacular's mean recognition minus Claude alone's (a tie is within 0.25 points). */
+  recognitionPaired: Paired;
+  /** The same, with echoes of the brief left out of both sides. */
+  recognitionPairedWithoutEchoes: Paired;
 }
 
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
@@ -59,7 +68,18 @@ function armSummary(arms: Arm[], echoOf: Echo[] = arms.map(() => never)): ArmSum
     meanPercentile: round(mean(measured.map((r) => r.percentile!))),
     landRate: measured.length ? round(measured.filter((r) => r.verdict === "lands").length / measured.length, 3) : null,
     missRate: measured.length ? round(measured.filter((r) => r.verdict === "misses").length / measured.length, 3) : null,
+    topShare: measured.length ? round(measured.filter((r) => r.percentile === 100).length / measured.length, 3) : null,
+    recognition: round(mean(refs.flatMap((r) => (r.recognition === undefined ? [] : [r.recognition]))), 2),
+    recognitionWithoutEchoes: round(
+      mean(arms.flatMap((a, i) => a.refs.filter((r) => r.recognition !== undefined && !echoOf[i](r)).map((r) => r.recognition!))),
+      2,
+    ),
   };
+}
+
+/** Mean recognition of a text's rated references, or null if none were rated. */
+export function pairRecognition(arm: Arm, skip: Echo = never): number | null {
+  return mean(arm.refs.flatMap((r) => (r.recognition === undefined || skip(r) ? [] : [r.recognition])));
 }
 
 /** Mean percentile of a text's measured references, or null if none were measured. */
@@ -68,19 +88,24 @@ export function pairScore(arm: Arm, skip: Echo = never): number | null {
 }
 
 function paired(pairs: PairResult[], echoFor: (p: PairResult) => Echo): Paired {
+  return pairedBy(pairs, (p, k) => pairScore(p[k], echoFor(p)), 1, 1);
+}
+
+function pairedBy(pairs: PairResult[], score: (p: PairResult, k: "claude" | "vernacular") => number | null, tie: number, dp: number): Paired {
   const diffs: number[] = [];
   for (const p of pairs) {
-    const v = pairScore(p.vernacular, echoFor(p));
-    const c = pairScore(p.claude, echoFor(p));
+    const v = score(p, "vernacular");
+    const c = score(p, "claude");
     if (v !== null && c !== null) diffs.push(v - c);
   }
+  const ci = bootstrapCi(diffs, 2000, 7, dp);
   return {
     n: diffs.length,
-    meanDiff: round(mean(diffs)),
-    ci: bootstrapCi(diffs),
-    wins: diffs.filter((d) => d >= 1).length,
-    ties: diffs.filter((d) => Math.abs(d) < 1).length,
-    losses: diffs.filter((d) => d <= -1).length,
+    meanDiff: round(mean(diffs), dp),
+    ci,
+    wins: diffs.filter((d) => d >= tie).length,
+    ties: diffs.filter((d) => Math.abs(d) < tie).length,
+    losses: diffs.filter((d) => d <= -tie).length,
   };
 }
 
@@ -94,7 +119,7 @@ function rng(seed: number) {
   };
 }
 
-export function bootstrapCi(diffs: number[], resamples = 2000, seed = 7): [number, number] | null {
+export function bootstrapCi(diffs: number[], resamples = 2000, seed = 7, dp = 1): [number, number] | null {
   if (diffs.length < 2) return null;
   const rand = rng(seed);
   const means: number[] = [];
@@ -104,7 +129,7 @@ export function bootstrapCi(diffs: number[], resamples = 2000, seed = 7): [numbe
     means.push(sum / diffs.length);
   }
   means.sort((a, b) => a - b);
-  return [round(means[Math.floor(resamples * 0.025)])!, round(means[Math.ceil(resamples * 0.975) - 1])!];
+  return [round(means[Math.floor(resamples * 0.025)], dp)!, round(means[Math.ceil(resamples * 0.975) - 1], dp)!];
 }
 
 export function summarize(pairs: PairResult[], audiences: { id: string; anchors?: string[] }[]): Summary {
@@ -140,5 +165,7 @@ export function summarize(pairs: PairResult[], audiences: { id: string; anchors?
       meanMs: round(mean(pairs.map((p) => p.stats.ms)), 0),
       meanQlooCalls: round(mean(pairs.map((p) => p.stats.qlooCalls))),
     },
+    recognitionPaired: pairedBy(pairs, (p, k) => pairRecognition(p[k]), 0.25, 2),
+    recognitionPairedWithoutEchoes: pairedBy(pairs, (p, k) => pairRecognition(p[k], echoFor(p)), 0.25, 2),
   };
 }

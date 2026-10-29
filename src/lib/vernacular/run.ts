@@ -7,7 +7,7 @@ import { resolveAudience, scoreReferences } from "./score";
 import { MAX_TEXT_CHARS } from "./limits";
 import type { CheckEvent, CheckInput, CheckResult } from "./types";
 
-export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void = () => {}): Promise<CheckResult> {
+export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void = () => {}, signal?: AbortSignal): Promise<CheckResult> {
   const started = Date.now();
   const text = input.text.trim();
   if (!text) throw new Error("Paste some copy to check.");
@@ -26,6 +26,7 @@ export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void 
   emit({ type: "audience", anchors: audience.anchors });
   emit({ type: "extracted", references });
 
+  signal?.throwIfAborted();
   const scored = await scoreReferences(references, audience);
   for (const s of scored) emit({ type: "scored", reference: s });
 
@@ -33,7 +34,8 @@ export async function runCheck(input: CheckInput, emit: (e: CheckEvent) => void 
   // One agent per sentence, in parallel: references in the same sentence share an
   // agent so their rewrites build on each other; different sentences can't clash.
   const groups = [...new Map(weak.map((w) => [w.sentence, weak.filter((x) => x.sentence === w.sentence)])).values()];
-  const runs = await Promise.all(groups.map((g) => runSwapAgent(text, g, audience, emit)));
+  signal?.throwIfAborted();
+  const runs = await Promise.all(groups.map((g) => runSwapAgent(text, g, audience, emit, signal)));
   const swaps = runs.flatMap((r) => r.swaps);
   const kept = runs.flatMap((r) => r.kept);
   const llmCalls = runs.reduce((n, r) => n + r.llmCalls, 0);

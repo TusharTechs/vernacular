@@ -1,0 +1,28 @@
+# Vernacular
+
+> The spell-checker for culture. Vernacular finds every cultural reference in a piece of ad copy (artists, shows, films, brands, places, public figures), scores each one for a specific audience on Qloo's taste graph, and swaps the ones that miss for Qloo-verified equivalents that play the same role. Built for the Qloo Agentic Hackathon (2026).
+
+Vernacular is a Next.js app. Claude (claude-opus-5-5) extracts references and runs a swap agent whose tools call the Qloo Taste AI API; every audience score, verdict and percentile comes from Qloo. Source: https://github.com/TusharTechs/vernacular (MIT).
+
+## Try it
+
+- [Check](https://vernacular-lime.vercel.app/): opens on a saved check of a comedy-tour ad for Gen Z Latin-pop fans; click any underlined reference for its Qloo evidence and swap; "Re-run it live" runs it fresh.
+- [Campaign check](https://vernacular-lime.vercel.app/campaign): up to 5 ad versions × 5 audiences in one grid.
+- [Culture Translator](https://vernacular-lime.vercel.app/translate): one reference scored for five audiences.
+- [Vernacular Anywhere](https://vernacular-lime.vercel.app/anywhere): the browser extension's check in mock composers.
+- [Benchmark](https://vernacular-lime.vercel.app/benchmark): Vernacular vs the same model without Qloo on 40 copy × audience pairs, plus an outside recognition check by a non-Claude model.
+- [How it works](https://vernacular-lime.vercel.app/how) and [Why Vernacular](https://vernacular-lime.vercel.app/pitch).
+- MCP server (Streamable HTTP, for MCP clients): https://vernacular-lime.vercel.app/api/mcp. Tools: check_copy, build_audience, compare_audiences, check_campaign, where_it_lands, translate_reference.
+
+## How it uses Qloo
+
+- GET /search: resolves every reference, anchor and candidate, with a name-plausibility check against Qloo's alternative names.
+- GET /v2/insights: scores references against a panel of ~40 well-known peers of the same type in the same request (within-audience percentile; lands >= p65, misses < p35); swap candidates with feature.explainability, genre tags and a popularity floor of 0.85; urn:demographics for age skew; signal.location.query for city-local places; urn:heatmap with locality boundaries for neighbourhood maps.
+- GET /v2/audiences and GET /v2/tags: turn a plain-language audience into Qloo segments and interest tags.
+
+## Evidence and limits
+
+- [README](https://github.com/TusharTechs/vernacular#readme): architecture, a real request trace, tests, run instructions, known limitations.
+- [Findings log](https://github.com/TusharTechs/vernacular/blob/main/docs/FINDINGS.md): pre-registered data tests (one failed, one passed), and the outside recognition check that changed the swap agent.
+- [Claims map](https://github.com/TusharTechs/vernacular/blob/main/docs/CLAIMS.md): each factual claim in the submission, with the file or data that backs it.
+- Benchmark numbers are computed live from results.json on the benchmark page; Qloo is both Vernacular's source and the benchmark's main grader, which the page states.

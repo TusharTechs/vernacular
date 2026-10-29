@@ -1,0 +1,34 @@
+npm run edge-cases -- --full · 2026-10-29T05:03:09Z · commit base dff9ea8 + working tree
+PASS  none          no references
+      got: none
+PASS  generic       generic nouns are not references
+      got: none
+PASS  possessive    Beyoncé (artist), span without the possessive
+      got: Beyoncé → Beyoncé (artist)
+PASS  hashtag       Taylor Swift and Netflix from a hashtag and a handle
+      got: TaylorSwift → Taylor Swift (artist); netflix → Netflix (brand)
+PASS  misspelt      queries corrected to Beyoncé and Coachella
+      got: Beyonse → Beyoncé (artist); Coachela → Coachella (place)
+PASS  atlanta-show  Atlanta as a TV show
+      got: Atlanta → Atlanta (tv_show)
+PASS  atlanta-city  Atlanta as a destination
+      got: Atlanta → Atlanta (destination)
+PASS  spanish       Bad Bunny (artist) and La Casa de Papel (tv_show) in Spanish copy
+      got: Bad Bunny → Bad Bunny (artist); La Casa de Papel → La Casa de Papel (tv_show)
+PASS  emoji         Drake and SZA through emoji
+      got: Drake → Drake (artist); SZA → SZA (artist)
+PASS  injection     instruction inside the copy is ignored; Fleetwood Mac found
+      got: Fleetwood Mac → Fleetwood Mac (artist)
+PASS  repeat        the repeated name is found, spans exact
+      got: Taylor Swift → Taylor Swift (artist)
+PASS  anchor        the audience's own anchor lands at p100
+      got: Bad Bunny → Bad Bunny · lands p100
+PASS  fictional     made-up names are not matched to real entities
+      got: Zorblax Quartet → no match · unmeasured; Glimmerfang → no match · unmeasured
+PASS  old-vs-young  older references don't land with Gen Z
+      got: Frank Sinatra → Frank Sinatra · mixed p60; Murder, She Wrote → Murder, She Wrote · mixed p53
+PASS  spanish-swap  swaps in Spanish copy keep the copy in Spanish
+      got: Más intenso que un concierto de Rosalía y una noche viendo Elite.
+PASS  factual       a factual credit (the studio's own film) is never swapped
+      got: This summer, from the studio that gave you Jurassic Park, comes a story funnier than The Kissing Booth 2.
+16 passed, 0 failed · 8 Qloo network calls

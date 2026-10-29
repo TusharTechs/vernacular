@@ -57,6 +57,8 @@ export interface Swap {
   change: Change;
   /** Qloo explainability: how much each audience anchor drove the replacement's affinity. */
   drivers: { name: string; share: number }[];
+  /** Qloo tags the replacement shares with the original (genre, keywords, category): why it plays the same role. */
+  shared?: string[];
   rationale: string;
   evidence: Evidence[];
 }

@@ -1,11 +1,12 @@
-// GET /api/sample: a real check of the landing-page sample, cached server-side
-// for a day so first-time visitors see results instantly. Qloo allows private
-// server-side caching; nothing here is written to the repository.
+// GET /api/sample: a real check of the landing-page sample. Served from the saved
+// snapshot (npm run snapshot) so first-time visitors see results instantly; if the
+// sample copy has changed since, a live check cached server-side for a day.
 
 import { unstable_cache } from "next/cache";
 import { AUDIENCE_PRESETS, SAMPLE_COPY } from "@/lib/vernacular/presets";
 import { runCheck } from "@/lib/vernacular/run";
 import { slimResult } from "@/lib/vernacular/slim";
+import { sampleSnapshot } from "@/lib/vernacular/snapshots";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -17,6 +18,8 @@ const cachedSample = unstable_cache(
 );
 
 export async function GET() {
+  const saved = sampleSnapshot();
+  if (saved) return Response.json(saved);
   try {
     const d = await cachedSample();
     return Response.json({ ...d, result: slimResult(d.result) });

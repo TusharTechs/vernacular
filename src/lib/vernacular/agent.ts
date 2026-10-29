@@ -10,6 +10,8 @@ import {
   findEquivalents,
   scoreWithPanel,
   searchTags,
+  sharedTags,
+  SWAP_POPULARITY_FLOOR,
   type Audience,
   type Equivalent,
   type Evidence,
@@ -36,7 +38,7 @@ const SYSTEM = `You are Vernacular's swap agent. Copy is being adapted for a spe
 How to work:
 1. Call find_equivalents for the reference. By default it filters to the original's genre tags. If the results don't fit the reference's role in the sentence (a crooner swapped for a rapper, a sitcom for a drama), call search_tags to find tags that capture the role (e.g. "sitcom", "crooner", "steakhouse") and call find_equivalents again with those tag_ids.
    Some references can't be replaced like for like. A director usually stands for a visual style, a public figure for a trait, and Qloo's people results lean heavily toward musicians. When same-type candidates don't fit the role, call find_equivalents with a different type (e.g. a movie or tv_show for a director, a tv_show or brand for a personality) and rephrase only as much as the new type needs ("looks like a Wes Anderson film" → "looks like a scene from <film>").
-2. Pick up to 3 candidates that fit the role and would read naturally, and call verify_candidates.
+2. Pick up to 3 candidates that fit the role and would read naturally, and call verify_candidates. Each candidate's shared_with_original lists the Qloo tags it shares with the original; overlap there is evidence it plays the same role.
 3. Call submit_swap with the best verified candidate. It must score "lands", or at least "mixed" and clearly above the original. If nothing qualifies after a couple of attempts, call keep_reference and explain plainly.
 
 Rules:
@@ -44,6 +46,7 @@ Rules:
 - Only use candidates returned by find_equivalents in this run. Never invent or rename entities.
 - When the reference is a yardstick ("funnier than X", "as strong as X", "bigger than X"), the replacement must be a household name for this audience. Prefer the most widely known candidate that lands over a niche one that scores a little higher; Qloo's popularity numbers don't capture this, so use your judgment.
 - The rewritten sentence must keep the original's meaning, tone and length, change only what the swap needs, and name the replacement the way people actually say it: Qloo's spelling or its common short form ("NBA", not "National Basketball Association").
+- Fix the grammar around the new name: "a The White Lotus marathon" must become "a White Lotus marathon".
 - If two references share a sentence, rewrite from the sentence's current version, which submit_swap returns.
 - Finish every reference you were given with exactly one submit_swap or keep_reference.`;
 
@@ -55,11 +58,20 @@ export function namesEntity(sentence: string, name: string) {
   return said.includes(words.slice(0, 2).join(" ")) || (acronym.length >= 2 && said.includes(` ${acronym} `));
 }
 
+/** "like a The White Lotus marathon": an article left in front of a title that brings its own. */
+export function articleClash(before: string, after: string): string | null {
+  const clash = /\b(a|an)\s+the\b/i;
+  const m = clash.exec(after);
+  if (!m || clash.test(before)) return null;
+  return `"${m[0]}" doesn't read naturally. Drop "${m[1]}" or rephrase around the title.`;
+}
+
 export async function runSwapAgent(
   text: string,
   weak: ScoredReference[],
   audience: Audience,
   emit: (e: CheckEvent) => void,
+  signal?: AbortSignal,
 ): Promise<{ swaps: Swap[]; kept: Kept[]; llmCalls: number }> {
   const swaps: Swap[] = [];
   const kept: Kept[] = [];
@@ -114,7 +126,7 @@ export async function runSwapAgent(
       reference_id: z.string(),
       type: z.enum(ENTITY_TYPES).optional().describe("Look in a different entity type when like-for-like can't fill the role. Omit for the reference's own type."),
       tag_ids: z.array(z.string()).max(4).optional().describe("Tag ids from search_tags. Omit to use the original's genre tags."),
-      popularity_floor: z.number().min(0.2).max(0.95).optional().describe("Minimum Qloo popularity, 0–1. Higher means more recognisable. Default 0.6."),
+      popularity_floor: z.number().min(0.2).max(0.95).optional().describe(`Minimum Qloo popularity, 0–1. Higher means more recognisable. Default ${SWAP_POPULARITY_FLOOR}, the floor of the well-known peers swaps are ranked against; lower it only when nothing at the default fits the role.`),
     }),
     run: (input) =>
       safe(async () => {
@@ -127,7 +139,7 @@ export async function runSwapAgent(
             ? `Looking for ${type.replace("_", " ")} equivalents to ${r.entity?.name ?? r.span}`
             : `Looking for a ${type.replace("_", " ")} that could stand in for ${r.entity?.name ?? r.span}`,
         });
-        const res = await findEquivalents(r.entity!, audience, { take: 8, popularityFloor: input.popularity_floor ?? 0.6, tagIds: input.tag_ids, type });
+        const res = await findEquivalents(r.entity!, audience, { take: 8, popularityFloor: input.popularity_floor ?? SWAP_POPULARITY_FLOOR, tagIds: input.tag_ids, type });
         qlooCalls += res.evidence.length - 3; // reconcile with actual calls made
         addEvidence(r.id, res.evidence);
         const map = candidates.get(r.id) ?? new Map();
@@ -142,6 +154,7 @@ export async function runSwapAgent(
             popularity: c.popularity && Number(c.popularity.toFixed(2)),
             affinity: c.affinity && Number(c.affinity.toFixed(3)),
             tags: c.tags.slice(0, 6).map((t) => t.name),
+            shared_with_original: sharedTags(r.entity!, c),
           })),
         });
       })(),
@@ -212,6 +225,8 @@ export async function runSwapAgent(
         }
         if (!namesEntity(input.rewritten_sentence, v.candidate.name)) throw new Error(`The rewritten sentence must name ${v.candidate.name}.`);
         if (input.rewritten_sentence.includes(r.span)) throw new Error(`The rewritten sentence still contains "${r.span}".`);
+        const clash = articleClash(currentSentence.get(r.sentence) ?? r.sentence, input.rewritten_sentence);
+        if (clash) throw new Error(clash);
 
         const raw = (v.candidate.explainability as { "signal.interests.entities"?: { entity_id: string; score: number }[] } | undefined)?.[
           "signal.interests.entities"
@@ -222,6 +237,7 @@ export async function runSwapAgent(
           .sort((a, b) => b.share - a.share);
         const swap: Swap = {
           drivers,
+          shared: r.entity ? sharedTags(r.entity, v.candidate) : [],
           referenceId: r.id,
           replacement: { ...v.candidate, percentile: v.percentile, affinity: v.affinity },
           rewrittenSentence: input.rewritten_sentence,
@@ -291,6 +307,7 @@ export async function runSwapAgent(
 
   let llmCalls = 0;
   for await (const message of runner) {
+    if (signal?.aborted) break; // the visitor left; stop spending on this run
     llmCalls++;
     if (message.stop_reason === "refusal") throw new RefusalError(message.stop_details?.category);
   }

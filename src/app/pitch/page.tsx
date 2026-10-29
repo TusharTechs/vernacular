@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 const pct = (x: number | null) => (x === null ? "–" : `${Math.round(x * 100)}%`);
+const signed = (x: number) => (x > 0 ? `+${x}` : `${x}`);
 
 function Section({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
@@ -78,10 +79,10 @@ export default function PitchPage() {
           {[
             {
               who: "Agency strategist",
-              pain: "One national script has to run on stations and feeds with very different listeners. Re-briefing a writer per audience takes days.",
-              flow: "Tour Mode scores the script for every audience at once; the agent localises each version; share cards go to the client.",
-              proof: "A country-radio truck ad, rewritten for a Latin-pop station",
-              href: "/#scenario=radio",
+              pain: "A campaign ships in several creative routes to audiences that share almost nothing. Deciding which route runs where, and re-briefing writers per audience, takes days.",
+              flow: "Campaign check scores every version for every audience in one grid; any weak cell opens the full check, where the agent localises it; share cards go to the client.",
+              proof: "Four cold-brew routes × five audiences, in one grid",
+              href: "/campaign",
             },
             {
               who: "Social media manager",
@@ -127,9 +128,10 @@ export default function PitchPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           {[
             { h: "Check", d: "Paste copy, a storyboard or a video ad. Every reference scored for the exact audience, weak ones swapped, the copy kept in its own voice.", href: "/" },
-            { h: "Anywhere", d: "A browser extension that underlines culture in any text box: social, email, docs, chat. One click to swap.", href: "/anywhere" },
+            { h: "Campaign", d: "Every version of an ad against every audience in one grid: which version runs where, and which references to fix first.", href: "/campaign" },
+            { h: "Anywhere", d: "A browser extension that checks the culture in any text box: social, email, docs, chat. One click to swap.", href: "/anywhere" },
             { h: "Translator", d: "One reference, five audiences: what Seinfeld means to Gen Z, to country fans, to hip-hop heads.", href: "/translate" },
-            { h: "API for agents", d: "An MCP server so AI agents check their own copy before they publish. Five tools, open to any MCP client.", href: "/" },
+            { h: "API for agents", d: "An MCP server so AI agents check their own copy, and pick between their own variants, before they publish. Six tools, open to any MCP client.", href: "https://github.com/TusharTechs/vernacular#use-it-from-an-agent-mcp" },
           ].map((x) => (
             <Link key={x.h} href={x.href} className="flex flex-col gap-1 rounded-xl border border-rule bg-sheet p-5 transition-colors hover:border-accent">
               <span className="font-serif text-xl italic">{x.h}</span>
@@ -161,7 +163,9 @@ export default function PitchPage() {
           <div className="flex flex-col gap-1 rounded-xl border border-rule bg-sheet p-5">
             <span className="font-mono text-4xl text-lands">{s.paired.wins}/{s.paired.n}</span>
             <span className="text-sm text-muted">
-              pairs where Vernacular beat Claude alone{s.paired.ci ? ` (95% interval +${s.paired.ci[0]} to +${s.paired.ci[1]} points)` : ""}
+              pairs where Vernacular beat Claude alone
+              {s.paired.meanDiff !== null && `, by ${signed(s.paired.meanDiff)} points on average`}
+              {s.paired.ci && ` (95% interval ${signed(s.paired.ci[0])} to ${signed(s.paired.ci[1])})`}
             </span>
           </div>
         </div>

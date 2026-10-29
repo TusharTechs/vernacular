@@ -62,6 +62,7 @@ const Interpretation = z.object({
   segment_ids: z.array(z.string()).max(3).describe("Ids from the provided segment catalog that clearly match the description. Empty if none fit."),
   age: z.enum(AGE_BANDS).nullable().describe("Only if the description states or clearly implies an age range."),
   location: z.string().nullable().describe("A city or region if the description names one."),
+  gender: z.enum(["male", "female"]).nullable().describe("Only if the description states or clearly implies one, e.g. 'moms' or 'dads'."),
 });
 
 const SYSTEM = `You turn a marketer's description of an audience into structured signals for Qloo's taste graph.
@@ -69,7 +70,7 @@ const SYSTEM = `You turn a marketer's description of an audience into structured
 - named: only entities the description explicitly names. Do not add your own guesses about what the audience likes; Qloo supplies that.
 - interests: genres, styles, cuisines or activities the description mentions (not named entities). They are matched to Qloo tags.
 - segment_ids: choose only from the catalog provided, and only segments the description clearly supports.
-- age and location: only when stated or unmistakably implied ("college students" implies 24_and_younger; "retirees" implies 55_and_older).`;
+- age, gender and location: only when stated or unmistakably implied ("college students" implies 24_and_younger; "retirees" implies 55_and_older; "new moms" implies female).`;
 
 export interface AudienceProposal {
   spec: AudienceSpec;
@@ -126,6 +127,7 @@ export async function proposeAudience(description: string): Promise<AudienceProp
     label: parsed.label,
     anchors: named,
     age: parsed.age ?? undefined,
+    gender: parsed.gender ?? undefined,
     location: parsed.location ?? undefined,
     segments: picked.map((s) => s.id),
     tags: tags.map((t) => t.id),
@@ -156,6 +158,7 @@ export async function proposeAudience(description: string): Promise<AudienceProp
       label: parsed.label,
       anchors: anchors.map((a) => ({ query: a.name, type: a.type })),
       age: parsed.age ?? undefined,
+      gender: parsed.gender ?? undefined,
       location: parsed.location ?? undefined,
       segments: picked.map((s) => ({ id: s.id, name: s.name })),
       tags,

@@ -7,7 +7,7 @@ export function ScenarioGallery({ active, loading, onOpen }: { active: string | 
     <section className="flex flex-col gap-2" aria-label="Real-world scenarios">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-muted">Real-world scenarios</h2>
-        <span className="hidden text-xs text-muted sm:inline">Each one is a real check, cached so it opens instantly</span>
+        <span className="hidden text-xs text-muted sm:inline">Each one is a real check, saved so it opens instantly</span>
       </div>
       <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
         {SCENARIOS.map((s) => (

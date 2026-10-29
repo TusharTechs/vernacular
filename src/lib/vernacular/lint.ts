@@ -2,7 +2,7 @@
 // offer the best Qloo-verified same-type alternative. No rewriting agent, so it
 // answers in seconds; it powers the browser extension and the /anywhere demo.
 
-import { findEquivalents, scoreWithPanel } from "../qloo/tools";
+import { findEquivalents, scoreWithPanel, sharedTags } from "../qloo/tools";
 import { extractReferences } from "./extract";
 import { resolveAudience, scoreReferences, THRESHOLDS } from "./score";
 import type { AudienceSpec, Verdict } from "./types";
@@ -14,7 +14,8 @@ export interface LintItem {
   verdict: Verdict;
   percentile: number | null;
   note: string | null;
-  suggestion: { name: string; percentile: number } | null;
+  /** A verified alternative that plays the same role: it must share Qloo tags with the original. */
+  suggestion: { name: string; percentile: number; shared: string[] } | null;
 }
 
 const cache = new Map<string, { at: number; items: LintItem[] }>();
@@ -32,15 +33,23 @@ export async function lint(text: string, spec: AudienceSpec): Promise<LintItem[]
       // A person usually stands for a role (a director's look, a trait), which only the full agent can rewrite around.
       if (!s.entity || s.type === "person" || (s.verdict !== "misses" && s.verdict !== "mixed")) return { ...base, suggestion: null };
       try {
-        const { candidates } = await findEquivalents(s.entity, audience, { take: 6, popularityFloor: 0.6 });
-        const top = candidates.slice(0, 3);
+        const { candidates } = await findEquivalents(s.entity, audience, { take: 8 });
+        // No agent here to judge the role, so a suggestion must share what-it-is tags with
+        // the original (a coffee chain for a coffee chain, not a sports league).
+        const entity = s.entity;
+        const top = candidates
+          .map((c) => ({ c, shared: sharedTags(entity, c) }))
+          .filter((x) => x.shared.length > 0)
+          .sort((a, b) => b.shared.length - a.shared.length)
+          .slice(0, 3)
+          .map((x) => ({ ...x.c, shared: x.shared }));
         if (!top.length) return { ...base, suggestion: null };
         const { results } = await scoreWithPanel(top.map((c) => c.id), s.type, audience);
         const best = results
           .filter((r) => r.percentile !== null && r.percentile >= THRESHOLDS.lands)
           .sort((a, b) => (b.percentile ?? 0) - (a.percentile ?? 0))[0];
         const c = best && top.find((x) => x.id === best.entityId);
-        return { ...base, suggestion: c ? { name: c.name, percentile: best.percentile! } : null };
+        return { ...base, suggestion: c ? { name: c.name, percentile: best.percentile!, shared: c.shared } : null };
       } catch {
         return { ...base, suggestion: null };
       }

@@ -10,6 +10,7 @@ import { publicMessage } from "@/lib/sse";
 import { resolveEntity } from "@/lib/qloo/tools";
 import { proposeAudience } from "@/lib/vernacular/audience";
 import { buildCityMap, MAP_TOP } from "@/lib/vernacular/map";
+import { collectCampaign } from "@/lib/vernacular/campaign";
 import { runCheck } from "@/lib/vernacular/run";
 import { AUDIENCE_PRESETS } from "@/lib/vernacular/presets";
 import { translate, type TranslateEvent } from "@/lib/vernacular/translate";
@@ -29,13 +30,14 @@ const audienceShape = {
     .optional()
     .describe("Things this audience loves, e.g. [{query: 'Bad Bunny', type: 'artist'}]."),
   age: z.enum(AGE_BANDS).optional(),
+  gender: z.enum(["male", "female"]).optional().describe("Only when the audience clearly skews one way."),
   location: z.string().max(80).optional().describe("City; applied to brand and place references only."),
 };
 const AudienceInput = z.object(audienceShape);
 
 async function toSpec(a: z.infer<typeof AudienceInput>): Promise<AudienceSpec> {
   if (a.anchors?.length || a.age) {
-    return { label: a.label ?? a.description ?? "Target audience", anchors: a.anchors ?? [], age: a.age, location: a.location };
+    return { label: a.label ?? a.description ?? "Target audience", anchors: a.anchors ?? [], age: a.age, gender: a.gender, location: a.location };
   }
   if (!a.description) throw new Error("Describe the audience with at least one thing they love or an age band.");
   return (await proposeAudience(a.description)).spec;
@@ -134,6 +136,37 @@ function buildServer(ip: string) {
           .map(([ref, cols]) => `- ${ref}: ${Object.entries(cols).map(([a, v]) => `${a} ${v}`).join("; ")}`)
           .join("\n");
         return { content: [{ type: "text" as const, text: text_ || "No named cultural references found." }], structuredContent: { grid } };
+      }),
+  );
+
+  server.registerTool(
+    "check_campaign",
+    {
+      title: "Pick which ad variant runs for which audience",
+      description:
+        "Scores up to 5 versions of an ad for up to 5 audiences on Qloo in one grid (no rewriting): each cell is the version's average percentile for that audience, with each reference's verdict. Use it to choose which version to publish where, then call check_copy on a weak cell to fix it.",
+      inputSchema: {
+        variants: z.array(z.object({ name: z.string().max(40).optional(), text: z.string().min(1).max(600) })).min(1).max(5),
+        audiences: z.array(AudienceInput).min(1).max(5),
+      },
+    },
+    async ({ variants, audiences }) =>
+      guarded(async () => {
+        const specs = await Promise.all(audiences.map(toSpec));
+        const named = variants.map((v, i) => ({ name: v.name || `Variant ${String.fromCharCode(65 + i)}`, text: v.text }));
+        const r = await collectCampaign({ variants: named, audiences: specs });
+        const lines = specs.map((spec, a) => {
+          const col = r.cells.filter((c) => c.audience === a && c.fit !== null).sort((x, y) => y.fit! - x.fit!);
+          const best = col[0];
+          return `- ${spec.label}: ${best ? `best is ${named[best.variant].name} (p${best.fit})` : "no scores"}; ${col.map((c) => `${named[c.variant].name} p${c.fit}`).join(", ")}`;
+        });
+        const grid = r.cells.map((c) => ({
+          variant: named[c.variant].name,
+          audience: specs[c.audience].label,
+          fit: c.fit,
+          references: c.refs.map((x) => ({ reference: x.span, verdict: x.verdict, percentile: x.percentile })),
+        }));
+        return { content: [{ type: "text" as const, text: `Campaign grid (average Qloo percentile per cell):\n${lines.join("\n")}` }], structuredContent: { grid } };
       }),
   );
 

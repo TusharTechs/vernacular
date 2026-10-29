@@ -9,6 +9,8 @@ export interface GradedRef {
   type: EntityType;
   percentile: number | null;
   verdict: Verdict;
+  /** Outside check: 1–5 from a non-Claude model, blind to which version used it (see recognition.ts). */
+  recognition?: number;
 }
 
 export interface Arm {
@@ -32,4 +34,6 @@ export interface BenchmarkRun {
   copy: { id: string; label: string; text: string }[];
   audiences: { id: string; label: string; anchors: string[] }[];
   pairs: PairResult[];
+  /** Model that rated recognition, when that pass has been run. */
+  recognitionModel?: string;
 }

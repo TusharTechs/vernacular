@@ -22,6 +22,10 @@ const SHORT_AGE: Record<AgeBand, string> = {
   "55_and_older": "55+",
 };
 
+/** Qloo's explainability only says something when the anchors' shares differ. */
+const informative = (drivers: { share: number }[]) =>
+  drivers.length >= 2 && Math.max(...drivers.map((d) => d.share)) - Math.min(...drivers.map((d) => d.share)) >= 0.15;
+
 export function Source({ kind }: { kind: "qloo" | "model" | "generated" }) {
   const map = {
     qloo: ["Qloo", "border-lands/40 text-lands", "Measured by a Qloo API call"],
@@ -159,7 +163,7 @@ export function ReferenceCard({
       )}
 
       {swap && (
-        <div className="flex flex-col gap-2 rounded-md border border-rule bg-desk/60 p-3">
+        <div data-tour="swap" className="flex flex-col gap-2 rounded-md border border-rule bg-desk/60 p-3">
           <div className="flex items-baseline justify-between gap-2">
             <p className="text-sm">
               Swap for <strong className="font-serif text-base">{swap.replacement.name}</strong>
@@ -171,7 +175,30 @@ export function ReferenceCard({
             <span>{swap.rationale}</span>
           </p>
           <SwapPreview swap={swap} />
-          {swap.drivers.length > 0 && (
+          {!!swap.shared?.length && (
+            <p className="flex items-start gap-2 text-sm text-muted">
+              <Source kind="qloo" />
+              <span>
+                Plays the same role: Qloo tags both {reference?.entity?.name ?? span} and {swap.replacement.name}{" "}
+                {swap.shared.map((t, i) => (
+                  <span key={t}>
+                    {i > 0 && (i === swap.shared!.length - 1 ? " and " : ", ")}
+                    <span className="text-ink">{t}</span>
+                  </span>
+                ))}
+                .
+              </span>
+            </p>
+          )}
+          {swap.drivers.length > 0 && !informative(swap.drivers) && (
+            <p className="flex items-start gap-2 text-sm text-muted">
+              <Source kind="qloo" />
+              <span>
+                Pulled in by {swap.drivers.map((d) => d.name).join(" and ")} about equally (Qloo explainability).
+              </span>
+            </p>
+          )}
+          {informative(swap.drivers) && (
             <div className="flex items-start gap-2">
               <Source kind="qloo" />
               <TastePath

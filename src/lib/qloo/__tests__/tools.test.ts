@@ -115,18 +115,23 @@ describe("findEquivalents", () => {
     tags: [{ id: "urn:tag:genre:media:comedy", name: "Comedy" }, { id: "urn:tag:keyword:media:nyc", name: "NYC" }],
   };
 
-  it("uses genre tags first and relaxes when nothing comes back", async () => {
+  it("keeps the genre tags while it lowers the popularity floor, then drops them", async () => {
     mockFetch(
+      { body: { results: { entities: [] } } },
       { body: { results: { entities: [] } } },
       { body: { results: { entities: [{ entity_id: "c1", name: "Abbott Elementary", query: { affinity: 0.7 } }] } } },
     );
     const r = await findEquivalents(original, audience);
     expect(requests[0].searchParams.get("filter.tags")).toBe("urn:tag:genre:media:comedy");
+    expect(requests[0].searchParams.get("filter.popularity.min")).toBe("0.85");
     expect(requests[0].searchParams.get("filter.exclude.entities")).toBe("orig");
-    expect(requests[1].searchParams.has("filter.tags")).toBe(false);
+    expect(requests[1].searchParams.get("filter.tags")).toBe("urn:tag:genre:media:comedy");
+    expect(requests[1].searchParams.get("filter.popularity.min")).toBe("0.6");
+    expect(requests[2].searchParams.has("filter.tags")).toBe(false);
+    expect(requests[2].searchParams.get("filter.popularity.min")).toBe("0.85");
     expect(r.relaxed).toEqual(["genre_tags"]);
     expect(r.candidates[0]).toMatchObject({ id: "c1", affinity: 0.7 });
-    expect(r.evidence).toHaveLength(2);
+    expect(r.evidence).toHaveLength(3);
   });
 });
 

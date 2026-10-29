@@ -165,10 +165,58 @@ export async function ageSkew(entityId: string) {
 
 // ------------------------------------------------------------------ equivalents
 
+/**
+ * The original's genre tags, most specific first. Qloo tags most brands with a
+ * "mobile app" genre, which would match TikTok to Starbucks, so it is used only
+ * when nothing else is there.
+ */
+export function genreTags(e: ResolvedEntity): QlooTag[] {
+  const genre = e.tags.filter((t) => t.id.includes(":genre:"));
+  const specific = genre.filter((t) => !t.id.includes(":mobile_app"));
+  return specific.length ? specific : genre;
+}
+
+// Tag families that say what a thing is, most telling first. Everything else
+// (business model, target market, price level, audience, tone…) says little about
+// the role a reference plays in a sentence.
+const ROLE_FAMILIES = ["subgenre", "genre", "category", "cuisine", "keyword", "wikipedia_category", "plot", "theme", "style", "archetype", "industry"];
+const NOISE = /:mobile_app|wikipedia_category:.*(\d|compan|establish|headquarter|based_in|brands_of)|actor_|character_name|_in_title/;
+
+function roleRank(id: string): number {
+  if (NOISE.test(id)) return -1;
+  const family = id.split(":")[2] ?? "";
+  return ROLE_FAMILIES.indexOf(family);
+}
+
+/** Qloo tags two entities share that describe what they are (genre, keywords, category), most telling first, by name. */
+export function sharedTags(a: ResolvedEntity, b: ResolvedEntity, max = 4): string[] {
+  const ids = new Set(a.tags.map((t) => t.id));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  const shared = b.tags
+    .filter((t) => ids.has(t.id) && t.name && roleRank(t.id) >= 0)
+    .sort((x, y) => roleRank(x.id) - roleRank(y.id));
+  for (const t of shared) {
+    const key = t.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(t.name);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 export interface Equivalent extends ResolvedEntity {
   affinity?: number;
   explainability?: unknown;
 }
+
+/**
+ * Swaps must be at least as well-known as the peers they're ranked against (the
+ * panel's floor). At 0.6, Qloo's high-affinity picks were often titles the audience
+ * over-indexes on but mostly hasn't heard of; an outside recognition check caught it.
+ */
+export const SWAP_POPULARITY_FLOOR = 0.85;
 
 export interface EquivalentsResult {
   candidates: Equivalent[];
@@ -179,15 +227,15 @@ export interface EquivalentsResult {
 
 /**
  * Entities this audience over-indexes on, by default of the original's type and
- * constrained to its genre tags, with a recognisability floor. Relaxes the tag filter,
- * then the popularity floor, if Qloo returns nothing.
+ * constrained to its genre tags, with a recognisability floor. Relaxes the floor,
+ * then the tag filter, then the floor entirely, if Qloo returns nothing.
  */
 export async function findEquivalents(
   original: ResolvedEntity,
   audience: Audience,
   {
     take = 8,
-    popularityFloor = 0.5,
+    popularityFloor = SWAP_POPULARITY_FLOOR,
     maxGenreTags = 3,
     tagIds,
     type = original.type,
@@ -198,14 +246,24 @@ export async function findEquivalents(
     ? tagIds
     : type !== original.type
       ? []
-      : original.tags.filter((t) => t.id.includes(":genre:")).slice(0, maxGenreTags).map((t) => t.id);
-  const attempts: { tags?: string; floor?: number; relaxed: EquivalentsResult["relaxed"] }[] = [
-    { tags: genre.length ? genre.join(",") : undefined, floor: popularityFloor, relaxed: [] },
-    { floor: popularityFloor, relaxed: ["genre_tags"] },
+      : genreTags(original).slice(0, maxGenreTags).map((t) => t.id);
+  // Keep the role (genre tags) longest; lower the recognisability floor in steps before dropping it.
+  type Attempt = { tags?: string; floor?: number; relaxed: EquivalentsResult["relaxed"] };
+  const lower = Math.min(popularityFloor, 0.6);
+  const withTags: Attempt[] = genre.length
+    ? [
+        { tags: genre.join(","), floor: popularityFloor, relaxed: [] },
+        ...(lower < popularityFloor ? [{ tags: genre.join(","), floor: lower, relaxed: ["popularity_floor"] } satisfies Attempt] : []),
+      ]
+    : [];
+  const attempts: Attempt[] = [
+    ...withTags,
+    { floor: popularityFloor, relaxed: genre.length ? ["genre_tags"] : [] },
+    ...(lower < popularityFloor ? [{ floor: lower, relaxed: ["genre_tags", "popularity_floor"] } satisfies Attempt] : []),
     { relaxed: ["genre_tags", "popularity_floor"] },
   ];
   const ev: Evidence[] = [];
-  for (const a of genre.length ? attempts : attempts.slice(1)) {
+  for (const a of attempts) {
     const call = await qlooGet<{ results?: { entities?: RawEntity[] } }>("/v2/insights", {
       "filter.type": urn(type),
       ...audienceSignals(audience, type),

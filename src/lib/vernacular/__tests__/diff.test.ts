@@ -52,3 +52,15 @@ describe("namesEntity", () => {
     expect(namesEntity("dinner like a Friday at Applebee's", "Bubba Gump Shrimp Co.")).toBe(false);
   });
 });
+
+describe("articleClash", () => {
+  it("rejects an article left in front of a title that brings its own", async () => {
+    const { articleClash } = await import("../agent");
+    expect(articleClash("keeps you up like a Seinfeld marathon", "keeps you up like a The White Lotus marathon")).toMatch(/a The/);
+    expect(articleClash("keeps you up like a Seinfeld marathon", "keeps you up like a White Lotus marathon")).toBeNull();
+  });
+  it("allows the phrase when the original already had it", async () => {
+    const { articleClash } = await import("../agent");
+    expect(articleClash("an the-style mixup", "an the-style mixup with SZA")).toBeNull();
+  });
+});

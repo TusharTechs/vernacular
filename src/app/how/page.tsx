@@ -33,13 +33,13 @@ const STEPS = [
     n: "3",
     h: "Swap",
     who: "Claude agent + Qloo",
-    d: "One agent per sentence asks Qloo for equivalents the audience over-indexes on, verifies each with the same scoring, and rewrites only the words it needs.",
+    d: "One agent per sentence asks Qloo for equivalents the audience over-indexes on that are at least as well-known as the peers they're ranked against, verifies each with the same scoring, and rewrites only the words it needs.",
   },
   {
     n: "4",
     h: "Prove",
     who: "Evidence",
-    d: "Every verdict and swap links to the Qloo calls behind it, with Qloo's explainability: which of the audience's favourites pulled a swap in.",
+    d: "Every verdict and swap links to the Qloo calls behind it, and each swap shows the Qloo tags it shares with the original: the evidence that it plays the same role.",
   },
 ];
 
@@ -50,11 +50,11 @@ const FINDINGS = [
   },
   {
     h: "Without data, a model repeats the brief.",
-    d: "In our benchmark, 36 of Claude alone's references were the very examples used to describe the audience: Bad Bunny for Bad Bunny fans. Qloo excludes the examples you give it, so every swap is a new name the audience already loves.",
+    d: "In our benchmark, 36 of Claude alone's references were the very examples used to describe the audience: Bad Bunny for Bad Bunny fans. Qloo leaves the examples you give it out of its suggestions, so every swap is a new name rather than the brief read back.",
   },
   {
-    h: "Popularity isn't recognisability.",
-    d: "Qloo rated a little-known 2019 film (popularity 0.93) about as popular as Boy Meets World (0.92). For a yardstick like \"funnier than X\", the agent has to choose a household name, so that rule lives in its instructions.",
+    h: "Over-indexing isn't recognition.",
+    d: "An outside judge (a non-Claude model, blind to which version wrote what) found our early swaps were often real Qloo favourites few people would know, like The Knick for country fans. Swaps now have to be at least as well-known as the peers they're ranked against: recognition rose to level with Claude alone's own picks, for three percentile points.",
   },
   {
     h: "Search always answers, even when it shouldn't.",
@@ -119,7 +119,7 @@ export default function HowPage() {
         <h2 className="font-serif text-3xl italic">One show, five audiences</h2>
         <p className="max-w-2xl text-muted">
           A score only means something relative to an audience. Seinfeld beats every well-known show for 55+ classic-rock fans and only one in five
-          for indie and A24 fans. Live Qloo scores, from the Culture Translator:
+          for indie and A24 fans. Qloo scores from a Culture Translator run on Oct 20, 2026 (run it yourself on the Translator page):
         </p>
         <div className="flex flex-col gap-3 pt-2">
           {SEINFELD.map((x) => (
@@ -173,7 +173,7 @@ export default function HowPage() {
             </table>
           </div>
           <p className="text-xs text-muted">
-            One run of the landing sample: 30 Qloo calls and 9 Claude calls, first verdicts in about 7 seconds. Every call behind a result is listed under
+            The saved landing sample: 27 Qloo calls and 7 Claude calls in 43 seconds, with the first verdicts streaming in after a few seconds. Every call behind a result is listed under
             the check.
           </p>
         </div>
@@ -183,7 +183,8 @@ export default function HowPage() {
             {[
               "A swap must come from Qloo in this run; the model can't invent one.",
               "It must verify as landing, or be mixed and at least 15 points above the original.",
-              "The rewrite must name it and drop the original, or the tool rejects it.",
+              "It must be at least as well-known as the peers it's ranked against (Qloo popularity 0.85), unless nothing at that level fits the role.",
+              "The rewrite must name it, drop the original and not leave a stray article (\"a The White Lotus\"), or the tool rejects it.",
               "Each agent is capped at 16 turns and 40 Qloo calls.",
               "Factual references (credits, venues) are kept, never swapped.",
             ].map((g) => (

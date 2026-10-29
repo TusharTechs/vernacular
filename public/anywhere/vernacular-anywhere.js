@@ -128,7 +128,7 @@
       else if (!weak.length) setPill("idle", `✓ ${lands} land${unscored ? ` · ${unscored} unscored` : ""}`, COLORS.lands);
       else setPill("idle", `${weak.length} to fix`, misses ? COLORS.misses : COLORS.mixed);
       if (panel.style.display === "block") render();
-    } catch (e) {
+    } catch {
       if (mine === seq) setPill("idle", "Vernacular · retry", COLORS.unmeasured);
       lastKey = "";
     }
@@ -162,6 +162,12 @@
           t.querySelector("span").textContent = `Try ${it.suggestion.name} · p${it.suggestion.percentile}`;
           t.querySelector("button").addEventListener("click", () => use(it.span, it.suggestion.name));
           el.appendChild(t);
+          if (it.suggestion.shared && it.suggestion.shared.length) {
+            const why = document.createElement("span");
+            why.className = "note";
+            why.textContent = `Same kind of thing, per Qloo: ${it.suggestion.shared.slice(0, 3).join(", ")}`;
+            el.appendChild(why);
+          }
         }
         list.appendChild(el);
       }

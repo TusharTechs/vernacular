@@ -90,3 +90,16 @@ export const LintInputSchema = z.object({
 export const TranslateInputSchema = z.object({
   query: z.string().trim().min(2, "Type a reference to translate.").max(80, "Keep it to one reference."),
 });
+
+export const CampaignInputSchema = z.object({
+  variants: z
+    .array(
+      z.object({
+        name: z.string().trim().max(40).default(""),
+        text: z.string().trim().min(1, "A variant is empty.").max(600, "Keep each variant under 600 characters."),
+      }),
+    )
+    .min(1, "Add at least one variant.")
+    .max(5, "A campaign check takes up to 5 variants."),
+  audiences: z.array(AudienceSchema).min(1, "Pick at least one audience.").max(5, "A campaign check takes up to 5 audiences."),
+});

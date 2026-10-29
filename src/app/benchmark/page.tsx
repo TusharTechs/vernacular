@@ -120,7 +120,7 @@ export default function BenchmarkPage() {
               </>
             )}
             . Vernacular repeated the brief {s.arms.vernacular.echoes === 0 ? "zero times" : `${s.arms.vernacular.echoes} times`}: Qloo leaves the
-            examples you give it out of its suggestions, so every swap is a new name the audience already loves.
+            examples you give it out of its suggestions, so every swap is a new name rather than the brief read back.
           </p>
         </section>
       )}
@@ -215,6 +215,62 @@ export default function BenchmarkPage() {
         </div>
       </section>
 
+      {s.arms.vernacular.recognition !== null && (
+        <section aria-label="Outside check" className="flex flex-col gap-4 rounded-xl border border-rule bg-sheet p-6">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">Outside check: would they recognise it?</h2>
+            <p className="max-w-3xl text-sm text-muted">
+              Percentiles can&apos;t tell a household name from a title the audience over-indexes on but mostly hasn&apos;t heard of, and Qloo grades
+              its own suggestions here. So a model from a different family ({run.recognitionModel}, not Claude, which also wrote the Claude-alone
+              versions) rated every reference in every version, blind to which version used it: would a typical member of this audience recognise it
+              and feel good about it? 1 to 5.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {arms.map((k) => {
+              const a = s.arms[k];
+              return (
+                <div key={k} className="flex flex-col gap-1 rounded-lg border border-rule p-4">
+                  <span className="flex items-center gap-2 text-xs text-muted">
+                    <span className={`h-2 w-2 rounded-full ${ARM_DOT[k]}`} /> {ARM_LABEL[k]}
+                  </span>
+                  <span className="font-mono text-3xl">
+                    {a.recognition ?? "–"}
+                    <span className="text-base text-muted">/5</span>
+                  </span>
+                  <span className="text-xs text-muted">
+                    {a.echoes > 0 && `${a.recognitionWithoutEchoes ?? "–"}/5 without the brief's own examples · `}
+                    {pct(a.topShare)} of references at p100
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="max-w-3xl text-sm text-muted">
+            {(() => {
+              const p = s.recognitionPairedWithoutEchoes;
+              const all = s.recognitionPaired;
+              const signedNum = (x: number) => `${x > 0 ? "+" : ""}${x}`;
+              return (
+                <>
+                  With the brief&apos;s own examples left out of both sides, Vernacular&apos;s references were rated more recognisable than Claude
+                  alone&apos;s in {p.wins} of {p.n} pairs, about the same in {p.ties} and less in {p.losses}
+                  {p.meanDiff !== null && ` (average gap ${signedNum(p.meanDiff)}`}
+                  {p.ci && `, 95% interval ${signedNum(p.ci[0])} to ${signedNum(p.ci[1])}`}
+                  {p.meanDiff !== null && ")"}. Counting those examples, which the judge rightly rates highly, Claude alone leads
+                  {all.meanDiff !== null && ` by ${Math.abs(all.meanDiff)} points per pair`}. The previous version of the swap agent lost this check
+                  even without them; what we changed, and what it cost on Qloo, is in{" "}
+                  <a className="text-accent underline underline-offset-2" href="https://github.com/TusharTechs/vernacular/blob/main/docs/FINDINGS.md#outside-recognition-check-oct-29">
+                    the findings log
+                  </a>
+                  .
+                </>
+              );
+            })()}
+          </p>
+        </section>
+      )}
+
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-serif text-2xl italic">Every pair</h2>
@@ -242,6 +298,10 @@ export default function BenchmarkPage() {
             <li>
               The fidelity judge is Claude at low effort, shown both rewrites unlabelled in a fixed random order, and told not to judge audience fit.
             </li>
+            <li>
+              The recognition judge is {run.recognitionModel ?? "a non-Claude model"}, shown each audience&apos;s references de-duplicated and shuffled
+              across all three versions, with no sign of which version used them.
+            </li>
           </ul>
         </div>
         <div className="flex flex-col gap-2">
@@ -250,7 +310,9 @@ export default function BenchmarkPage() {
             <li>
               Qloo is both Vernacular&apos;s source and the grader, so this measures how far a model alone is from what Qloo&apos;s data says about an
               audience, not how real people react. In an earlier fixed-in-advance check, Qloo&apos;s percentiles ranked references the way the
-              audiences&apos; own tastes predicted most of the time, but that isn&apos;t a human panel.
+              audiences&apos; own tastes predicted most of the time (
+              <a className="text-accent underline underline-offset-2" href="https://github.com/TusharTechs/vernacular/blob/main/docs/FINDINGS.md">findings log</a>), and
+              the recognition judge is independent of Qloo, but neither is a human panel.
             </li>
             <li>The copy was written for this benchmark and is short; each pair ran once, and model outputs vary between runs.</li>
             <li>Reference finding is itself model-based, so a version can be graded on a slightly different set of references.</li>
@@ -262,7 +324,7 @@ export default function BenchmarkPage() {
         <span>
           Corpus v{run.corpusVersion} · {run.model} · run {run.ranAt}
         </span>
-        <span>Reproduce with npm run benchmark</span>
+        <span>Reproduce with npm run benchmark, then npm run benchmark:recognition</span>
       </footer>
     </main>
   );

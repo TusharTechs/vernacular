@@ -15,7 +15,7 @@
 //
 // Uses the production tools layer (src/lib/qloo/tools.ts).
 
-import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { resolveEntity, scoreForAudience, type Audience, type ResolvedEntity } from "../src/lib/qloo/tools";
 import { QlooError } from "../src/lib/qloo/client";
 import type { AgeBand, EntityType } from "../src/lib/qloo/params";
@@ -135,8 +135,8 @@ async function main() {
   const p3 = changed && wh("Atlanta") > tj("Atlanta") && !(wh("Seattle") > tj("Seattle"));
   say(`- P3 brand location: ${JSON.stringify(byCity)} · ${p3 ? "PASS" : "FAIL"}`);
 
-  appendFileSync("docs/FINDINGS.md", lines.join("\n") + "\n");
-  console.log("\nAppended to docs/FINDINGS.md");
+  writeFileSync(".cache/confirm-test/report.md", lines.join("\n") + "\n");
+  console.log("\nWrote .cache/confirm-test/report.md (the Oct 19 run's report is kept in docs/FINDINGS.md)");
 }
 
 main().catch((err) => {

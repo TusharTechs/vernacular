@@ -16,7 +16,7 @@ export function publicMessage(err: unknown): string {
   if (err instanceof Anthropic.RateLimitError) return "The model is rate-limited right now. Try again in a minute.";
   if (err instanceof Anthropic.AuthenticationError) return "The server's model connection isn't configured correctly.";
   if (err instanceof Anthropic.APIError) return "The model request failed. Try again in a moment.";
-  if (err instanceof Error && /Paste some copy|limited to|Describe the audience|taste anchors|Tour Mode compares|interpret that audience|frames|Frames|voiceover|neighbourhood data|Qloo has no|Couldn't identify/.test(err.message)) return err.message;
+  if (err instanceof Error && /Paste some copy|limited to|Describe the audience|taste anchors|Tour Mode compares|interpret that audience|frames|Frames|voiceover|neighbourhood data|Qloo has no|Couldn't identify|variant/.test(err.message)) return err.message;
   return "Something went wrong while checking this copy.";
 }
 
@@ -24,32 +24,39 @@ export function publicMessage(err: unknown): string {
  * Admit the request, then run `work` and stream every event it emits as one
  * `data:` line. Failures become a final `{type: "error"}` event.
  */
-export async function streamEvents<E>(req: Request, work: (send: (e: E) => void) => Promise<unknown>): Promise<Response> {
+export async function streamEvents<E>(req: Request, work: (send: (e: E) => void, signal: AbortSignal) => Promise<unknown>): Promise<Response> {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   const admission = await admitQueued(ip);
   if (!admission.ok) {
     return Response.json({ error: admission.message }, { status: admission.status, headers: { "Retry-After": String(admission.retryAfter) } });
   }
 
+  // When the visitor leaves, stop the work too, so an abandoned check stops spending.
+  const abort = new AbortController();
+  req.signal?.addEventListener("abort", () => abort.abort(), { once: true });
+
   const encoder = new TextEncoder();
+  let closed = false;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      let closed = false;
       const write = (s: string) => !closed && controller.enqueue(encoder.encode(s));
       const keepAlive = setInterval(() => write(": ping\n\n"), 15_000);
       try {
-        await work((e) => write(`data: ${JSON.stringify(e)}\n\n`));
+        await work((e) => write(`data: ${JSON.stringify(e)}\n\n`), abort.signal);
       } catch (err) {
+        if (abort.signal.aborted) return;
         console.error("stream failed:", err instanceof Error ? `${err.name}: ${err.message}` : err);
         write(`data: ${JSON.stringify({ type: "error", message: publicMessage(err) })}\n\n`);
       } finally {
         clearInterval(keepAlive);
         admission.release();
+        if (!closed) controller.close();
         closed = true;
-        controller.close();
       }
     },
     cancel() {
+      closed = true;
+      abort.abort();
       admission.release();
     },
   });
