@@ -6,6 +6,7 @@ Vernacular is a Next.js app. Claude (claude-opus-5-5) extracts references and ru
 
 ## Try it
 
+- [Demo film, 3 minutes](https://youtu.be/boE-7dRUW74): the problem, a live check, Campaign check, the benchmark and the business case.
 - [Check](https://vernacular-lime.vercel.app/): opens on a saved check of a comedy-tour ad for Gen Z Latin-pop fans; click any underlined reference for its Qloo evidence and swap; "Re-run it live" runs it fresh.
 - [Campaign check](https://vernacular-lime.vercel.app/campaign): up to 5 ad versions × 5 audiences in one grid.
 - [Culture Translator](https://vernacular-lime.vercel.app/translate): one reference scored for five audiences.

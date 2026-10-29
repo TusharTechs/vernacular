@@ -246,6 +246,9 @@ export default function PitchPage() {
           <Link href="/benchmark" className="rounded-full border border-sheet/40 px-5 py-2.5 text-sm hover:border-sheet">
             See the benchmark
           </Link>
+          <a href="https://youtu.be/boE-7dRUW74" className="rounded-full border border-sheet/40 px-5 py-2.5 text-sm hover:border-sheet">
+            ▶ Watch the 3-minute film
+          </a>
         </div>
       </section>
     </main>

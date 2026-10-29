@@ -9,6 +9,7 @@
 Every artist, show, film, brand and place in your copy, scored for the exact audience you're writing for on Qloo's taste graph, and the ones that miss swapped for verified equivalents that land.</p>
 
 <p align="center">
+  <a href="https://youtu.be/boE-7dRUW74"><b>3-minute film</b></a> ·
   <a href="https://vernacular-lime.vercel.app"><b>Live demo</b></a> ·
   <a href="https://vernacular-lime.vercel.app/benchmark">Benchmark</a> ·
   <a href="https://vernacular-lime.vercel.app/pitch">Why Vernacular</a> ·
@@ -29,6 +30,7 @@ Every artist, show, film, brand and place in your copy, scored for the exact aud
 
 | What | Link |
 |---|---|
+| Demo film (3 minutes: the problem, the product live, the proof, the business) | https://youtu.be/boE-7dRUW74 |
 | Live demo (no sign-in; opens on a real, saved check) | https://vernacular-lime.vercel.app |
 | Campaign check: every ad variant × every audience, in one grid | https://vernacular-lime.vercel.app/campaign |
 | Culture Translator: one reference, five audiences | https://vernacular-lime.vercel.app/translate |
@@ -49,6 +51,7 @@ Every artist, show, film, brand and place in your copy, scored for the exact aud
 
 ## Judge it in two minutes
 
+0. **Short on time? [Watch the 3-minute film](https://youtu.be/boE-7dRUW74).** It covers the problem, a live check, Campaign check, the benchmark and the business case.
 1. **Open [the live demo](https://vernacular-lime.vercel.app).** It opens on a saved check of a comedy-tour ad for *Gen Z Latin-pop fans*. Click any underlined reference: the card shows its Qloo percentile, its age skew, the verified swap and the Qloo tags that show the swap plays the same role. Press **Re-run it live** to watch the agent work (about 40 seconds).
 2. **Open [Campaign check](https://vernacular-lime.vercel.app/campaign).** Four creative routes for one product × five audiences, in one grid: which version should run where, and which cell to fix first.
 3. **Open [the benchmark](https://vernacular-lime.vercel.app/benchmark).** Vernacular against the same model without Qloo on 40 copy × audience pairs, plus the outside check that made us change the product ([findings log](docs/FINDINGS.md)).
