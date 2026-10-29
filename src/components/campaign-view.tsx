@@ -239,7 +239,7 @@ export function CampaignView() {
             type="button"
             onClick={run}
             disabled={running || !picked.length || !variants.some((v) => v.text.trim())}
-            className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+            className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-sheet shadow-sm hover:opacity-90 disabled:opacity-40"
           >
             {running ? "Scoring the campaign…" : `Check ${variants.filter((v) => v.text.trim()).length} × ${picked.length}`}
           </button>
@@ -360,7 +360,7 @@ export function CampaignView() {
                     );
                   })}
                 </ul>
-                <p className="pt-1 text-xs text-muted">★ marks the best version per audience. Averages are within-audience Qloo percentiles, so compare down a column, not across.</p>
+                <p className="pt-1 text-xs text-muted">★ marks the best version per audience. Averages are within-audience Qloo percentiles, so compare down a column, not across. A version that names an audience&apos;s own taste anchors (Bad Bunny for Gen Z Latin-pop fans) scores them p100 by definition.</p>
               </div>
               {sel && (
                 <div className="flex flex-col gap-2 rounded-xl border border-rule bg-sheet p-5" aria-live="polite">

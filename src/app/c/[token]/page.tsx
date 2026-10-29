@@ -46,7 +46,7 @@ export default async function SharedCheck({ params }: Params) {
           verified equivalents the audience actually loves.
         </p>
         <div>
-          <Link href="/" className="inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90">
+          <Link href="/" className="inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-sheet shadow-sm hover:opacity-90">
             Check your own copy
           </Link>
         </div>

@@ -7,6 +7,7 @@
 import { SAMPLE_COPY, AUDIENCE_PRESETS } from "../presets";
 import { SCENARIOS } from "../scenarios";
 import { SAMPLE_CAMPAIGN, type CampaignResult } from "../campaign";
+import type { TranslateEvent } from "../translate";
 import type { CheckResult } from "../types";
 import data from "./data.json";
 
@@ -15,7 +16,15 @@ export interface Snapshot {
   result: CheckResult;
 }
 
-const saved = data as unknown as { sample?: Snapshot; scenarios?: Record<string, Snapshot>; campaign?: CampaignResult };
+export interface TranslateSnapshot {
+  checkedAt: string;
+  query: string;
+  events: TranslateEvent[];
+}
+
+export const SAMPLE_TRANSLATION = "Seinfeld";
+
+const saved = data as unknown as { sample?: Snapshot; scenarios?: Record<string, Snapshot>; campaign?: CampaignResult; translate?: TranslateSnapshot };
 
 /** A snapshot only counts if it was made from the copy and audience the site shows today. */
 function current(snap: Snapshot | undefined, text: string, audienceLabel: string): Snapshot | null {
@@ -36,4 +45,8 @@ export function scenarioSnapshot(id: string): Snapshot | null {
 export function campaignSnapshot(): CampaignResult | null {
   const c = saved.campaign;
   return c && JSON.stringify(c.input.variants) === JSON.stringify(SAMPLE_CAMPAIGN.variants) ? c : null;
+}
+
+export function translateSnapshot(): TranslateSnapshot | null {
+  return saved.translate?.query === SAMPLE_TRANSLATION ? saved.translate : null;
 }

@@ -168,7 +168,7 @@ export function DialTest({ takes, audience }: { takes: Take[]; audience: string 
             data-tour="dial-play"
             onClick={() => start()}
             disabled={loading}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-50"
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-sheet shadow-sm hover:opacity-90 disabled:opacity-50"
           >
             {loading ? "Warming up the voice…" : done ? "Play again" : "▶ Play the Dial Test"}
           </button>

@@ -91,7 +91,7 @@ export function TourView({ text, onOpen }: { text: string; onOpen: (audience: Au
             type="button"
             onClick={run}
             disabled={status === "running" || picked.length < 2 || !text.trim()}
-            className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+            className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-sheet shadow-sm hover:opacity-90 disabled:opacity-40"
           >
             {status === "running" ? "Scoring…" : `Score for ${picked.length} audiences`}
           </button>

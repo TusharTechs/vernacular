@@ -353,7 +353,7 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
           {sampleAt && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/30 bg-accent-soft px-4 py-3 text-sm">
               <span>
-                Example: a saved check, run live on Qloo{" "}
+                Example: a saved check, run on Qloo on{" "}
                 {new Date(sampleAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}. Click a marked reference to see why.
               </span>
               <span className="flex flex-wrap gap-4">
@@ -451,7 +451,7 @@ export function Workbench({ stats }: { stats: { lift: number | null; missRate: n
                   type="button"
                   onClick={() => check()}
                   disabled={!text.trim() || (!audience.anchors.some((a) => a.query.trim()) && !audience.age && !audience.segments?.length && !audience.tags?.length)}
-                  className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+                  className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-sheet shadow-sm hover:opacity-90 disabled:opacity-40"
                 >
                   Check copy
                 </button>

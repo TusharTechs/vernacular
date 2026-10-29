@@ -1,17 +1,19 @@
 // Saves real checks of the landing sample and the gallery scenarios to
 // src/lib/vernacular/snapshots/data.json, which the site serves instantly.
 // Usage: npm run snapshot                 (everything)
-//        npm run snapshot -- tour radio   (only these ids; "sample" for the landing sample, "campaign" for /campaign)
+//        npm run snapshot -- tour radio   (only these ids; "sample" for the landing sample, "campaign" for /campaign, "translate" for /translate)
 import { readFileSync, writeFileSync } from "node:fs";
 import { collectCampaign, SAMPLE_CAMPAIGN } from "../src/lib/vernacular/campaign";
 import { AUDIENCE_PRESETS, SAMPLE_COPY } from "../src/lib/vernacular/presets";
 import { runCheck } from "../src/lib/vernacular/run";
 import { SCENARIOS } from "../src/lib/vernacular/scenarios";
 import { slimResult } from "../src/lib/vernacular/slim";
+import { SAMPLE_TRANSLATION } from "../src/lib/vernacular/snapshots";
+import { translate, type TranslateEvent } from "../src/lib/vernacular/translate";
 import type { CheckInput, CheckResult } from "../src/lib/vernacular/types";
 
 const FILE = "src/lib/vernacular/snapshots/data.json";
-const data = JSON.parse(readFileSync(FILE, "utf8")) as { sample?: unknown; scenarios?: Record<string, unknown>; campaign?: unknown };
+const data = JSON.parse(readFileSync(FILE, "utf8")) as { sample?: unknown; scenarios?: Record<string, unknown>; campaign?: unknown; translate?: unknown };
 data.scenarios ??= {};
 
 const jobs: { id: string; input: CheckInput }[] = [
@@ -33,6 +35,15 @@ function summary(r: CheckResult) {
 }
 
 (async () => {
+  if (!only.length || only.includes("translate")) {
+    const events: TranslateEvent[] = [];
+    await translate(SAMPLE_TRANSLATION, AUDIENCE_PRESETS.map((p) => p.spec), (e) => events.push(e));
+    data.translate = { checkedAt: new Date().toISOString(), query: SAMPLE_TRANSLATION, events };
+    writeFileSync(FILE, JSON.stringify(data) + "\n");
+    console.log("translate");
+    for (const e of events) if (e.type === "translation") console.log(`  ${e.audience}: ${e.keep ? "keeps it" : `${e.name} p${e.percentile}`}`);
+    console.log("");
+  }
   if (!only.length || only.includes("campaign")) {
     const c = await collectCampaign(SAMPLE_CAMPAIGN);
     data.campaign = c;

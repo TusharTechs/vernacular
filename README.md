@@ -54,13 +54,13 @@ Every artist, show, film, brand and place in your copy, scored for the exact aud
 3. **Open [the benchmark](https://vernacular-lime.vercel.app/benchmark).** Vernacular against the same model without Qloo on 40 copy × audience pairs, plus the outside check that made us change the product ([findings log](docs/FINDINGS.md)).
 4. **For agents:** `claude mcp add --transport http vernacular https://vernacular-lime.vercel.app/api/mcp`, then ask your agent to check some copy for an audience.
 
-Every Qloo request behind a result is listed under **"Qloo calls back what you see here"** on the check page; [Known limitations](#known-limitations) says what the numbers don't show.
+Every Qloo request behind a verdict or swap is listed under **"Qloo calls back what you see here"** on the check page; [Known limitations](#known-limitations) says what the numbers don't show.
 
 ## What it does
 
 1. **Finds the references.** Claude reads the copy (or storyboard frames, or a video ad's frames and voiceover) and extracts every named cultural reference with the role it plays in its sentence.
 2. **Scores them on Qloo.** Each reference is resolved on Qloo and ranked against about 40 well-known peers of the same type *for this audience*: its taste anchors, age band, Qloo audience segments and interest tags. Raw affinity isn't comparable across audiences, so the score is a within-audience percentile, then adjusted for the reference's demographic age skew. Lands is p65 or above, misses is below p35.
-3. **Swaps the weak ones.** A Claude agent with Qloo tools finds equivalents the audience over-indexes on that are at least as well-known as the peers they're ranked against, verifies each one with the same scoring, picks the one that plays the same role, and rewrites only the words it needs. Each swap shows the Qloo tags it shares with the original, the evidence that it plays the same role.
+3. **Swaps the weak ones.** A Claude agent with Qloo tools finds equivalents the audience over-indexes on that are at least as well-known as the peers they're ranked against, verifies each one with the same scoring, picks the one that plays the same role, and rewrites only the words it needs. A like-for-like swap shows the Qloo tags it shares with the original, the evidence that it plays the same role; when the agent switches type to fill a role (a musician for a brand), the card says so.
 
 ## Qloo, used unusually
 
@@ -72,7 +72,7 @@ Nine things Vernacular does with Qloo that a recommendations call alone wouldn't
 
 **1. A dictionary for a spell-checker.** Raw affinity isn't comparable across audiences, so each reference is ranked against ~40 well-known peers scored for the same audience in the same request. That turns affinity into a verdict a writer can act on (lands, mixed, misses), adjusted by Qloo's demographic age skew.
 
-**2. Evidence for every swap.** Each swap shows the Qloo tags it shares with the original (*Comedy*, *Dating*, *Friendship* for Seinfeld → *Never Have I Ever*), so "plays the same role" is something you can check, not take on trust. Qloo's `feature.explainability` is drawn as a taste path when the audience's anchors pulled the swap in unequally.
+**2. Evidence for every swap.** A like-for-like swap shows the Qloo tags it shares with the original (*Comedy*, *Dating*, *Friendship* for Seinfeld → *Never Have I Ever*), so "plays the same role" is something you can check, not take on trust. Qloo's `feature.explainability` is drawn as a taste path when the audience's anchors pulled the swap in unequally.
 
 </td>
 <td width="50%"><img src="docs/screenshots/reference-card.png" alt="A reference card: Seinfeld scores p40 for Gen Z Latin-pop fans, with age-skew bars and a verified swap for Never Have I Ever at p100; Qloo tags both Comedy, Dating, Friendship and Humorous" /></td>
@@ -112,7 +112,7 @@ Nine things Vernacular does with Qloo that a recommendations call alone wouldn't
 <tr>
 <td valign="top">
 
-**7. One grid for a whole campaign.** Campaign check scores every version of an ad for every audience in a single pass per audience, so an agency sees which version runs where: in the example, the classic-rock route wins with 55+ fans, the Latin-pop route with Gen Z, and the indie route doesn't even win with indie fans.
+**7. One grid for a whole campaign.** Campaign check scores every version of an ad for every audience in a single pass per audience, so an agency sees which version runs where: in the example, the classic-rock route wins with 55+ fans, the Latin-pop route with Gen Z (helped by naming Bad Bunny and *Euphoria*, that audience's own anchors, which score p100 by definition), and the indie route doesn't even win with indie fans.
 
 </td>
 <td><img src="docs/screenshots/campaign.png" alt="Campaign check: four cold-brew versions by five audiences, each cell a Qloo percentile, with the best version per audience starred" /></td>
@@ -177,11 +177,11 @@ Vernacular would not work without Qloo: the model writes, Qloo decides what land
 
 ### A real trace
 
-The saved landing sample (*Gen Z Latin-pop fans*: anchors Bad Bunny and *Euphoria*, age 24 and younger), run on 2026-10-29: 27 Qloo calls, 7 Claude calls, 43 seconds. IDs are shortened here; the full call list is in the app.
+The saved landing sample (*Gen Z Latin-pop fans*: anchors Bad Bunny and *Euphoria*, age 24 and younger), run on 2026-10-29: 27 Qloo calls (2 resolve the audience's anchors; the 25 behind the verdicts and swaps are listed in the app), 7 Claude calls, 43 seconds. IDs are shortened here.
 
 ```text
 GET /search?query=Seinfeld&take=3&types=urn:entity:tv_show
-GET /v2/insights?filter.popularity.min=0.85&filter.type=urn:entity:tv_show&take=40        ← reference panel (once per type)
+GET /v2/insights?filter.popularity.min=0.85&filter.type=urn:entity:tv_show&take=40        ← reference panel (fetched once per type per server, then reused)
 GET /v2/insights?filter.results.entities=<Seinfeld, panel…>&filter.type=urn:entity:tv_show
                 &signal.demographics.age=24_and_younger&signal.interests.entities=<Bad Bunny, Euphoria>&take=41
 GET /v2/insights?filter.type=urn:demographics&signal.interests.entities=<Seinfeld>        ← age skew
@@ -284,7 +284,7 @@ The prompt adds judgment the data can't make: keep references that state a fact 
 - Streams results as they're ready.
 - Runs one agent per sentence in parallel.
 - Queues requests for up to 20 seconds when an instance is busy, instead of failing.
-- Serves gallery scenarios and the landing sample from a daily server cache that refreshes in the background.
+- Serves the landing sample, gallery scenarios and example campaign from saved checks in the repository, so they open instantly; a live check, cached for a day, is the fallback if an example changes.
 - Strips unused Qloo tags from everything sent to the browser.
 - Offers a ready-made example when a check fails.
 
@@ -331,7 +331,7 @@ All 16 pass ([latest output](docs/evidence/edge-cases.txt)).
 
 **Load.** `scripts/load-test.ts` fires simultaneous fresh checks as distinct visitors. Five at once on one local production server all completed: first scores in 8–10 seconds, all finished within 36 seconds ([output](docs/evidence/load-test.txt)).
 
-**Accessibility.** `npm run a11y` runs axe-core 4.14 (WCAG 2.1 A and AA rules plus best practices) in Chromium on the seven main pages, and checks that each fits a 375 px screen without sideways scrolling. All pass ([output](docs/evidence/a11y.txt)).
+**Accessibility.** `npm run a11y` runs axe-core 4.14 (WCAG 2.1 A and AA rules plus best practices) in Chromium on the seven main pages, in the light and the dark theme, and checks that each fits a 375 px screen without sideways scrolling. All 14 pass ([output](docs/evidence/a11y.txt)).
 
 **CI.** GitHub Actions runs lint, typecheck, the unit tests, a production build and the accessibility audit (the saved checks let every page render without API keys) on every push to `main`, and scans the full git history for leaked keys with gitleaks.
 
@@ -559,7 +559,7 @@ The author directed the work, made the product decisions, reviewed the results, 
 - **Anthropic Claude** (`claude-opus-5-5`) reads copy and frames, runs the swap agent, picks translations, writes the simulated comments, and is the benchmark's blind fidelity judge.
 - **OpenAI** `gpt-4o-mini-tts` reads copy aloud in the Dial Test, and `whisper-1` transcribes voiceovers. Both are labelled in the interface.
 - **OpenAI** `gpt-5.5` is the benchmark's outside recognition judge (not part of the product).
-- **The sample animatic's voiceover, and the demo video's narration,** are AI-generated (OpenAI text-to-speech). Its storyboard panels were drawn as SVG in code.
+- **The sample animatic's voiceover, and the demo video's narration,** are AI-generated (OpenAI text-to-speech). The animatic's storyboard panels were drawn as SVG in code.
 - **Predicted comments** are simulated by Claude and labelled as such. They are not real people.
 
 What is not generated by a model: every audience score, verdict and percentile comes from Qloo's Taste AI API, and every swap is verified against Qloo before it is suggested.

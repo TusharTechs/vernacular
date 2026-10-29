@@ -6,7 +6,7 @@ Vernacular rests on one bet: that Qloo's taste data, conditioned on an audience,
 |---|---|---|---|
 | Oct 19 | Exploratory data test | [`scripts/data-test.ts`](../scripts/data-test.ts) | The pre-set test **failed**; the failure showed raw affinity can't be compared across audiences |
 | Oct 19 | Confirmatory test, new references and audiences | [`scripts/confirm-test.ts`](../scripts/confirm-test.ts) | **Passed** all three pre-set thresholds; the scoring method was built on it |
-| Oct 20 | Public benchmark, 8 copies × 5 audiences | [`scripts/benchmark.ts`](../scripts/benchmark.ts) | See [/benchmark](https://vernacular-lime.vercel.app/benchmark) |
+| Oct 20, re-run Oct 29 | Public benchmark, 8 copies × 5 audiences | [`scripts/benchmark.ts`](../scripts/benchmark.ts) | [/benchmark](https://vernacular-lime.vercel.app/benchmark) shows the Oct 29 run on the current code; the Oct 20 run is in git history |
 | Oct 29 | Outside recognition check on the benchmark | [`scripts/benchmark-recognition.ts`](../scripts/benchmark-recognition.ts) | See [the last section](#outside-recognition-check-oct-29) |
 
 Raw Qloo responses stay out of the repository (`.cache/` is git-ignored); this log keeps only names, derived scores and verdicts.

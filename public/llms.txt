@@ -25,4 +25,4 @@ Vernacular is a Next.js app. Claude (claude-opus-5-5) extracts references and ru
 - [README](https://github.com/TusharTechs/vernacular#readme): architecture, a real request trace, tests, run instructions, known limitations.
 - [Findings log](https://github.com/TusharTechs/vernacular/blob/main/docs/FINDINGS.md): pre-registered data tests (one failed, one passed), and the outside recognition check that changed the swap agent.
 - [Claims map](https://github.com/TusharTechs/vernacular/blob/main/docs/CLAIMS.md): each factual claim in the submission, with the file or data that backs it.
-- Benchmark numbers are computed live from results.json on the benchmark page; Qloo is both Vernacular's source and the benchmark's main grader, which the page states.
+- Benchmark numbers on the site are computed from results.json when the page is built; Qloo is both Vernacular's source and the benchmark's main grader, which the page states.

@@ -240,7 +240,7 @@ export function MediaInput({ onRead, disabled }: { onRead: (r: StoryboardRead) =
           type="button"
           onClick={read}
           disabled={disabled || busy || !frames.length}
-          className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-sheet shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Check the frames
         </button>

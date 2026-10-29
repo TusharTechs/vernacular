@@ -70,8 +70,7 @@ async function seenTour(page: Page) {
 
   // Culture Translator, live for one reference.
   await page.goto(base + "/translate", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Seinfeld", exact: true }).click();
-  await page.waitForTimeout(70000);
+  await page.waitForTimeout(2500); // opens on the saved Seinfeld run
   await page.screenshot({ path: `${OUT}/translator.png` });
 
   // Vernacular Anywhere: the extension's check on a chat box. Its pill lives in a
@@ -87,8 +86,12 @@ async function seenTour(page: Page) {
   await page.screenshot({ path: `${OUT}/anywhere.png` });
 
   // Other pages.
+  // Campaign check: the grid and its summary.
+  await page.goto(base + "/campaign", { waitUntil: "networkidle" });
+  await settle(page, 2000);
+  await page.locator('section[aria-label="Campaign grid"]').screenshot({ path: `${OUT}/campaign.png` });
+
   for (const [path, name, wait] of [
-    ["/campaign", "campaign", 2500],
     ["/benchmark", "benchmark", 1500],
     ["/how", "how", 1500],
   ] as const) {

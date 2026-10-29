@@ -190,6 +190,16 @@ export function ReferenceCard({
               </span>
             </p>
           )}
+          {!swap.shared?.length && (
+            <p className="flex items-start gap-2 text-sm text-muted">
+              <Source kind="model" />
+              <span>
+                {swap.replacement.type !== (reference?.type ?? swap.replacement.type)
+                  ? `A different kind of reference (${swap.replacement.type.replace("_", " ")} for ${reference?.type.replace("_", " ")}): the agent switched type to fill the role in the sentence.`
+                  : "Qloo tags these two differently, so the agent chose it for its role in the sentence."}
+              </span>
+            </p>
+          )}
           {swap.drivers.length > 0 && !informative(swap.drivers) && (
             <p className="flex items-start gap-2 text-sm text-muted">
               <Source kind="qloo" />

@@ -56,7 +56,7 @@ export default function PitchPage() {
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { k: pct(o.missRate), t: "of references in ordinary ad copy missed the audience it was sent to", tone: "text-misses" },
+            { k: pct(o.missRate), t: "of the references in our benchmark ads missed when each ad was sent to five different audiences", tone: "text-misses" },
             { k: pct(c.missRate), t: "still missed after Claude rewrote it alone, with the same brief", tone: "text-mixed" },
             { k: String(c.echoes), t: "times Claude alone just repeated the audience's own examples back", tone: "text-mixed" },
           ].map((x) => (
@@ -170,8 +170,11 @@ export default function PitchPage() {
           </div>
         </div>
         <p className="max-w-2xl text-sm text-muted">
-          Meaning is kept about as well as Claude alone keeps it (blind judge: {s.fidelity.vernacular.meaning ?? "–"}/5 against {s.fidelity.claude.meaning ?? "–"}/5).
-          The moat compounds: every accepted or rejected swap is a labelled example of what works for whom, which no general model sees.
+          The trade-off is small: a blind judge rates meaning and fluency at {s.fidelity.vernacular.meaning ?? "–"} and {s.fidelity.vernacular.natural ?? "–"}/5 against
+          Claude alone&apos;s {s.fidelity.claude.meaning ?? "–"} and {s.fidelity.claude.natural ?? "–"}, and an outside judge from another model family rates the
+          swaps about as recognisable as Claude&apos;s own picks ({s.arms.vernacular.recognitionWithoutEchoes ?? "–"} vs {s.arms.claude.recognitionWithoutEchoes ?? "–"}/5)
+          once its echoes of the brief are left out.
+          The moat would compound: with saved decisions, every accepted or rejected swap becomes a labelled example of what works for whom, which no general model sees.
         </p>
       </Section>
 

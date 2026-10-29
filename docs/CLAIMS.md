@@ -38,7 +38,7 @@ Every factual claim in the README, the Devpost description and the site, with th
 | The rewrite must name it, drop the original and leave no stray article | [`agent.ts:226`](../src/lib/vernacular/agent.ts#L226), [`agent.ts:62`](../src/lib/vernacular/agent.ts#L62) `articleClash` |
 | Each run is capped at 16 model turns and 40 Qloo calls | [`agent.ts:25`](../src/lib/vernacular/agent.ts#L25) |
 | Factual references (credits, venues) are kept | The agent's instructions in [`agent.ts:45`](../src/lib/vernacular/agent.ts#L45); edge case `factual` in [evidence](evidence/edge-cases.txt) |
-| Each swap shows the Qloo tags it shares with the original | [`tools.ts:192`](../src/lib/qloo/tools.ts#L192) `sharedTags`; rendered in [`reference-card.tsx`](../src/components/reference-card.tsx) |
+| A like-for-like swap shows the Qloo tags it shares with the original; a cross-type swap is labelled as one | [`tools.ts:192`](../src/lib/qloo/tools.ts#L192) `sharedTags`; rendered in [`reference-card.tsx`](../src/components/reference-card.tsx) |
 | The extension's suggestions must share Qloo tags with the original | [`lint.ts:41`](../src/lib/vernacular/lint.ts#L41); tests in [`role.test.ts`](../src/lib/qloo/__tests__/role.test.ts) |
 | One agent per sentence, in parallel | [`run.ts`](../src/lib/vernacular/run.ts) (`groups.map(runSwapAgent)`) |
 | An abandoned check stops spending | [`sse.ts:36`](../src/lib/sse.ts#L36), [`agent.ts:310`](../src/lib/vernacular/agent.ts#L310) |
@@ -64,5 +64,5 @@ Every factual claim in the README, the Devpost description and the site, with th
 | The Oct 20 agent scored p88 and 3.56 recognition | [FINDINGS.md](FINDINGS.md#outside-recognition-check-oct-29); the Oct 20 results are in git history (`git show dff9ea8:src/lib/vernacular/benchmark/results.json > old.json`) and re-rate with `npm run benchmark:recognition -- old.json` |
 | 16 adversarial edge cases pass | [`scripts/edge-cases.ts`](../scripts/edge-cases.ts); output in [`evidence/edge-cases.txt`](evidence/edge-cases.txt) |
 | 75 unit tests in 13 files | `npm test`; CI in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) |
-| No axe-core violations on the seven main pages; each fits 375 px | [`scripts/a11y.ts`](../scripts/a11y.ts); output in [`evidence/a11y.txt`](evidence/a11y.txt); runs in CI |
+| No axe-core violations on the seven main pages, light and dark; each fits 375 px | [`scripts/a11y.ts`](../scripts/a11y.ts); output in [`evidence/a11y.txt`](evidence/a11y.txt); runs in CI |
 | Five simultaneous fresh checks complete: first scores 8–10 s, all within 36 s | [`scripts/load-test.ts`](../scripts/load-test.ts); output in [`evidence/load-test.txt`](evidence/load-test.txt) |

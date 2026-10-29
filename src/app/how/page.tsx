@@ -39,7 +39,7 @@ const STEPS = [
     n: "4",
     h: "Prove",
     who: "Evidence",
-    d: "Every verdict and swap links to the Qloo calls behind it, and each swap shows the Qloo tags it shares with the original: the evidence that it plays the same role.",
+    d: "Every verdict and swap links to the Qloo calls behind it, and a like-for-like swap shows the Qloo tags it shares with the original: the evidence that it plays the same role.",
   },
 ];
 
@@ -197,7 +197,7 @@ export default function HowPage() {
             ))}
           </ul>
           <p className="text-xs text-muted">
-            Tested by a live suite of 16 adversarial cases (prompt injection, made-up names, Spanish copy, misspellings and more) and 63 unit tests.{" "}
+            Tested by a live suite of 16 adversarial cases (prompt injection, made-up names, Spanish copy, misspellings and more) and 75 unit tests.{" "}
             <Link href="/benchmark" className="text-accent underline underline-offset-2">
               See the benchmark →
             </Link>

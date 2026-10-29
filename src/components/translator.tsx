@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TranslateEvent } from "@/lib/vernacular/translate";
 import type { Verdict } from "@/lib/vernacular/types";
 import { streamPost } from "./use-check";
@@ -46,25 +46,48 @@ export function Translator() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
+  const touched = useRef(false);
+
+  const apply = (e: TranslateEvent) => {
+    if (e.type === "subject") setSubject({ name: e.name, role: e.role, entityType: e.entityType });
+    if (e.type === "scored") setRows((r) => ({ ...r, [e.index]: { audience: e.audience, percentile: e.percentile, verdict: e.verdict } }));
+    if (e.type === "translation") setRows((r) => ({ ...r, [e.index]: { ...r[e.index], keep: e.keep, name: e.name, to: e.percentile, why: e.why } }));
+    if (e.type === "error") setError(e.message);
+  };
+
+  // Open on a saved real run, so the compass is there before anyone waits.
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/translate/sample")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { checkedAt: string; query: string; events: TranslateEvent[] } | null) => {
+        if (!alive || !d || touched.current) return;
+        setQuery(d.query);
+        d.events.forEach(apply);
+        setSavedAt(d.checkedAt);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const run = async (q = query) => {
     if (!q.trim()) return;
     abort.current?.abort();
     const ctrl = new AbortController();
     abort.current = ctrl;
+    touched.current = true;
     setQuery(q);
     setSubject(null);
     setRows({});
     setError(null);
     setCopied(false);
+    setSavedAt(null);
     setBusy(true);
-    const err = await streamPost<TranslateEvent>("/api/translate", { query: q }, ctrl.signal, (e) => {
-      if (e.type === "subject") setSubject({ name: e.name, role: e.role, entityType: e.entityType });
-      if (e.type === "scored") setRows((r) => ({ ...r, [e.index]: { audience: e.audience, percentile: e.percentile, verdict: e.verdict } }));
-      if (e.type === "translation") setRows((r) => ({ ...r, [e.index]: { ...r[e.index], keep: e.keep, name: e.name, to: e.percentile, why: e.why } }));
-      if (e.type === "error") setError(e.message);
-    });
+    const err = await streamPost<TranslateEvent>("/api/translate", { query: q }, ctrl.signal, apply);
     if (err) setError(err);
     setBusy(false);
   };
@@ -109,6 +132,12 @@ export function Translator() {
         </div>
       </form>
       {error && <p role="alert" className="text-sm text-misses">{error}</p>}
+      {savedAt && (
+        <p className="text-sm text-muted">
+          Example: a saved run on Qloo, {new Date(savedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}. Press Translate to run it
+          live, or try another reference.
+        </p>
+      )}
 
       {(subject || busy) && (
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
